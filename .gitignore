@@ -22,3 +22,4 @@ pnpm-debug.log*
 **/generated/
 
 .DS_Store
+.gstack/

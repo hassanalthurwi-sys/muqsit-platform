@@ -63,6 +63,22 @@ docker compose down       # stop (use -v to drop volumes)
 
 Defaults: Postgres on `5432` (db/user/pass `muqsit`), Redis on `6379`. Override via `.env`.
 
+## Known limitations / notes
+
+- **Sprint 1 is a foundation only.** No domain models, migrations, auth, or business
+  logic exist yet. The Prisma schema declares the datasource/generator only, and the
+  API exposes a single `/health` endpoint.
+- **`/health` degrades gracefully.** If Postgres is unreachable, the endpoint still
+  returns `200` with `status: "degraded"` and `dependencies.database: "down"` rather
+  than throwing.
+- **Docker images require registry access.** In network-restricted/sandboxed
+  environments the `postgres:16-alpine` and `redis:7-alpine` images may fail to pull
+  (e.g. `403 Forbidden` from the Docker registry CDN). The Compose file is validated
+  (`docker compose config`) and runs normally on any machine with standard registry
+  access. This setup was authored in such a sandbox, so the live containers and a
+  DB-connected API boot were not exercised there — only `docker compose config`,
+  `pnpm build`, `pnpm type-check`, and `pnpm lint` were run.
+
 ## Layout
 
 ```

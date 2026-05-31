@@ -11,7 +11,7 @@ export function Sidebar() {
   const { tenant } = useAuth();
 
   return (
-    <aside className="hidden w-64 shrink-0 border-e border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
+    <aside className="hidden w-56 shrink-0 border-e border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
       <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
         <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
           <Wallet className="size-4" />

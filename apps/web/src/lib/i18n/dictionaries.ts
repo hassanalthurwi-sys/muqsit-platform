@@ -7,6 +7,9 @@ export interface PageCopy {
   description: string;
 }
 
+export type FollowupTab = "today" | "thisWeek" | "overdue" | "defaulted";
+export type FollowupStatus = "dueToday" | "upcoming" | "overdue" | "defaulted";
+
 export interface Dictionary {
   appName: string;
   nav: Record<NavKey, string>;
@@ -34,53 +37,84 @@ export interface Dictionary {
     currency: string;
     viewAll: string;
     review: string;
-    thisMonth: string;
-    ofExpected: string;
-    deployed: string;
+    open: string;
+    distribute: string;
+    today: string;
     daysAgo: string;
     daysLeft: string;
-    today: string;
   };
   investorType: {
     internal: string;
     external: string;
-    splitTitle: string;
   };
   dashboard: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     kpi: {
-      collections: string;
-      collectionsHint: string;
-      overdue: string;
-      overdueHint: string;
-      activeContracts: string;
-      activeContractsHint: string;
-      pendingContracts: string;
-      pendingContractsHint: string;
-      investmentSplit: string;
-      investmentSplitHint: string;
-      cashMovement: string;
-      cashMovementHint: string;
+      collections: {
+        label: string;
+        expected: string;
+        percent: string;
+      };
+      overdue: {
+        label: string;
+        installments: string;
+        customers: string;
+      };
+      activeContracts: {
+        label: string;
+        totalValue: string;
+        unpaidBalance: string;
+      };
+      pendingContracts: {
+        label: string;
+        totalValue: string;
+        awaitingSignature: string;
+      };
     };
-    lateCustomers: {
-      title: string;
-      hint: string;
-    };
-    cashMovement: {
-      inflow: string;
-      outflow: string;
-      net: string;
-    };
-    upcoming: {
+    alerts: {
       title: string;
       subtitle: string;
+      delay30: string;
+      delay60: string;
+      pendingContracts: string;
+      unutilizedCapital: string;
+      paymentDocs: string;
+    };
+    profit: {
+      title: string;
+      subtitle: string;
+      selfOwned: string;
+      managementFee: string;
+      goodsMargin: string;
+    };
+    utilization: {
+      title: string;
+      subtitle: string;
+      internal: string;
+      external: string;
+      utilized: string;
+      unutilized: string;
+    };
+    cashMovement: {
+      title: string;
+      net: string;
+      inflow: string;
+      outflow: string;
+      purchases: string;
+      investorDisbursements: string;
+    };
+    followup: {
+      title: string;
+      subtitle: string;
+      tabs: Record<FollowupTab, string>;
+      status: Record<FollowupStatus, string>;
       empty: string;
-      status: {
-        overdue: string;
-        dueToday: string;
-        upcoming: string;
+      columns: {
+        customer: string;
+        amount: string;
+        due: string;
+        status: string;
       };
     };
   };
@@ -90,7 +124,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
   ar: {
     appName: "مُقسِط",
     nav: {
-      dashboard: "لوحة التحكم",
+      dashboard: "لوحة المكتب",
       contracts: "العقود",
       clients: "العملاء",
       investors: "المستثمرون",
@@ -106,8 +140,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       settings: "النظام",
     },
     pages: {
-      dashboard: { title: "لوحة التحكم", description: "نظرة عامة على نشاط منصتك." },
-      contracts: { title: "العقود", description: "إدارة عقود الاستثمار والاتفاقيات." },
+      dashboard: { title: "لوحة المكتب", description: "نظرة عامة على تشغيل المكتب." },
+      contracts: { title: "العقود", description: "إدارة عقود الاستثمار والتقسيط." },
       clients: { title: "العملاء", description: "إدارة سجلات العملاء وملفاتهم." },
       investors: { title: "المستثمرون", description: "متابعة المستثمرين ومساهماتهم." },
       financial: { title: "المالية", description: "العمليات والأرصدة المالية." },
@@ -137,53 +171,94 @@ export const dictionaries: Record<Locale, Dictionary> = {
       currency: "ر.س",
       viewAll: "عرض الكل",
       review: "مراجعة",
-      thisMonth: "هذا الشهر",
-      ofExpected: "من المتوقع",
-      deployed: "مُستثمر",
-      daysAgo: "منذ {n} يوم",
-      daysLeft: "خلال {n} يوم",
+      open: "فتح",
+      distribute: "توزيع",
       today: "اليوم",
+      daysAgo: "منذ {n} يوم",
+      daysLeft: "بعد {n} أيام",
     },
     investorType: {
       internal: "داخلي",
       external: "خارجي",
-      splitTitle: "توزيع الاستثمارات",
     },
     dashboard: {
-      eyebrow: "لوحة المكتب",
-      title: "نظرة عامة على العمليات",
-      subtitle: "ملخص يومي للتحصيلات والعقود والاستثمارات.",
+      title: "لوحة المكتب",
+      subtitle: "نظرة عامة على العمليات والتحصيلات والمستثمرين.",
       kpi: {
-        collections: "تحصيلات هذا الشهر",
-        collectionsHint: "من المتوقع",
-        overdue: "الأقساط المتأخرة",
-        overdueHint: "قسط متأخر",
-        activeContracts: "العقود النشطة",
-        activeContractsHint: "إجمالي قيمة العقود",
-        pendingContracts: "عقود قيد التفعيل",
-        pendingContractsHint: "بانتظار التوقيع أو المراجعة",
-        investmentSplit: "الاستثمارات النشطة",
-        investmentSplitHint: "داخلي مقابل خارجي",
-        cashMovement: "حركة النقد الشهرية",
-        cashMovementHint: "صافي هذا الشهر",
+        collections: {
+          label: "تحصيلات الشهر",
+          expected: "المتوقع",
+          percent: "نسبة التحصيل",
+        },
+        overdue: {
+          label: "الأقساط المتأخرة",
+          installments: "قسط متأخر",
+          customers: "عميل متأخر",
+        },
+        activeContracts: {
+          label: "العقود النشطة",
+          totalValue: "إجمالي القيمة",
+          unpaidBalance: "الرصيد المتبقي",
+        },
+        pendingContracts: {
+          label: "عقود قيد التفعيل",
+          totalValue: "إجمالي القيمة",
+          awaitingSignature: "بانتظار التوقيع",
+        },
       },
-      lateCustomers: {
-        title: "{n} عملاء متأخرون عن السداد",
-        hint: "تحتاج إلى متابعة وإعادة جدولة",
+      alerts: {
+        title: "تنبيهات ذكية",
+        subtitle: "إجراءات تشغيلية تحتاج اهتمامك الآن",
+        delay30: "{n} عملاء متأخرون أكثر من 30 يوم",
+        delay60: "{n} عميل متعثر أكثر من 60 يوم",
+        pendingContracts: "{n} عقود تنتظر إجراء (توقيع أو مراجعة)",
+        unutilizedCapital: "{amount} رأس مال مستثمر غير مستخدم",
+        paymentDocs: "{n} مستندات دفع بحاجة إلى مراجعة",
+      },
+      profit: {
+        title: "ربح المكتب — هذا الشهر",
+        subtitle: "موزع حسب مصدر الدخل",
+        selfOwned: "أرباح العقود الذاتية",
+        managementFee: "نسبة الإدارة على المستثمر",
+        goodsMargin: "ربح بيع البضائع للمستثمر",
+      },
+      utilization: {
+        title: "رأس المال المستثمر النشط",
+        subtitle: "داخلي مقابل خارجي ونسبة الاستخدام",
+        internal: "داخلي (المكتب)",
+        external: "خارجي",
+        utilized: "المُستخدم",
+        unutilized: "غير المُستخدم",
       },
       cashMovement: {
-        inflow: "وارد",
-        outflow: "صادر",
-        net: "صافي",
+        title: "حركة النقد — هذا الشهر",
+        net: "صافي الشهر",
+        inflow: "نقد داخل",
+        outflow: "نقد خارج",
+        purchases: "مشتريات بضائع",
+        investorDisbursements: "صرف للمستثمرين",
       },
-      upcoming: {
-        title: "الأقساط القادمة",
-        subtitle: "أقرب خمسة استحقاقات",
-        empty: "لا توجد أقساط قادمة هذا الأسبوع.",
+      followup: {
+        title: "متابعة الأقساط",
+        subtitle: "اختر الفئة لمتابعة العملاء وأقساطهم",
+        tabs: {
+          today: "اليوم",
+          thisWeek: "هذا الأسبوع",
+          overdue: "متأخرة",
+          defaulted: "متعثرة 60+ يوم",
+        },
         status: {
-          overdue: "متأخر",
           dueToday: "اليوم",
           upcoming: "قادم",
+          overdue: "متأخر",
+          defaulted: "متعثر",
+        },
+        empty: "لا توجد أقساط في هذه الفئة.",
+        columns: {
+          customer: "العميل",
+          amount: "المبلغ",
+          due: "الاستحقاق",
+          status: "الحالة",
         },
       },
     },
@@ -191,7 +266,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
   en: {
     appName: "Muqsit",
     nav: {
-      dashboard: "Dashboard",
+      dashboard: "Office",
       contracts: "Contracts",
       clients: "Clients",
       investors: "Investors",
@@ -207,8 +282,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       settings: "System",
     },
     pages: {
-      dashboard: { title: "Dashboard", description: "Overview of your platform activity." },
-      contracts: { title: "Contracts", description: "Manage investment contracts and agreements." },
+      dashboard: { title: "Office", description: "Operational overview of the office." },
+      contracts: { title: "Contracts", description: "Manage investment and installment contracts." },
       clients: { title: "Clients", description: "Manage client records and profiles." },
       investors: { title: "Investors", description: "Track investors and their contributions." },
       financial: { title: "Financial", description: "Financial operations and balances." },
@@ -238,53 +313,94 @@ export const dictionaries: Record<Locale, Dictionary> = {
       currency: "SAR",
       viewAll: "View all",
       review: "Review",
-      thisMonth: "this month",
-      ofExpected: "of expected",
-      deployed: "deployed",
+      open: "Open",
+      distribute: "Allocate",
+      today: "Today",
       daysAgo: "{n}d ago",
       daysLeft: "in {n}d",
-      today: "today",
     },
     investorType: {
       internal: "Internal",
       external: "External",
-      splitTitle: "Investment mix",
     },
     dashboard: {
-      eyebrow: "Office",
-      title: "Operations overview",
-      subtitle: "Daily summary of collections, contracts and investments.",
+      title: "Office overview",
+      subtitle: "Operations, collections and investor capital at a glance.",
       kpi: {
-        collections: "Collections this month",
-        collectionsHint: "of expected",
-        overdue: "Overdue installments",
-        overdueHint: "installments overdue",
-        activeContracts: "Active contracts",
-        activeContractsHint: "total contract value",
-        pendingContracts: "Pending contracts",
-        pendingContractsHint: "awaiting signature or review",
-        investmentSplit: "Active investments",
-        investmentSplitHint: "internal vs external",
-        cashMovement: "Monthly cash movement",
-        cashMovementHint: "net this month",
+        collections: {
+          label: "Collections this month",
+          expected: "Expected",
+          percent: "Collection rate",
+        },
+        overdue: {
+          label: "Overdue installments",
+          installments: "installments overdue",
+          customers: "delayed customers",
+        },
+        activeContracts: {
+          label: "Active contracts",
+          totalValue: "Total value",
+          unpaidBalance: "Remaining balance",
+        },
+        pendingContracts: {
+          label: "Pending contracts",
+          totalValue: "Total value",
+          awaitingSignature: "awaiting signature",
+        },
       },
-      lateCustomers: {
-        title: "{n} late customers",
-        hint: "Need follow-up and rescheduling",
+      alerts: {
+        title: "Smart alerts",
+        subtitle: "Operational actions that need attention now",
+        delay30: "{n} customers more than 30 days late",
+        delay60: "{n} customer defaulted more than 60 days",
+        pendingContracts: "{n} contracts awaiting action (signature or review)",
+        unutilizedCapital: "{amount} unutilized investor capital",
+        paymentDocs: "{n} payment documents to review",
+      },
+      profit: {
+        title: "Office profit — this month",
+        subtitle: "Broken down by income source",
+        selfOwned: "Office-owned installment contracts",
+        managementFee: "Management % on investor operations",
+        goodsMargin: "Margin from selling goods to investors",
+      },
+      utilization: {
+        title: "Active invested capital",
+        subtitle: "Internal vs external and utilization",
+        internal: "Internal (office)",
+        external: "External",
+        utilized: "Utilized",
+        unutilized: "Unutilized",
       },
       cashMovement: {
-        inflow: "Inflow",
-        outflow: "Outflow",
-        net: "Net",
+        title: "Cash movement — this month",
+        net: "Net this month",
+        inflow: "Cash in",
+        outflow: "Cash out",
+        purchases: "Goods purchased",
+        investorDisbursements: "Investor disbursements",
       },
-      upcoming: {
-        title: "Upcoming installments",
-        subtitle: "Next five due",
-        empty: "No upcoming installments this week.",
-        status: {
+      followup: {
+        title: "Installment follow-up",
+        subtitle: "Select a category to follow up with customers",
+        tabs: {
+          today: "Today",
+          thisWeek: "This week",
           overdue: "Overdue",
+          defaulted: "Defaulted 60+",
+        },
+        status: {
           dueToday: "Today",
           upcoming: "Upcoming",
+          overdue: "Overdue",
+          defaulted: "Defaulted",
+        },
+        empty: "No installments in this category.",
+        columns: {
+          customer: "Customer",
+          amount: "Amount",
+          due: "Due",
+          status: "Status",
         },
       },
     },

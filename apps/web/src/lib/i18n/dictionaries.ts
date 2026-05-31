@@ -1,4 +1,4 @@
-import type { NavKey } from "@/lib/nav";
+import type { NavGroupKey, NavKey } from "@/lib/nav";
 
 export type Locale = "ar" | "en";
 
@@ -10,6 +10,7 @@ export interface PageCopy {
 export interface Dictionary {
   appName: string;
   nav: Record<NavKey, string>;
+  navGroups: Record<NavGroupKey, string>;
   pages: Record<NavKey, PageCopy>;
   auth: {
     loginTitle: string;
@@ -30,12 +31,58 @@ export interface Dictionary {
     comingSoonHint: string;
     openMenu: string;
     closeMenu: string;
+    currency: string;
+    viewAll: string;
+    review: string;
+    thisMonth: string;
+    ofExpected: string;
+    deployed: string;
+    daysAgo: string;
+    daysLeft: string;
+    today: string;
+  };
+  investorType: {
+    internal: string;
+    external: string;
+    splitTitle: string;
   };
   dashboard: {
-    kpiContracts: string;
-    kpiClients: string;
-    kpiInvestors: string;
-    kpiAum: string;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    kpi: {
+      collections: string;
+      collectionsHint: string;
+      overdue: string;
+      overdueHint: string;
+      activeContracts: string;
+      activeContractsHint: string;
+      pendingContracts: string;
+      pendingContractsHint: string;
+      investmentSplit: string;
+      investmentSplitHint: string;
+      cashMovement: string;
+      cashMovementHint: string;
+    };
+    lateCustomers: {
+      title: string;
+      hint: string;
+    };
+    cashMovement: {
+      inflow: string;
+      outflow: string;
+      net: string;
+    };
+    upcoming: {
+      title: string;
+      subtitle: string;
+      empty: string;
+      status: {
+        overdue: string;
+        dueToday: string;
+        upcoming: string;
+      };
+    };
   };
 }
 
@@ -51,6 +98,12 @@ export const dictionaries: Record<Locale, Dictionary> = {
       documents: "المستندات",
       reports: "التقارير",
       settings: "الإعدادات",
+    },
+    navGroups: {
+      operations: "العمليات",
+      financial: "المالية",
+      archive: "الأرشيف",
+      settings: "النظام",
     },
     pages: {
       dashboard: { title: "لوحة التحكم", description: "نظرة عامة على نشاط منصتك." },
@@ -81,12 +134,58 @@ export const dictionaries: Record<Locale, Dictionary> = {
       comingSoonHint: "هذه الصفحة قيد الإنشاء وستتوفر في مرحلة لاحقة.",
       openMenu: "فتح القائمة",
       closeMenu: "إغلاق القائمة",
+      currency: "ر.س",
+      viewAll: "عرض الكل",
+      review: "مراجعة",
+      thisMonth: "هذا الشهر",
+      ofExpected: "من المتوقع",
+      deployed: "مُستثمر",
+      daysAgo: "منذ {n} يوم",
+      daysLeft: "خلال {n} يوم",
+      today: "اليوم",
+    },
+    investorType: {
+      internal: "داخلي",
+      external: "خارجي",
+      splitTitle: "توزيع الاستثمارات",
     },
     dashboard: {
-      kpiContracts: "العقود النشطة",
-      kpiClients: "إجمالي العملاء",
-      kpiInvestors: "المستثمرون",
-      kpiAum: "الأصول المُدارة",
+      eyebrow: "لوحة المكتب",
+      title: "نظرة عامة على العمليات",
+      subtitle: "ملخص يومي للتحصيلات والعقود والاستثمارات.",
+      kpi: {
+        collections: "تحصيلات هذا الشهر",
+        collectionsHint: "من المتوقع",
+        overdue: "الأقساط المتأخرة",
+        overdueHint: "قسط متأخر",
+        activeContracts: "العقود النشطة",
+        activeContractsHint: "إجمالي قيمة العقود",
+        pendingContracts: "عقود قيد التفعيل",
+        pendingContractsHint: "بانتظار التوقيع أو المراجعة",
+        investmentSplit: "الاستثمارات النشطة",
+        investmentSplitHint: "داخلي مقابل خارجي",
+        cashMovement: "حركة النقد الشهرية",
+        cashMovementHint: "صافي هذا الشهر",
+      },
+      lateCustomers: {
+        title: "{n} عملاء متأخرون عن السداد",
+        hint: "تحتاج إلى متابعة وإعادة جدولة",
+      },
+      cashMovement: {
+        inflow: "وارد",
+        outflow: "صادر",
+        net: "صافي",
+      },
+      upcoming: {
+        title: "الأقساط القادمة",
+        subtitle: "أقرب خمسة استحقاقات",
+        empty: "لا توجد أقساط قادمة هذا الأسبوع.",
+        status: {
+          overdue: "متأخر",
+          dueToday: "اليوم",
+          upcoming: "قادم",
+        },
+      },
     },
   },
   en: {
@@ -100,6 +199,12 @@ export const dictionaries: Record<Locale, Dictionary> = {
       documents: "Documents",
       reports: "Reports",
       settings: "Settings",
+    },
+    navGroups: {
+      operations: "Operations",
+      financial: "Financial",
+      archive: "Archive",
+      settings: "System",
     },
     pages: {
       dashboard: { title: "Dashboard", description: "Overview of your platform activity." },
@@ -130,12 +235,58 @@ export const dictionaries: Record<Locale, Dictionary> = {
       comingSoonHint: "This page is under construction and will be available in a later phase.",
       openMenu: "Open menu",
       closeMenu: "Close menu",
+      currency: "SAR",
+      viewAll: "View all",
+      review: "Review",
+      thisMonth: "this month",
+      ofExpected: "of expected",
+      deployed: "deployed",
+      daysAgo: "{n}d ago",
+      daysLeft: "in {n}d",
+      today: "today",
+    },
+    investorType: {
+      internal: "Internal",
+      external: "External",
+      splitTitle: "Investment mix",
     },
     dashboard: {
-      kpiContracts: "Active contracts",
-      kpiClients: "Total clients",
-      kpiInvestors: "Investors",
-      kpiAum: "Assets under management",
+      eyebrow: "Office",
+      title: "Operations overview",
+      subtitle: "Daily summary of collections, contracts and investments.",
+      kpi: {
+        collections: "Collections this month",
+        collectionsHint: "of expected",
+        overdue: "Overdue installments",
+        overdueHint: "installments overdue",
+        activeContracts: "Active contracts",
+        activeContractsHint: "total contract value",
+        pendingContracts: "Pending contracts",
+        pendingContractsHint: "awaiting signature or review",
+        investmentSplit: "Active investments",
+        investmentSplitHint: "internal vs external",
+        cashMovement: "Monthly cash movement",
+        cashMovementHint: "net this month",
+      },
+      lateCustomers: {
+        title: "{n} late customers",
+        hint: "Need follow-up and rescheduling",
+      },
+      cashMovement: {
+        inflow: "Inflow",
+        outflow: "Outflow",
+        net: "Net",
+      },
+      upcoming: {
+        title: "Upcoming installments",
+        subtitle: "Next five due",
+        empty: "No upcoming installments this week.",
+        status: {
+          overdue: "Overdue",
+          dueToday: "Today",
+          upcoming: "Upcoming",
+        },
+      },
     },
   },
 };

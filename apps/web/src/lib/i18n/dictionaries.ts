@@ -52,6 +52,8 @@ export interface Dictionary {
     save: string;
     saving: string;
     none: string;
+    yes: string;
+    no: string;
   };
   investorType: Record<InvestorTypeKey, string>;
   investorStatus: Record<InvestorStatusKey, string>;
@@ -170,7 +172,15 @@ export interface Dictionary {
       investor: string;
       capitalUsage: string;
       profitNotes: string;
-      goodsMarginNotes: string;
+      recycling: {
+        title: string;
+        note: string;
+        status: string;
+        thresholdLabel: string;
+        noThreshold: string;
+        enabled: string;
+        disabled: string;
+      };
       linkedInstallments: string;
       linkedInstallmentsEmpty: string;
       timeline: string;
@@ -212,8 +222,10 @@ export interface Dictionary {
         title: string;
         profitNotes: string;
         profitNotesPlaceholder: string;
-        goodsMarginNotes: string;
-        goodsMarginNotesPlaceholder: string;
+        recyclingToggle: string;
+        recyclingNote: string;
+        recyclingThreshold: string;
+        recyclingThresholdHint: string;
         attachment: string;
         attachmentHint: string;
         chooseFile: string;
@@ -294,6 +306,8 @@ const ar: Dictionary = {
     save: "حفظ العقد",
     saving: "جاري الحفظ...",
     none: "لا يوجد",
+    yes: "نعم",
+    no: "لا",
   },
   investorType: { internal: "داخلي", external: "خارجي" },
   investorStatus: { active: "نشط", inactive: "غير نشط", suspended: "متوقف" },
@@ -422,7 +436,15 @@ const ar: Dictionary = {
       investor: "المستثمر",
       capitalUsage: "استخدام رأس المال",
       profitNotes: "ملاحظات تقاسم الأرباح",
-      goodsMarginNotes: "ملاحظات هامش بيع البضائع",
+      recycling: {
+        title: "إعادة تدوير رأس المال",
+        note: "السماح بإعادة تدوير رأس المال تلقائياً عند توفر مبالغ محصلة.",
+        status: "الحالة",
+        thresholdLabel: "الحد الأدنى للإعادة",
+        noThreshold: "بدون حد أدنى",
+        enabled: "مسموح",
+        disabled: "غير مسموح",
+      },
       linkedInstallments: "عقود التقسيط المرتبطة",
       linkedInstallmentsEmpty: "ستظهر عقود التقسيط المموّلة من هذا العقد هنا.",
       timeline: "النشاط",
@@ -461,11 +483,13 @@ const ar: Dictionary = {
         operationPctInternalNote: "للمستثمر الداخلي تثبت النسبة عند 0%.",
       },
       step3: {
-        title: "ملاحظات ومستندات",
+        title: "تفضيلات ومستندات",
         profitNotes: "ملاحظات تقاسم الأرباح",
         profitNotesPlaceholder: "مثال: صافي الربح يوزّع شهرياً بعد خصم نسبة العمليات.",
-        goodsMarginNotes: "ملاحظات هامش بيع البضائع",
-        goodsMarginNotesPlaceholder: "مثال: البضائع تباع بهامش 1.5% فوق التكلفة.",
+        recyclingToggle: "السماح بإعادة تدوير رأس المال",
+        recyclingNote: "السماح بإعادة تدوير رأس المال تلقائياً عند توفر مبالغ محصلة من أقساط العملاء، دون طلب موافقة المستثمر في كل مرة.",
+        recyclingThreshold: "الحد الأدنى لإعادة التدوير (ر.س) — اختياري",
+        recyclingThresholdHint: "يبدأ المكتب بإعادة التدوير عند بلوغ المبالغ المُحصَّلة هذا الحد. اتركه فارغاً لإعادة التدوير دون حد أدنى.",
         attachment: "مرفق ملف العقد",
         attachmentHint: "PDF أو صورة — لن يتم رفع الملف فعلياً في هذه النسخة.",
         chooseFile: "اختر ملفاً",
@@ -546,6 +570,8 @@ const en: Dictionary = {
     save: "Save contract",
     saving: "Saving...",
     none: "None",
+    yes: "Yes",
+    no: "No",
   },
   investorType: { internal: "Internal", external: "External" },
   investorStatus: { active: "Active", inactive: "Inactive", suspended: "Suspended" },
@@ -669,7 +695,15 @@ const en: Dictionary = {
       investor: "Investor",
       capitalUsage: "Capital usage",
       profitNotes: "Profit-sharing notes",
-      goodsMarginNotes: "Goods margin notes",
+      recycling: {
+        title: "Capital recycling",
+        note: "Permission to automatically recycle collected installment funds back into new operations.",
+        status: "Status",
+        thresholdLabel: "Minimum threshold",
+        noThreshold: "No minimum",
+        enabled: "Allowed",
+        disabled: "Not allowed",
+      },
       linkedInstallments: "Linked installment contracts",
       linkedInstallmentsEmpty: "Installment contracts funded by this contract will appear here.",
       timeline: "Activity",
@@ -708,11 +742,13 @@ const en: Dictionary = {
         operationPctInternalNote: "For internal investors the operation % is locked at 0%.",
       },
       step3: {
-        title: "Notes and documents",
+        title: "Preferences and documents",
         profitNotes: "Profit-sharing notes",
         profitNotesPlaceholder: "e.g. Net profit distributed monthly after operation fee.",
-        goodsMarginNotes: "Goods margin notes",
-        goodsMarginNotesPlaceholder: "e.g. Goods sold at 1.5% over cost.",
+        recyclingToggle: "Allow capital recycling",
+        recyclingNote: "Permission for the office to automatically recycle collected installment funds back into new operations, without asking the investor each time.",
+        recyclingThreshold: "Minimum recycling threshold (SAR) — optional",
+        recyclingThresholdHint: "The office begins recycling once collected funds reach this threshold. Leave empty to recycle with no minimum.",
         attachment: "Contract document",
         attachmentHint: "PDF or image — file is not actually uploaded in this prototype.",
         chooseFile: "Choose file",

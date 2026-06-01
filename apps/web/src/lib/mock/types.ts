@@ -57,7 +57,8 @@ export interface InvestmentContract {
   remaining: number;
   status: ContractStatus;
   profitNotes: string;
-  goodsMarginNotes: string;
+  capitalRecyclingEnabled: boolean;
+  capitalRecyclingMinThreshold?: number;
   documentName?: string;
   timeline: ActivityItem[];
   linkedInstallmentContractIds: string[];

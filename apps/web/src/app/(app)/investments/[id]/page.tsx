@@ -191,10 +191,32 @@ export default function InvestmentDetailsPage({
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">{d.goodsMarginNotes}</CardTitle>
+            <CardTitle className="text-base font-semibold">{d.recycling.title}</CardTitle>
+            <p className="text-xs text-muted-foreground leading-5">{d.recycling.note}</p>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-7">{contract.goodsMarginNotes}</p>
+            <DataRows>
+              <DataRow
+                label={d.recycling.status}
+                value={
+                  <StatusPill tone={contract.capitalRecyclingEnabled ? "success" : "default"}>
+                    {contract.capitalRecyclingEnabled ? d.recycling.enabled : d.recycling.disabled}
+                  </StatusPill>
+                }
+              />
+              {contract.capitalRecyclingEnabled ? (
+                <DataRow
+                  label={d.recycling.thresholdLabel}
+                  value={
+                    contract.capitalRecyclingMinThreshold ? (
+                      <Currency value={contract.capitalRecyclingMinThreshold} />
+                    ) : (
+                      <span className="text-muted-foreground">{d.recycling.noThreshold}</span>
+                    )
+                  }
+                />
+              ) : null}
+            </DataRows>
           </CardContent>
         </Card>
       </div>

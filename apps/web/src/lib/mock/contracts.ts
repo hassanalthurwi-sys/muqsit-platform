@@ -14,7 +14,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 500_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 15% نسبة عمليات للمكتب.",
-    goodsMarginNotes: "البضائع تباع للمستثمر بهامش 1.5% فوق سعر التكلفة وفقًا للملحق.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 50_000,
     documentName: "INV-2024-001-contract.pdf",
     timeline: [
       { ts: "2024-03-15", text: "تفعيل العقد" },
@@ -38,7 +39,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 500_000,
     status: "active",
     profitNotes: "حساب داخلي للمكتب — كل الأرباح للمكتب.",
-    goodsMarginNotes: "لا يوجد هامش بيع بضائع داخلي.",
+    capitalRecyclingEnabled: true,
     documentName: "INV-2024-002-internal.pdf",
     timeline: [
       { ts: "2024-04-01", text: "تفعيل العقد الداخلي" },
@@ -61,7 +62,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 300_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع ربع سنوي بعد خصم 14% نسبة عمليات.",
-    goodsMarginNotes: "هامش بيع البضائع 1.2% فوق التكلفة.",
+    capitalRecyclingEnabled: false,
     documentName: "INV-2024-003-contract.pdf",
     timeline: [
       { ts: "2024-05-10", text: "تفعيل العقد" },
@@ -84,7 +85,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 500_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 16% نسبة عمليات.",
-    goodsMarginNotes: "هامش بيع البضائع 1.7% فوق التكلفة. مراجعة فصلية.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 100_000,
     documentName: "INV-2024-004-contract.pdf",
     timeline: [
       { ts: "2024-06-01", text: "تفعيل العقد" },
@@ -107,7 +109,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 300_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 12% نسبة عمليات.",
-    goodsMarginNotes: "هامش بيع البضائع 1.3% فوق التكلفة.",
+    capitalRecyclingEnabled: false,
     documentName: "INV-2024-005-contract.pdf",
     timeline: [
       { ts: "2024-07-15", text: "تفعيل العقد" },
@@ -129,7 +131,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 300_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 14% نسبة عمليات. التحويل بالريال السعودي.",
-    goodsMarginNotes: "هامش بيع البضائع 1.5% فوق التكلفة.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 25_000,
     documentName: "INV-2024-006-contract.pdf",
     timeline: [
       { ts: "2024-08-20", text: "تفعيل العقد" },
@@ -152,7 +155,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 300_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 13% نسبة عمليات.",
-    goodsMarginNotes: "هامش بيع البضائع 1.3% فوق التكلفة.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 50_000,
     documentName: "INV-2024-007-contract.pdf",
     timeline: [
       { ts: "2024-09-05", text: "تفعيل العقد" },
@@ -174,7 +178,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 400_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 15% نسبة عمليات.",
-    goodsMarginNotes: "هامش بيع البضائع 1.6% فوق التكلفة.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 100_000,
     documentName: "INV-2024-008-contract.pdf",
     timeline: [
       { ts: "2024-10-12", text: "تفعيل العقد" },
@@ -196,7 +201,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 200_000,
     status: "active",
     profitNotes: "Net profit distributed monthly after 14% operation fee. SAR settlement.",
-    goodsMarginNotes: "Goods sold at 1.4% above cost.",
+    capitalRecyclingEnabled: false,
     documentName: "INV-2024-009-contract.pdf",
     timeline: [
       { ts: "2024-11-01", text: "Contract activated" },
@@ -219,7 +224,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 550_000,
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 15% نسبة عمليات.",
-    goodsMarginNotes: "هامش بيع البضائع 1.5% فوق التكلفة. مراجعة سنوية.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 200_000,
     documentName: "INV-2024-010-contract.pdf",
     timeline: [
       { ts: "2024-12-05", text: "تفعيل العقد" },
@@ -241,7 +247,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 100_000,
     status: "active",
     profitNotes: "حساب داخلي للمكتب — كل الأرباح للمكتب.",
-    goodsMarginNotes: "لا يوجد هامش بيع بضائع داخلي.",
+    capitalRecyclingEnabled: true,
     documentName: "INV-2025-001-internal.pdf",
     timeline: [
       { ts: "2025-01-15", text: "تفعيل العقد الداخلي" },
@@ -263,10 +269,8 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     remaining: 500_000,
     status: "pendingSetup",
     profitNotes: "بانتظار توقيع المستثمر وأول صرف رأس مال.",
-    goodsMarginNotes: "بانتظار تحديد هامش البضائع.",
-    timeline: [
-      { ts: "2025-05-10", text: "إعداد عقد جديد للمستثمر" },
-    ],
+    capitalRecyclingEnabled: false,
+    timeline: [{ ts: "2025-05-10", text: "إعداد عقد جديد للمستثمر" }],
     linkedInstallmentContractIds: [],
   },
 ];

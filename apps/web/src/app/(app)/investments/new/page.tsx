@@ -17,6 +17,7 @@ import { MOCK_INVESTORS } from "@/lib/mock/investors";
 import { useContractStore } from "@/lib/mock/store";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { InvestmentContract } from "@/lib/mock/types";
 
 const DURATIONS = [12, 18, 24, 30, 36] as const;
@@ -50,7 +51,8 @@ export default function NewInvestmentContractPage() {
   const [durationMonths, setDurationMonths] = useState<number>(24);
   const [operationPct, setOperationPct] = useState<string>("15");
   const [profitNotes, setProfitNotes] = useState<string>("");
-  const [goodsMarginNotes, setGoodsMarginNotes] = useState<string>("");
+  const [recyclingEnabled, setRecyclingEnabled] = useState<boolean>(true);
+  const [recyclingThreshold, setRecyclingThreshold] = useState<string>("");
   const [documentName, setDocumentName] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
@@ -92,6 +94,7 @@ export default function NewInvestmentContractPage() {
     setSaving(true);
     const { id, number } = nextContractId();
     const today = new Date().toISOString().slice(0, 10);
+    const thresholdNum = Number(recyclingThreshold.replace(/[^\d]/g, "") || 0);
     const contract: InvestmentContract = {
       id,
       number,
@@ -105,7 +108,9 @@ export default function NewInvestmentContractPage() {
       remaining: amountNum,
       status: "pendingSetup",
       profitNotes: profitNotes || "—",
-      goodsMarginNotes: goodsMarginNotes || "—",
+      capitalRecyclingEnabled: recyclingEnabled,
+      capitalRecyclingMinThreshold:
+        recyclingEnabled && thresholdNum > 0 ? thresholdNum : undefined,
       documentName: documentName || undefined,
       timeline: [{ ts: today, text: "إعداد عقد جديد للمستثمر" }],
       linkedInstallmentContractIds: [],
@@ -279,16 +284,62 @@ export default function NewInvestmentContractPage() {
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="goods-notes">{c.step3.goodsMarginNotes}</Label>
-                <textarea
-                  id="goods-notes"
-                  value={goodsMarginNotes}
-                  onChange={(e) => setGoodsMarginNotes(e.target.value)}
-                  rows={3}
-                  placeholder={c.step3.goodsMarginNotesPlaceholder}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-sm font-medium">{c.step3.recyclingToggle}</p>
+                    <p className="text-xs leading-5 text-muted-foreground">{c.step3.recyclingNote}</p>
+                  </div>
+                  <div className="inline-flex shrink-0 overflow-hidden rounded-md border border-input bg-background p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setRecyclingEnabled(true)}
+                      aria-pressed={recyclingEnabled}
+                      className={cn(
+                        "px-3 py-1 text-xs font-medium transition-colors",
+                        recyclingEnabled
+                          ? "bg-primary text-primary-foreground rounded-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {dict.common.yes}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRecyclingEnabled(false)}
+                      aria-pressed={!recyclingEnabled}
+                      className={cn(
+                        "px-3 py-1 text-xs font-medium transition-colors",
+                        !recyclingEnabled
+                          ? "bg-primary text-primary-foreground rounded-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {dict.common.no}
+                    </button>
+                  </div>
+                </div>
+                {recyclingEnabled ? (
+                  <div className="space-y-1.5 pt-2">
+                    <Label htmlFor="recycling-threshold" className="text-xs">
+                      {c.step3.recyclingThreshold}
+                    </Label>
+                    <Input
+                      id="recycling-threshold"
+                      type="text"
+                      inputMode="numeric"
+                      value={recyclingThreshold}
+                      onChange={(e) =>
+                        setRecyclingThreshold(e.target.value.replace(/[^\d,]/g, ""))
+                      }
+                      placeholder="50,000"
+                      className="num"
+                    />
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      {c.step3.recyclingThresholdHint}
+                    </p>
+                  </div>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <Label>{c.step3.attachment}</Label>
@@ -389,12 +440,19 @@ export default function NewInvestmentContractPage() {
                     }
                   />
                   <DataRow
-                    label={c.step3.goodsMarginNotes}
+                    label={c.step3.recyclingToggle}
                     value={
-                      <span className="text-end">
-                        {goodsMarginNotes || (
-                          <span className="text-muted-foreground">{dict.common.none}</span>
-                        )}
+                      <span className="inline-flex items-center gap-2">
+                        <StatusPill tone={recyclingEnabled ? "success" : "default"}>
+                          {recyclingEnabled
+                            ? dict.investments.details.recycling.enabled
+                            : dict.investments.details.recycling.disabled}
+                        </StatusPill>
+                        {recyclingEnabled && Number(recyclingThreshold.replace(/[^\d]/g, "")) > 0 ? (
+                          <span className="num text-xs text-muted-foreground">
+                            ≥ <Currency value={Number(recyclingThreshold.replace(/[^\d]/g, ""))} compact />
+                          </span>
+                        ) : null}
                       </span>
                     }
                   />

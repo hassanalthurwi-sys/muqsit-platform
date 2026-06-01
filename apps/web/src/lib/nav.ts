@@ -7,12 +7,14 @@ import {
   TrendingUp,
   Users,
   Wallet,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 
 export type NavKey =
   | "dashboard"
   | "contracts"
+  | "investments"
   | "clients"
   | "investors"
   | "financial"
@@ -38,6 +40,7 @@ export const navGroups: NavGroup[] = [
     key: "operations",
     items: [
       { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { key: "investments", href: "/investments", icon: Briefcase },
       { key: "contracts", href: "/contracts", icon: FileText },
       { key: "clients", href: "/clients", icon: Users },
       { key: "investors", href: "/investors", icon: TrendingUp },
@@ -61,3 +64,9 @@ export const navGroups: NavGroup[] = [
 ];
 
 export const navItems: NavItem[] = navGroups.flatMap((group) => group.items);
+
+// Sub-route awareness — items with children that should highlight when the URL is a descendant.
+export function isItemActive(itemHref: string, pathname: string): boolean {
+  if (itemHref === "/") return pathname === "/";
+  return pathname === itemHref || pathname.startsWith(itemHref + "/");
+}

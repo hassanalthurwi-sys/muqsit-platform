@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navGroups } from "@/lib/nav";
+import { navGroups, isItemActive } from "@/lib/nav";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           <div className="flex flex-col gap-0.5">
             {group.items.map((item) => {
               const Icon = item.icon;
-              const active = pathname === item.href;
+              const active = isItemActive(item.href, pathname);
               return (
                 <Link
                   key={item.key}

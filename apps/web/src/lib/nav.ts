@@ -2,6 +2,7 @@ import {
   BarChart3,
   FileText,
   FolderOpen,
+  Inbox,
   LayoutDashboard,
   Settings,
   TrendingUp,
@@ -17,6 +18,7 @@ export type NavKey =
   | "investments"
   | "clients"
   | "investors"
+  | "collections"
   | "financial"
   | "documents"
   | "reports"
@@ -42,7 +44,8 @@ export const navGroups: NavGroup[] = [
       { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
       { key: "investments", href: "/investments", icon: Briefcase },
       { key: "contracts", href: "/contracts", icon: FileText },
-      { key: "clients", href: "/clients", icon: Users },
+      { key: "clients", href: "/customers", icon: Users },
+      { key: "collections", href: "/collections", icon: Inbox },
       { key: "investors", href: "/investors", icon: TrendingUp },
     ],
   },
@@ -65,7 +68,6 @@ export const navGroups: NavGroup[] = [
 
 export const navItems: NavItem[] = navGroups.flatMap((group) => group.items);
 
-// Sub-route awareness — items with children that should highlight when the URL is a descendant.
 export function isItemActive(itemHref: string, pathname: string): boolean {
   if (itemHref === "/") return pathname === "/";
   return pathname === itemHref || pathname.startsWith(itemHref + "/");

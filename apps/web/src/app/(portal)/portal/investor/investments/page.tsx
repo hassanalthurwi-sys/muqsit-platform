@@ -6,6 +6,7 @@ import { InvestorShell } from "@/components/portal/investor-shell";
 import { PortalCard } from "@/components/portal/portal-card";
 import { Currency } from "@/components/ui/currency";
 import { StatusPill } from "@/components/ui/status-pill";
+import { RecycledBadge } from "@/components/ui/recycled-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useInvestorIdentity } from "@/lib/portal/use-portal-identity";
 import { investorContracts } from "@/lib/portal/data";
@@ -41,7 +42,10 @@ export default function InvestorInvestmentsPage() {
                   <PortalCard className="space-y-3 transition-colors hover:border-primary/40">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="num text-xs font-medium text-muted-foreground">{c.number}</p>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="num text-xs font-medium text-muted-foreground">{c.number}</p>
+                          {c.sourceContractId ? <RecycledBadge /> : null}
+                        </div>
                         <p className="num mt-1 text-xl font-semibold text-foreground">
                           <Currency value={c.amount} />
                         </p>

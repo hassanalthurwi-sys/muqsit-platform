@@ -534,19 +534,49 @@ export interface Dictionary {
   operations: {
     pageTitle: string;
     pageSubtitle: string;
-    criticalSection: string;
-    workQueuesSection: string;
-    workQueues: {
-      overdue: { label: string; hint: string };
-      approvals: { label: string; hint: string };
-      collections: { label: string; hint: string };
-      ocr: { label: string; hint: string };
-      whatsappFollowups: { label: string; hint: string };
+    cards: {
+      overdue: { title: string; primary: string; secondary: string; cta: string };
+      proofs: { title: string; primary: string; secondary: string; cta: string };
+      approvals: { title: string; primary: string; secondary: string; cta: string };
+      recycle: { title: string; primary: string; secondary: string; cta: string; empty: string };
     };
-    capitalSection: string;
-    capitalLowHint: string;
-    expiringSection: string;
-    expiringHint: string;
+    expiring: { title: string; hint: string; cta: string; empty: string };
+    emptyDay: string;
+  };
+  recycling: {
+    badgeLabel: string;
+    listTitle: string;
+    listSubtitle: string;
+    thresholdRule: string;
+    rowThresholdPill: string;
+    rowAvailableLabel: string;
+    runNow: string;
+    empty: string;
+    form: {
+      pageTitle: string;
+      contextLabel: string;
+      collectedLabel: string;
+      pctLabel: string;
+      pctHint: string;
+      pctPlaceholder: string;
+      financingLabel: string;
+      officeShareLabel: string;
+      cancel: string;
+      submit: string;
+      successTitle: string;
+      successHint: string;
+      viewNew: string;
+    };
+    detail: {
+      sectionTitle: string;
+      collectedRow: string;
+      officeShareRow: string;
+      financingRow: string;
+      timelineLabel: string;
+    };
+    investorPicker: {
+      availableLabel: string;
+    };
   };
   approvals: {
     pageTitle: string;
@@ -1647,21 +1677,77 @@ const ar: Dictionary = {
   },
   notificationPriority: { critical: "حرج", warning: "تحذير", info: "للعلم" },
   operations: {
-    pageTitle: "لوحة العمليات اليومية",
-    pageSubtitle: "ابدأ يومك بقائمة العمل — موافقات، متأخرون، إيصالات تحتاج قراراً.",
-    criticalSection: "إجراءات عاجلة",
-    workQueuesSection: "صناديق العمل",
-    workQueues: {
-      overdue: { label: "أقساط متأخرة", hint: "{n} عميل" },
-      approvals: { label: "موافقات بانتظار قرار", hint: "{n} طلب" },
-      collections: { label: "إيصالات بحاجة مراجعة", hint: "{n} إيصال" },
-      ocr: { label: "ثقة OCR منخفضة", hint: "{n} إيصال" },
-      whatsappFollowups: { label: "متابعات واتساب", hint: "{n} عميل" },
+    pageTitle: "عمل اليوم",
+    pageSubtitle: "ما يحتاج إجراءً منك الآن — لا أكثر.",
+    cards: {
+      overdue: {
+        title: "أقساط متأخرة",
+        primary: "{n} عميل",
+        secondary: "{amount} ر.س متأخرة",
+        cta: "مراجعة التحصيلات",
+      },
+      proofs: {
+        title: "إيصالات بانتظار المراجعة",
+        primary: "{n} إيصال",
+        secondary: "منها {m} بدقة OCR منخفضة",
+        cta: "فتح صندوق الواتساب",
+      },
+      approvals: {
+        title: "موافقات قيد الانتظار",
+        primary: "{n} طلب",
+        secondary: "منها {critical} حرج",
+        cta: "مراجعة الموافقات",
+      },
+      recycle: {
+        title: "رأس مال جاهز لإعادة التشغيل",
+        primary: "{amount} ر.س",
+        secondary: "لـ {n} مستثمر",
+        cta: "تشغيل الآن",
+        empty: "لا يوجد مستثمر بلغ حد إعادة التشغيل اليوم.",
+      },
     },
-    capitalSection: "مستثمرون رأس مالهم على وشك النفاد",
-    capitalLowHint: "متاح {available} من {total} ({pct}%)",
-    expiringSection: "عقود استثمار تنتهي قريباً",
-    expiringHint: "خلال 30 يوماً",
+    expiring: {
+      title: "عقود استثمار قريبة من الانتهاء",
+      hint: "{n} عقد خلال 30 يوماً",
+      cta: "عرض",
+      empty: "—",
+    },
+    emptyDay: "لا توجد إجراءات اليوم — يوم هادئ.",
+  },
+  recycling: {
+    badgeLabel: "معاد تدويره",
+    listTitle: "رأس مال جاهز لإعادة التشغيل",
+    listSubtitle: "اختر المستثمر لإنشاء عقد جديد من المبلغ المُحصَّل.",
+    thresholdRule: "تظهر هنا العقود التي تجاوز فيها المبلغ المُحصَّل من الأقساط الحد الذي اتفقت عليه مع المستثمر.",
+    rowThresholdPill: "حد الإعادة: {amount} ر.س",
+    rowAvailableLabel: "المُحصَّل",
+    runNow: "تشغيل الآن",
+    empty: "لا يوجد مستثمر بلغ حد إعادة التشغيل اليوم.",
+    form: {
+      pageTitle: "إعادة تشغيل رأس المال",
+      contextLabel: "مستثمر",
+      collectedLabel: "المبلغ المُحصَّل",
+      pctLabel: "نسبة المكتب لهذه الدورة",
+      pctHint: "بين 0 و 100",
+      pctPlaceholder: "—",
+      financingLabel: "متاح للتمويل (مبدأ العقد الجديد)",
+      officeShareLabel: "نصيب المكتب",
+      cancel: "إلغاء",
+      submit: "تشغيل الآن",
+      successTitle: "تم إنشاء عقد إعادة التشغيل",
+      successHint: "أصبح المبلغ متاحاً للتمويل ضمن عقود الأقساط الجديدة.",
+      viewNew: "فتح العقد الجديد",
+    },
+    detail: {
+      sectionTitle: "تفاصيل إعادة التشغيل",
+      collectedRow: "المبلغ المُحصَّل قبل النسبة",
+      officeShareRow: "نصيب المكتب",
+      financingRow: "متاح للتمويل",
+      timelineLabel: "إعادة تشغيل رأس المال",
+    },
+    investorPicker: {
+      availableLabel: "متاح للتمويل",
+    },
   },
   approvals: {
     pageTitle: "الموافقات",
@@ -2799,21 +2885,77 @@ const en: Dictionary = {
   },
   notificationPriority: { critical: "Critical", warning: "Warning", info: "Info" },
   operations: {
-    pageTitle: "Operations center",
-    pageSubtitle: "Start your day with the work queue — approvals, overdues, proofs needing a decision.",
-    criticalSection: "Critical actions",
-    workQueuesSection: "Work queues",
-    workQueues: {
-      overdue: { label: "Overdue installments", hint: "{n} customers" },
-      approvals: { label: "Approvals pending", hint: "{n} requests" },
-      collections: { label: "Proofs to review", hint: "{n} proofs" },
-      ocr: { label: "Low-confidence OCR", hint: "{n} proofs" },
-      whatsappFollowups: { label: "WhatsApp follow-ups", hint: "{n} customers" },
+    pageTitle: "Today",
+    pageSubtitle: "Only what needs action right now — nothing more.",
+    cards: {
+      overdue: {
+        title: "Overdue installments",
+        primary: "{n} customers",
+        secondary: "{amount} SAR overdue",
+        cta: "Review collections",
+      },
+      proofs: {
+        title: "Proofs awaiting review",
+        primary: "{n} proofs",
+        secondary: "{m} with low OCR confidence",
+        cta: "Open WhatsApp inbox",
+      },
+      approvals: {
+        title: "Approvals pending",
+        primary: "{n} requests",
+        secondary: "{critical} critical",
+        cta: "Review approvals",
+      },
+      recycle: {
+        title: "Capital ready to recycle",
+        primary: "{amount} SAR",
+        secondary: "across {n} investors",
+        cta: "Run now",
+        empty: "No investor reached the recycling threshold today.",
+      },
     },
-    capitalSection: "Investors with low remaining capital",
-    capitalLowHint: "{available} of {total} ({pct}%)",
-    expiringSection: "Investment contracts expiring soon",
-    expiringHint: "within 30 days",
+    expiring: {
+      title: "Investment contracts expiring soon",
+      hint: "{n} contracts within 30 days",
+      cta: "View",
+      empty: "—",
+    },
+    emptyDay: "No actions today — quiet day.",
+  },
+  recycling: {
+    badgeLabel: "Recycled",
+    listTitle: "Capital ready to recycle",
+    listSubtitle: "Pick an investor to create a new contract from the collected amount.",
+    thresholdRule: "Shown here when collected installments cross the threshold the office agreed with the investor.",
+    rowThresholdPill: "Threshold: {amount} SAR",
+    rowAvailableLabel: "Collected",
+    runNow: "Run now",
+    empty: "No investor reached the recycling threshold today.",
+    form: {
+      pageTitle: "Recycle capital",
+      contextLabel: "Investor",
+      collectedLabel: "Collected amount",
+      pctLabel: "Office percentage for this cycle",
+      pctHint: "Between 0 and 100",
+      pctPlaceholder: "—",
+      financingLabel: "Available for financing (new contract principal)",
+      officeShareLabel: "Office share",
+      cancel: "Cancel",
+      submit: "Run now",
+      successTitle: "Recycled contract created",
+      successHint: "The amount is now available for financing new installment contracts.",
+      viewNew: "Open the new contract",
+    },
+    detail: {
+      sectionTitle: "Recycling details",
+      collectedRow: "Collected before percentage",
+      officeShareRow: "Office share",
+      financingRow: "Available for financing",
+      timelineLabel: "Capital recycled",
+    },
+    investorPicker: {
+      availableLabel: "Available for financing",
+    },
   },
   approvals: {
     pageTitle: "Approvals",

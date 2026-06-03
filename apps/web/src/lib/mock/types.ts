@@ -62,6 +62,14 @@ export interface InvestmentContract {
   documentName?: string;
   timeline: ActivityItem[];
   linkedInstallmentContractIds: string[];
+  // Optional capital-recycling tracking. When sourceContractId is set, this
+  // contract was created by recycling — but the source is intentionally not
+  // surfaced in the UI. recycledFromCollected and recyclingOfficeMargin are
+  // informational (rendered on the recycled contract detail).
+  sourceContractId?: string;
+  recyclingCycle?: number;
+  recycledFromCollected?: number;
+  recyclingOfficeMargin?: number;
 }
 
 // ─── Sprint 3: Customers · Installment contracts · Payments ───────────────

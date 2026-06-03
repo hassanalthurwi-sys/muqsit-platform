@@ -3,293 +3,289 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import {
-  AlertCircle,
-  AlertTriangle,
+  ArrowLeft,
   ArrowRight,
-  Clock,
-  GaugeCircle,
+  Bell,
+  CalendarClock,
+  CreditCard,
   Inbox,
-  MessageCircle,
+  Recycle,
   ShieldCheck,
-  TrendingUp,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
-import { StatusPill } from "@/components/ui/status-pill";
 import { useStore } from "@/lib/mock/store";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { aggregateRecycleReady, recycleReady } from "@/lib/mock/recycling";
 import { cn } from "@/lib/utils";
 
-export default function OperationsPage() {
-  const { dict } = useI18n();
-  const {
-    customers,
-    investmentContracts,
-    installmentContracts,
-    paymentProofs,
-    approvals,
-    notifications,
-  } = useStore();
-  const o = dict.operations;
+const REFERENCE_TODAY = "2025-06-01";
 
-  // Critical alerts derived from the data
-  const overdue60Customers = useMemo(() => {
+export default function OperationsPage() {
+  const { dict, dir } = useI18n();
+  const o = dict.operations;
+  const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const { installmentContracts, paymentProofs, approvals, investmentContracts } = useStore();
+
+  // ── Card 1: overdue installments ──────────────────────────────────────────
+  const overdue = useMemo(() => {
     const customerIds = new Set<string>();
+    let totalAmount = 0;
     installmentContracts.forEach((c) => {
       c.schedule.forEach((s) => {
-        if (s.status === "defaulted") customerIds.add(c.customerId);
+        if (s.status === "overdue" || s.status === "defaulted") {
+          customerIds.add(c.customerId);
+          totalAmount += s.amount - s.paidAmount;
+        }
       });
     });
-    return Array.from(customerIds).slice(0, 5);
+    return { customers: customerIds.size, total: totalAmount };
   }, [installmentContracts]);
 
-  const pendingApprovals = approvals.filter((a) => a.status === "pending");
-  const criticalApprovals = pendingApprovals.filter((a) => a.priority === "critical");
-  const pendingProofs = paymentProofs.filter((p) => p.status === "pending");
-  const lowOcrProofs = pendingProofs.filter((p) => p.ocr.confidence < 0.85);
-  const lowCapitalInvestors = investmentContracts
-    .filter((c) => c.status === "active")
-    .map((c) => ({
-      contract: c,
-      available: c.amount - c.utilized,
-      pct: c.amount > 0 ? (c.amount - c.utilized) / c.amount : 0,
-    }))
-    .filter((x) => x.pct <= 0.05)
-    .slice(0, 5);
-  const expiringContracts = investmentContracts
-    .filter((c) => c.status === "active")
-    .map((c) => {
-      const endTime = new Date(c.endDate).getTime();
-      const refTime = new Date("2025-06-01").getTime();
-      const daysToEnd = Math.round((endTime - refTime) / (1000 * 60 * 60 * 24));
-      return { contract: c, daysToEnd };
-    })
-    .filter((x) => x.daysToEnd >= 0 && x.daysToEnd <= 30)
-    .slice(0, 5);
+  // ── Card 2: proofs awaiting review ────────────────────────────────────────
+  const proofs = useMemo(() => {
+    const pending = paymentProofs.filter((p) => p.status === "pending");
+    const low = pending.filter((p) => p.ocr.confidence < 0.85);
+    return { count: pending.length, low: low.length };
+  }, [paymentProofs]);
 
-  const customerName = (id: string) => customers.find((c) => c.id === id)?.name ?? "—";
+  // ── Card 3: approvals ─────────────────────────────────────────────────────
+  const approval = useMemo(() => {
+    const pending = approvals.filter((a) => a.status === "pending");
+    const critical = pending.filter((a) => a.priority === "critical");
+    return { count: pending.length, critical: critical.length };
+  }, [approvals]);
 
-  const queues = [
-    {
-      key: "overdue",
-      icon: Clock,
-      tone: "danger" as const,
-      count: overdue60Customers.length,
-      hint: o.workQueues.overdue.hint.replace("{n}", String(overdue60Customers.length)),
-      label: o.workQueues.overdue.label,
-      href: "/customers",
-    },
-    {
-      key: "approvals",
-      icon: ShieldCheck,
-      tone: "warning" as const,
-      count: pendingApprovals.length,
-      hint: o.workQueues.approvals.hint.replace("{n}", String(pendingApprovals.length)),
-      label: o.workQueues.approvals.label,
-      href: "/approvals",
-    },
-    {
-      key: "collections",
-      icon: Inbox,
-      tone: "primary" as const,
-      count: pendingProofs.length,
-      hint: o.workQueues.collections.hint.replace("{n}", String(pendingProofs.length)),
-      label: o.workQueues.collections.label,
-      href: "/collections",
-    },
-    {
-      key: "ocr",
-      icon: AlertCircle,
-      tone: "warning" as const,
-      count: lowOcrProofs.length,
-      hint: o.workQueues.ocr.hint.replace("{n}", String(lowOcrProofs.length)),
-      label: o.workQueues.ocr.label,
-      href: "/collections",
-    },
-    {
-      key: "whatsapp",
-      icon: MessageCircle,
-      tone: "primary" as const,
-      count: 2,
-      hint: o.workQueues.whatsappFollowups.hint.replace("{n}", "2"),
-      label: o.workQueues.whatsappFollowups.label,
-      href: "/collections",
-    },
-  ];
+  // ── Card 4: capital ready to recycle ──────────────────────────────────────
+  const recycle = useMemo(() => {
+    const ready = recycleReady(investmentContracts, installmentContracts);
+    return { ready, ...aggregateRecycleReady(ready) };
+  }, [investmentContracts, installmentContracts]);
 
-  const queueTone: Record<"danger" | "warning" | "primary", string> = {
-    danger: "bg-danger-soft text-danger-foreground",
-    warning: "bg-warning-soft text-warning-foreground",
-    primary: "bg-primary-soft text-primary-soft-foreground",
-  };
+  // ── Secondary tile: contracts expiring ────────────────────────────────────
+  const expiring = useMemo(() => {
+    const refTime = new Date(REFERENCE_TODAY).getTime();
+    return investmentContracts.filter((c) => {
+      if (c.status !== "active") return false;
+      const days = Math.round((new Date(c.endDate).getTime() - refTime) / 86_400_000);
+      return days >= 0 && days <= 30;
+    }).length;
+  }, [investmentContracts]);
+
+  const nothingToday =
+    overdue.customers === 0 &&
+    proofs.count === 0 &&
+    approval.count === 0 &&
+    recycle.investorCount === 0;
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <GaugeCircle className="size-6 text-primary" />
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{o.pageTitle}</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">{o.pageSubtitle}</p>
-        </div>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{o.pageTitle}</h1>
+        <p className="text-sm text-muted-foreground">{o.pageSubtitle}</p>
       </header>
 
-      {/* Critical alerts */}
-      <Card className="border-danger-soft">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base font-semibold">
-            <AlertTriangle className="size-4 text-danger" />
-            {o.criticalSection}
-            <span className="num text-xs font-medium text-muted-foreground">
-              ({notifications.filter((n) => n.priority === "critical").length})
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {notifications
-            .filter((n) => n.priority === "critical")
-            .slice(0, 3)
-            .map((n) => (
-              <Link
-                key={n.id}
-                href={
-                  n.relatedEntity?.kind === "approval"
-                    ? `/approvals/${n.relatedEntity.id}`
-                    : n.relatedEntity?.kind === "proof"
-                      ? `/collections/${n.relatedEntity.id}`
-                      : "/notifications"
-                }
-                className="flex items-center gap-3 rounded-lg border border-danger-soft bg-danger-soft/40 px-3 py-2 text-sm text-foreground transition-colors hover:bg-danger-soft/60"
-              >
-                <span className="flex size-7 items-center justify-center rounded-md bg-card/60 text-danger-foreground">
-                  <AlertTriangle className="size-3.5" />
-                </span>
-                <span className="flex-1 font-medium">{n.title}</span>
-                <ArrowRight className="size-3.5 rtl:rotate-180" />
-              </Link>
-            ))}
-        </CardContent>
-      </Card>
-
-      {/* Work queues */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground">{o.workQueuesSection}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {queues.map((q) => {
-            const Icon = q.icon;
-            return (
-              <Link
-                key={q.key}
-                href={q.href}
-                className="group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-lg"
-              >
-                <span
-                  className={cn(
-                    "flex size-9 items-center justify-center rounded-lg [&_svg]:size-4",
-                    queueTone[q.tone],
-                  )}
-                >
-                  <Icon />
-                </span>
-                <div>
-                  <p className="num text-3xl font-semibold tracking-tight">{q.count}</p>
-                  <p className="mt-0.5 text-xs font-medium">{q.label}</p>
-                  <p className="text-xs text-muted-foreground">{q.hint}</p>
-                </div>
-              </Link>
-            );
-          })}
+      {nothingToday ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+          <Bell className="mx-auto mb-3 size-6 text-muted-foreground" aria-hidden />
+          <p className="text-sm text-muted-foreground">{o.emptyDay}</p>
         </div>
-      </section>
+      ) : null}
 
-      {/* Capital low + expiring */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base font-semibold">
-              <TrendingUp className="size-4 text-warning" />
-              {o.capitalSection}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 pb-2">
-            {lowCapitalInvestors.length === 0 ? (
-              <p className="text-sm text-muted-foreground">—</p>
-            ) : (
-              lowCapitalInvestors.map(({ contract, available, pct }) => (
-                <Link
-                  key={contract.id}
-                  href={`/investments/${contract.id}`}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/40"
-                >
-                  <span className="num font-medium">{contract.number}</span>
-                  <span className="num text-xs text-muted-foreground">
-                    {o.capitalLowHint
-                      .replace("{available}", `${(available / 1000).toFixed(0)}K`)
-                      .replace("{total}", `${(contract.amount / 1_000_000).toFixed(1)}M`)
-                      .replace("{pct}", String(Math.round(pct * 100)))}
-                  </span>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
+      <div className="space-y-3">
+        <ActionCard
+          icon={CreditCard}
+          tone="danger"
+          title={o.cards.overdue.title}
+          primary={o.cards.overdue.primary.replace("{n}", String(overdue.customers))}
+          secondary={
+            overdue.total > 0 ? (
+              <>
+                <Currency value={overdue.total} compact />{" "}
+                {o.cards.overdue.secondary
+                  .replace("{amount} ر.س", "")
+                  .replace("{amount} SAR", "")
+                  .trim()}
+              </>
+            ) : null
+          }
+          cta={o.cards.overdue.cta}
+          href="/collections"
+          Arrow={Arrow}
+          hideWhenZero={overdue.customers === 0}
+        />
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base font-semibold">
-              <Clock className="size-4 text-warning" />
-              {o.expiringSection}
-              <span className="text-xs font-normal text-muted-foreground">({o.expiringHint})</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 pb-2">
-            {expiringContracts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">—</p>
-            ) : (
-              expiringContracts.map(({ contract, daysToEnd }) => (
-                <Link
-                  key={contract.id}
-                  href={`/investments/${contract.id}`}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/40"
-                >
-                  <span className="num font-medium">{contract.number}</span>
-                  <span className="num text-xs">
-                    {daysToEnd} {dict.installmentContracts.details.months.replace("شهر", "يوم")}
-                  </span>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
+        <ActionCard
+          icon={Inbox}
+          tone="primary"
+          title={o.cards.proofs.title}
+          primary={o.cards.proofs.primary.replace("{n}", String(proofs.count))}
+          secondary={
+            proofs.low > 0 ? o.cards.proofs.secondary.replace("{m}", String(proofs.low)) : null
+          }
+          cta={o.cards.proofs.cta}
+          href="/collections/whatsapp"
+          Arrow={Arrow}
+          hideWhenZero={proofs.count === 0}
+        />
+
+        <ActionCard
+          icon={ShieldCheck}
+          tone="warning"
+          title={o.cards.approvals.title}
+          primary={o.cards.approvals.primary.replace("{n}", String(approval.count))}
+          secondary={
+            approval.critical > 0
+              ? o.cards.approvals.secondary.replace("{critical}", String(approval.critical))
+              : null
+          }
+          cta={o.cards.approvals.cta}
+          href="/approvals"
+          Arrow={Arrow}
+          hideWhenZero={approval.count === 0}
+        />
+
+        <RecycleCard
+          totalCollected={recycle.totalCollected}
+          investorCount={recycle.investorCount}
+        />
       </div>
 
-      {/* Critical approvals quick links */}
-      {criticalApprovals.length > 0 ? (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">
-              {dict.approvals.pageTitle} —{" "}
-              <span className="text-danger">{criticalApprovals.length}</span> {dict.approvalPriority.critical}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 pb-2">
-            {criticalApprovals.map((a) => (
-              <Link
-                key={a.id}
-                href={`/approvals/${a.id}`}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/40"
-              >
-                <span className="font-medium">{dict.permissionAction[a.type]}</span>
-                <span className="text-xs text-muted-foreground">{a.relatedEntity.label}</span>
-                <StatusPill tone="danger">
-                  {a.amount ? <Currency value={a.amount} compact /> : "—"}
-                </StatusPill>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
+      {/* Secondary lighter tile — informational follow-up */}
+      <Link
+        href="/investments"
+        className="mt-2 flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground hover:bg-muted/60"
+      >
+        <span className="flex items-center gap-2.5">
+          <CalendarClock className="size-4" aria-hidden />
+          <span>
+            {o.expiring.title} ·{" "}
+            <span className="num text-foreground">
+              {o.expiring.hint.replace("{n}", String(expiring))}
+            </span>
+          </span>
+        </span>
+        <Arrow className="size-4" aria-hidden />
+      </Link>
     </div>
+  );
+}
+
+// ─── Action card ─────────────────────────────────────────────────────────────
+
+type Tone = "danger" | "primary" | "warning" | "success";
+
+interface ActionCardProps {
+  icon: React.ComponentType<{ className?: string }>;
+  tone: Tone;
+  title: string;
+  primary: React.ReactNode;
+  secondary?: React.ReactNode;
+  cta: string;
+  href: string;
+  Arrow: React.ComponentType<{ className?: string }>;
+  hideWhenZero?: boolean;
+}
+
+const toneIcon: Record<Tone, string> = {
+  danger: "bg-danger-soft text-danger-foreground",
+  primary: "bg-primary-soft text-primary-soft-foreground",
+  warning: "bg-warning-soft text-warning-foreground",
+  success: "bg-success-soft text-success-foreground",
+};
+
+function ActionCard({
+  icon: Icon,
+  tone,
+  title,
+  primary,
+  secondary,
+  cta,
+  href,
+  Arrow,
+  hideWhenZero,
+}: ActionCardProps) {
+  if (hideWhenZero) return null;
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40 sm:p-5"
+    >
+      <span
+        className={cn(
+          "flex size-11 shrink-0 items-center justify-center rounded-xl",
+          toneIcon[tone],
+        )}
+      >
+        <Icon className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-medium text-muted-foreground">{title}</p>
+        <p className="num mt-0.5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          {primary}
+        </p>
+        {secondary ? (
+          <p className="num mt-0.5 text-[11px] text-muted-foreground">{secondary}</p>
+        ) : null}
+      </div>
+      <span className="hidden flex-col items-end gap-1 text-end text-xs font-medium text-primary sm:flex">
+        {cta}
+      </span>
+      <Arrow
+        className="size-4 text-muted-foreground transition-colors group-hover:text-foreground"
+        aria-hidden
+      />
+    </Link>
+  );
+}
+
+// ─── Recycle card (special: has empty state instead of hide) ─────────────────
+
+function RecycleCard({
+  totalCollected,
+  investorCount,
+}: {
+  totalCollected: number;
+  investorCount: number;
+}) {
+  const { dict, dir } = useI18n();
+  const o = dict.operations.cards.recycle;
+  const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+
+  if (investorCount === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+        <div className="flex items-center gap-4">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+            <Recycle className="size-5" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-medium text-muted-foreground">{o.title}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{o.empty}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href="/investments?ready=1"
+      className="group flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary-soft/40 p-4 transition-colors hover:border-primary/60 sm:p-5"
+    >
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        <Recycle className="size-5" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-medium text-primary-soft-foreground">{o.title}</p>
+        <p className="num mt-0.5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          <Currency value={totalCollected} />
+        </p>
+        <p className="num mt-0.5 text-[11px] text-muted-foreground">
+          {o.secondary.replace("{n}", String(investorCount))}
+        </p>
+      </div>
+      <span className="hidden text-end text-xs font-semibold text-primary sm:inline">{o.cta}</span>
+      <Arrow className="size-4 text-primary" aria-hidden />
+    </Link>
   );
 }

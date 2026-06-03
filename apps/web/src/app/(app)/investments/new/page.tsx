@@ -1,22 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { Suspense, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, ArrowRight, Check, Recycle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
 import { StatusPill } from "@/components/ui/status-pill";
 import { IdentityBadge } from "@/components/ui/identity-badge";
+import { RecycledBadge } from "@/components/ui/recycled-badge";
 import { Stepper } from "@/components/ui/stepper";
 import { DataRow, DataRows } from "@/components/ui/data-row";
 import { InvestorAvatar } from "@/components/investor-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MOCK_INVESTORS } from "@/lib/mock/investors";
-import { useContractStore } from "@/lib/mock/store";
+import { MOCK_INVESTORS, findInvestor } from "@/lib/mock/investors";
+import { useStore, useContractStore } from "@/lib/mock/store";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatDate } from "@/lib/format";
+import { collectedFor, nextRecycleNumber } from "@/lib/mock/recycling";
 import { cn } from "@/lib/utils";
 import type { InvestmentContract } from "@/lib/mock/types";
 
@@ -36,7 +39,16 @@ function nextContractId(): { id: string; number: string } {
   return { id: `c-user-${stamp}`, number: `INV-${year}-U${stamp.slice(-3)}` };
 }
 
-export default function NewInvestmentContractPage() {
+function NewInvestmentContractRouter() {
+  const search = useSearchParams();
+  const recycleFromId = search.get("recycleFromId");
+  if (recycleFromId) {
+    return <RecycleForm sourceId={recycleFromId} />;
+  }
+  return <NewInvestmentContractInner />;
+}
+
+function NewInvestmentContractInner() {
   const router = useRouter();
   const { dict, dir, locale } = useI18n();
   const { addContract } = useContractStore();
@@ -506,6 +518,214 @@ export default function NewInvestmentContractPage() {
           )}
         </div>
       </Card>
+    </div>
+  );
+}
+
+export default function NewInvestmentContractPage() {
+  return (
+    <Suspense fallback={null}>
+      <NewInvestmentContractRouter />
+    </Suspense>
+  );
+}
+
+// ─── Recycle form ───────────────────────────────────────────────────────────
+// Triggered by ?recycleFromId=<id>. The source contract is read silently —
+// it informs the calculation and gets recorded internally on the new contract,
+// but is intentionally NOT surfaced in the UI per product direction.
+
+function RecycleForm({ sourceId }: { sourceId: string }) {
+  const router = useRouter();
+  const { dict, dir } = useI18n();
+  const t = dict.recycling.form;
+  const { investmentContracts, installmentContracts, addInvestmentContract } = useStore();
+  const BackArrow = dir === "rtl" ? ArrowRight : ArrowLeft;
+
+  const source = investmentContracts.find((c) => c.id === sourceId);
+  const collected = source ? Math.round(collectedFor(source, installmentContracts)) : 0;
+  const investor = source ? findInvestor(source.investorId) : undefined;
+
+  const [pctStr, setPctStr] = useState<string>("");
+  const [saving, setSaving] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
+
+  const pct = Number(pctStr);
+  const validPct = pctStr !== "" && Number.isFinite(pct) && pct >= 0 && pct <= 100;
+  const financing = validPct ? Math.round(collected * (1 - pct / 100)) : 0;
+  const officeShare = validPct ? Math.round(collected * (pct / 100)) : 0;
+
+  if (!source || !investor) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+        <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
+          {dict.recycling.empty}
+        </div>
+      </div>
+    );
+  }
+
+  const handleSave = () => {
+    if (!validPct) return;
+    setSaving(true);
+    const existingCycles = investmentContracts
+      .filter((c) => c.sourceContractId === source.id)
+      .map((c) => c.recyclingCycle ?? 0);
+    const cycle = Math.max(0, ...existingCycles) + 1;
+    const { id, number } = nextRecycleNumber(source.number, cycle);
+    const today = new Date().toISOString().slice(0, 10);
+    const newContract: InvestmentContract = {
+      id,
+      number,
+      investorId: source.investorId,
+      amount: financing,
+      startDate: today,
+      // Default 12 months — operationally simple. Operator can adjust on the
+      // contract detail later if needed.
+      endDate: (() => {
+        const d = new Date(today);
+        d.setMonth(d.getMonth() + 12);
+        return d.toISOString().slice(0, 10);
+      })(),
+      durationMonths: 12,
+      operationPct: pct,
+      utilized: 0,
+      remaining: financing,
+      status: "active",
+      profitNotes: source.profitNotes,
+      capitalRecyclingEnabled: source.capitalRecyclingEnabled,
+      capitalRecyclingMinThreshold: source.capitalRecyclingMinThreshold,
+      timeline: [{ ts: today, text: dict.recycling.detail.timelineLabel }],
+      linkedInstallmentContractIds: [],
+      sourceContractId: source.id,
+      recyclingCycle: cycle,
+      recycledFromCollected: collected,
+      recyclingOfficeMargin: officeShare,
+    };
+    addInvestmentContract(newContract);
+    setCreatedId(id);
+  };
+
+  if (createdId) {
+    return (
+      <div className="mx-auto flex w-full max-w-xl flex-col gap-5">
+        <div className="rounded-2xl border border-success/30 bg-success-soft/30 p-6 text-center">
+          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-success text-white">
+            <Check className="size-6" aria-hidden />
+          </div>
+          <p className="text-base font-semibold text-foreground">{t.successTitle}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.successHint}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild className="flex-1 gap-1.5">
+            <Link href={`/investments/${createdId}`}>{t.viewNew}</Link>
+          </Button>
+          <Button variant="outline" className="flex-1" onClick={() => router.push("/investments")}>
+            {dict.common.back}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+      <header className="space-y-1">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <BackArrow className="size-3.5" aria-hidden />
+          {dict.common.back}
+        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.pageTitle}</h1>
+          <RecycledBadge size="md" />
+        </div>
+      </header>
+
+      <Card>
+        <CardContent className="space-y-5 p-5">
+          {/* Read-only context */}
+          <div className="rounded-xl bg-muted/30 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-medium text-muted-foreground">{t.contextLabel}</p>
+              <span className="text-sm font-semibold">{investor.name}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-medium text-muted-foreground">{t.collectedLabel}</p>
+              <p className="num text-2xl font-semibold text-foreground">
+                <Currency value={collected} />
+              </p>
+            </div>
+          </div>
+
+          {/* Percentage input */}
+          <div className="space-y-2">
+            <Label htmlFor="pct">{t.pctLabel}</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="pct"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                max={100}
+                step={0.5}
+                placeholder={t.pctPlaceholder}
+                value={pctStr}
+                onChange={(e) => setPctStr(e.target.value)}
+                className="num text-lg font-semibold"
+              />
+              <span className="text-sm text-muted-foreground">%</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">{t.pctHint}</p>
+          </div>
+
+          {/* Live preview */}
+          <div className="space-y-2 rounded-xl border border-primary/20 bg-primary-soft/30 p-4">
+            <DataRows>
+              <DataRow
+                label={t.financingLabel}
+                value={
+                  validPct ? (
+                    <span className="num text-base font-bold text-primary">
+                      <Currency value={financing} />
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )
+                }
+              />
+              <DataRow
+                label={t.officeShareLabel}
+                value={
+                  validPct ? <Currency value={officeShare} /> : <span className="text-muted-foreground">—</span>
+                }
+              />
+            </DataRows>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => router.push("/investments?ready=1")}
+          disabled={saving}
+        >
+          {t.cancel}
+        </Button>
+        <Button
+          className="flex-1 gap-1.5"
+          onClick={handleSave}
+          disabled={!validPct || saving}
+        >
+          <Recycle className="size-4" aria-hidden />
+          {t.submit}
+        </Button>
+      </div>
     </div>
   );
 }

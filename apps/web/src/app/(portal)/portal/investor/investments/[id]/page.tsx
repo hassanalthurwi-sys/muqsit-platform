@@ -7,6 +7,7 @@ import { InvestorShell } from "@/components/portal/investor-shell";
 import { PortalCard } from "@/components/portal/portal-card";
 import { Currency } from "@/components/ui/currency";
 import { StatusPill } from "@/components/ui/status-pill";
+import { RecycledBadge } from "@/components/ui/recycled-badge";
 import { DataRow, DataRows } from "@/components/ui/data-row";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useInvestorIdentity } from "@/lib/portal/use-portal-identity";
@@ -35,7 +36,10 @@ export default function InvestmentDetailPage() {
 
         <PortalCard tone="primary" className="space-y-3">
           <div>
-            <p className="num text-xs font-medium opacity-80">{contract.number}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="num text-xs font-medium opacity-80">{contract.number}</p>
+              {contract.sourceContractId ? <RecycledBadge /> : null}
+            </div>
             <p className="num mt-1 text-3xl font-semibold tracking-tight">
               <Currency value={contract.amount} />
             </p>
@@ -72,6 +76,33 @@ export default function InvestmentDetailPage() {
             ) : null}
           </DataRows>
         </PortalCard>
+
+        {contract.sourceContractId ? (
+          <PortalCard>
+            <div className="mb-2 flex items-center gap-2">
+              <RecycledBadge />
+              <h2 className="text-sm font-semibold">{dict.recycling.detail.sectionTitle}</h2>
+            </div>
+            <DataRows>
+              {contract.recycledFromCollected !== undefined ? (
+                <DataRow
+                  label={dict.recycling.detail.collectedRow}
+                  value={<Currency value={contract.recycledFromCollected} />}
+                />
+              ) : null}
+              {contract.recyclingOfficeMargin !== undefined ? (
+                <DataRow
+                  label={dict.recycling.detail.officeShareRow}
+                  value={<Currency value={contract.recyclingOfficeMargin} />}
+                />
+              ) : null}
+              <DataRow
+                label={dict.recycling.detail.financingRow}
+                value={<Currency value={contract.amount} />}
+              />
+            </DataRows>
+          </PortalCard>
+        ) : null}
 
         <PortalCard>
           <h2 className="mb-2 text-sm font-semibold">{t.profitTerms}</h2>

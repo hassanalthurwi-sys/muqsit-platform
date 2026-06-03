@@ -15,7 +15,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 15% نسبة عمليات للمكتب.",
     capitalRecyclingEnabled: true,
-    capitalRecyclingMinThreshold: 50_000,
+    capitalRecyclingMinThreshold: 800,
     documentName: "INV-2024-001-contract.pdf",
     timeline: [
       { ts: "2024-03-15", text: "تفعيل العقد" },
@@ -132,7 +132,7 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     status: "active",
     profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 14% نسبة عمليات. التحويل بالريال السعودي.",
     capitalRecyclingEnabled: true,
-    capitalRecyclingMinThreshold: 25_000,
+    capitalRecyclingMinThreshold: 1_500,
     documentName: "INV-2024-006-contract.pdf",
     timeline: [
       { ts: "2024-08-20", text: "تفعيل العقد" },
@@ -272,6 +272,30 @@ export const MOCK_CONTRACTS: InvestmentContract[] = [
     capitalRecyclingEnabled: false,
     timeline: [{ ts: "2025-05-10", text: "إعداد عقد جديد للمستثمر" }],
     linkedInstallmentContractIds: [],
+  },
+  // Pre-existing recycled contract — created earlier in the year from INV-2024-001.
+  // The source reference is stored for internal tracking but not surfaced in UI.
+  {
+    id: "c-2025-r-001",
+    number: "INV-2024-001-R1",
+    investorId: "inv-ext-2",
+    amount: 13_500,
+    startDate: "2025-04-20",
+    endDate: "2026-04-20",
+    durationMonths: 12,
+    operationPct: 10,
+    utilized: 0,
+    remaining: 13_500,
+    status: "active",
+    profitNotes: "صافي الربح يوزّع شهريًا بعد خصم 10% نسبة عمليات للمكتب.",
+    capitalRecyclingEnabled: true,
+    capitalRecyclingMinThreshold: 50_000,
+    timeline: [{ ts: "2025-04-20", text: "إعادة تشغيل رأس المال" }],
+    linkedInstallmentContractIds: [],
+    sourceContractId: "c-2024-001",
+    recyclingCycle: 1,
+    recycledFromCollected: 15_000,
+    recyclingOfficeMargin: 1_500,
   },
 ];
 

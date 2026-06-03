@@ -13,9 +13,11 @@ import { DataRow, DataRows } from "@/components/ui/data-row";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RecycledBadge } from "@/components/ui/recycled-badge";
 import { useStore } from "@/lib/mock/store";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { addMonthsIso } from "@/lib/mock/installment-contracts";
+import { findInvestor } from "@/lib/mock/investors";
 import { formatDate } from "@/lib/format";
 import type { Installment, InstallmentContract } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
@@ -95,10 +97,27 @@ export default function NewInstallmentContractPage() {
   const remainingAfter = chosenInvContract ? availableInChosen - utilizeNum : 0;
   const sufficient = chosenInvContract ? utilizeNum > 0 && utilizeNum <= availableInChosen : false;
 
+  // Investors sorted by total available financing (sum of remaining across
+  // their active contracts) — recycled capital floats to the top naturally.
   const investors = useMemo(() => {
-    const ids = new Set(investmentContracts.map((ic) => ic.investorId));
-    return Array.from(ids);
+    const totals = new Map<string, number>();
+    for (const ic of investmentContracts) {
+      if (ic.status !== "active") continue;
+      const available = ic.amount - ic.utilized;
+      totals.set(ic.investorId, (totals.get(ic.investorId) ?? 0) + available);
+    }
+    return [...totals.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, available]) => ({ id, available }));
   }, [investmentContracts]);
+
+  // Active investment contracts for the selected investor, sorted by
+  // available financing desc so the most useful capital appears first.
+  const sortedInvestorContracts = useMemo(() => {
+    return [...customerContractsByInvestor].sort(
+      (a, b) => b.amount - b.utilized - (a.amount - a.utilized),
+    );
+  }, [customerContractsByInvestor]);
 
   const canNext = (() => {
     switch (step) {
@@ -342,11 +361,16 @@ export default function NewInstallmentContractPage() {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
                   <option value="">—</option>
-                  {investors.map((iid) => (
-                    <option key={iid} value={iid}>
-                      {iid.replace("inv-ext-", "Investor #").replace("inv-internal-", "Internal #")}
-                    </option>
-                  ))}
+                  {investors.map(({ id, available }) => {
+                    const inv = findInvestor(id);
+                    const name = inv?.name ?? id;
+                    const fmtAvailable = available.toLocaleString("ar-SA-u-nu-latn");
+                    return (
+                      <option key={id} value={id}>
+                        {name} — {dict.recycling.investorPicker.availableLabel}: {fmtAvailable} ر.س
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div className="space-y-2">
@@ -362,17 +386,24 @@ export default function NewInstallmentContractPage() {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
                 >
                   <option value="">—</option>
-                  {customerContractsByInvestor.map((ic) => (
-                    <option key={ic.id} value={ic.id}>
-                      {ic.number} — متاح {(ic.amount - ic.utilized).toLocaleString("ar-SA-u-nu-latn")} ر.س
-                    </option>
-                  ))}
+                  {sortedInvestorContracts.map((ic) => {
+                    const prefix = ic.sourceContractId ? "🔄 " : "";
+                    return (
+                      <option key={ic.id} value={ic.id}>
+                        {prefix}
+                        {ic.number} — {dict.recycling.investorPicker.availableLabel}: {(ic.amount - ic.utilized).toLocaleString("ar-SA-u-nu-latn")} ر.س
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
               {chosenInvContract ? (
                 <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4 sm:col-span-2">
-                  <p className="text-sm font-semibold">{c.step3.chosenSummary}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold">{c.step3.chosenSummary}</p>
+                    {chosenInvContract.sourceContractId ? <RecycledBadge /> : null}
+                  </div>
                   <DataRows>
                     <DataRow
                       label={dict.investments.columns.amount}

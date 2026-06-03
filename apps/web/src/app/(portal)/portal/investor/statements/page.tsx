@@ -5,6 +5,8 @@ import { Printer, Share2 } from "lucide-react";
 import { InvestorShell } from "@/components/portal/investor-shell";
 import { PortalCard } from "@/components/portal/portal-card";
 import { Currency } from "@/components/ui/currency";
+import { RecycledBadge } from "@/components/ui/recycled-badge";
+import { MOCK_CONTRACTS } from "@/lib/mock/contracts";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useInvestorIdentity } from "@/lib/portal/use-portal-identity";
 import { investorDistributions, investorPortfolioSummary } from "@/lib/portal/data";
@@ -177,15 +179,24 @@ export default function InvestorStatementsPage() {
                       </td>
                     </tr>
                   ) : (
-                    rows.map((r) => (
-                      <tr key={`${r.date}-${r.contractId}`}>
-                        <td className="num px-3 py-2">{formatDate(r.date, locale)}</td>
-                        <td className="num px-3 py-2">{r.contractNumber}</td>
-                        <td className="num px-3 py-2 text-end"><Currency value={Math.round(r.gross)} /></td>
-                        <td className="num px-3 py-2 text-end"><Currency value={Math.round(r.fee)} /></td>
-                        <td className="num px-3 py-2 text-end font-semibold"><Currency value={r.net} /></td>
-                      </tr>
-                    ))
+                    rows.map((r) => {
+                      const contract = MOCK_CONTRACTS.find((c) => c.id === r.contractId);
+                      const isRecycled = Boolean(contract?.sourceContractId);
+                      return (
+                        <tr key={`${r.date}-${r.contractId}`}>
+                          <td className="num px-3 py-2">{formatDate(r.date, locale)}</td>
+                          <td className="num px-3 py-2">
+                            <span className="inline-flex items-center gap-1.5">
+                              {r.contractNumber}
+                              {isRecycled ? <RecycledBadge /> : null}
+                            </span>
+                          </td>
+                          <td className="num px-3 py-2 text-end"><Currency value={Math.round(r.gross)} /></td>
+                          <td className="num px-3 py-2 text-end"><Currency value={Math.round(r.fee)} /></td>
+                          <td className="num px-3 py-2 text-end font-semibold"><Currency value={r.net} /></td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
                 <tfoot className="border-t border-border bg-muted/40">

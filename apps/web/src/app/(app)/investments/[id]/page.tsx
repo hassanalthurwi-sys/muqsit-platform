@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
 import { StatusPill } from "@/components/ui/status-pill";
 import { IdentityBadge } from "@/components/ui/identity-badge";
+import { RecycledBadge } from "@/components/ui/recycled-badge";
 import { DataRow, DataRows } from "@/components/ui/data-row";
 import { Timeline } from "@/components/ui/timeline";
 import { useContractStore } from "@/lib/mock/store";
@@ -63,6 +64,7 @@ export default function InvestmentDetailsPage({
             >
               {dict.contractStatus[contract.status]}
             </StatusPill>
+            {contract.sourceContractId ? <RecycledBadge size="md" /> : null}
           </div>
           {investor ? (
             <p className="text-sm text-muted-foreground">
@@ -178,6 +180,37 @@ export default function InvestmentDetailsPage({
           </div>
         </CardContent>
       </Card>
+
+      {contract.sourceContractId ? (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <RecycledBadge />
+              {dict.recycling.detail.sectionTitle}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataRows>
+              {contract.recycledFromCollected !== undefined ? (
+                <DataRow
+                  label={dict.recycling.detail.collectedRow}
+                  value={<Currency value={contract.recycledFromCollected} />}
+                />
+              ) : null}
+              {contract.recyclingOfficeMargin !== undefined ? (
+                <DataRow
+                  label={dict.recycling.detail.officeShareRow}
+                  value={<Currency value={contract.recyclingOfficeMargin} />}
+                />
+              ) : null}
+              <DataRow
+                label={dict.recycling.detail.financingRow}
+                value={<Currency value={contract.amount} />}
+              />
+            </DataRows>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

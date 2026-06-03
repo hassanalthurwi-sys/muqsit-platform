@@ -1,10 +1,12 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
 import { IdentityBadge } from "@/components/ui/identity-badge";
 import { RiskClassBadge } from "@/components/ui/risk-class-badge";
+import { SearchInput } from "@/components/ui/search-input";
 import { InvestorAvatar } from "@/components/investor-avatar";
 import { customerContracts } from "@/lib/mock/installment-contracts";
 import { useStore } from "@/lib/mock/store";
@@ -14,6 +16,19 @@ export default function CustomersPage() {
   const { dict } = useI18n();
   const { customers } = useStore();
   const c = dict.customers;
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return customers;
+    const q = query.trim().toLowerCase();
+    return customers.filter(
+      (cu) =>
+        cu.name.toLowerCase().includes(q) ||
+        cu.city.toLowerCase().includes(q) ||
+        cu.employer.toLowerCase().includes(q) ||
+        cu.mobile.includes(q),
+    );
+  }, [customers, query]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,6 +44,8 @@ export default function CustomersPage() {
           {c.newCustomer}
         </Link>
       </header>
+
+      <SearchInput value={query} onChange={setQuery} className="max-w-sm" />
 
       <Card>
         <CardContent className="px-0 pb-2 pt-0">
@@ -47,7 +64,7 @@ export default function CustomersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {customers.map((cust) => {
+                {filtered.map((cust) => {
                   const contracts = customerContracts(cust.id);
                   return (
                     <tr key={cust.id} className="hover:bg-muted/40">

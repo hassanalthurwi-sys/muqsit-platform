@@ -27,6 +27,39 @@ export type InstallmentStatusKey =
 export type RiskClassKey = "low" | "medium" | "high";
 export type PaymentSourceKey = "whatsapp_upload" | "bank_transfer" | "cash";
 export type ProofStatusKey = "pending" | "approved" | "rejected" | "needsClarification";
+export type PermissionActionKey =
+  | "createInstallmentContract"
+  | "editInstallments"
+  | "rescheduleContract"
+  | "deleteAttachment"
+  | "closeContract"
+  | "approvePaymentProof"
+  | "rejectPaymentProof"
+  | "recordPartialPayment"
+  | "createCustomer"
+  | "approveHighRiskCustomer"
+  | "createInvestmentContract"
+  | "distributeProfits"
+  | "exportReport"
+  | "managePermissions";
+export type PermissionStateKey = "allow" | "requireApproval" | "deny";
+export type ApprovalStatusKey =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "needsClarification"
+  | "escalated";
+export type ApprovalPriorityKey = "critical" | "normal" | "low";
+export type NotificationTypeKey =
+  | "overdueCustomer"
+  | "newPaymentProof"
+  | "duplicateTransferReference"
+  | "pendingApproval"
+  | "investorLowCapital"
+  | "contractExpiring"
+  | "ocrLowConfidence"
+  | "rescheduleRequest";
+export type NotificationPriorityKey = "critical" | "warning" | "info";
 
 export interface Dictionary {
   appName: string;
@@ -474,17 +507,141 @@ export interface Dictionary {
       customerSender: string;
     };
   };
+  // ─── Sprint 4 ───
+  permissionAction: Record<PermissionActionKey, string>;
+  permissionGroup: Record<"contracts" | "payments" | "customers" | "investors" | "system", string>;
+  permissionState: Record<PermissionStateKey, string>;
+  approvalStatus: Record<ApprovalStatusKey, string>;
+  approvalPriority: Record<ApprovalPriorityKey, string>;
+  notificationType: Record<NotificationTypeKey, string>;
+  notificationPriority: Record<NotificationPriorityKey, string>;
+  operations: {
+    pageTitle: string;
+    pageSubtitle: string;
+    criticalSection: string;
+    workQueuesSection: string;
+    workQueues: {
+      overdue: { label: string; hint: string };
+      approvals: { label: string; hint: string };
+      collections: { label: string; hint: string };
+      ocr: { label: string; hint: string };
+      whatsappFollowups: { label: string; hint: string };
+    };
+    capitalSection: string;
+    capitalLowHint: string;
+    expiringSection: string;
+    expiringHint: string;
+  };
+  approvals: {
+    pageTitle: string;
+    pageSubtitle: string;
+    pendingCount: string;
+    filters: { all: string; pending: string; critical: string; approved: string; rejected: string };
+    columns: { type: string; requester: string; entity: string; priority: string; ageHours: string; status: string };
+    empty: string;
+    review: {
+      back: string;
+      requestedBy: string;
+      requestedAt: string;
+      actionDetails: string;
+      flags: string;
+      reason: string;
+      decision: string;
+      decisionNote: string;
+      decisionNotePlaceholder: string;
+      approve: string;
+      reject: string;
+      requestClarification: string;
+      reminderBadge: string;
+      escalatedBadge: string;
+    };
+  };
+  notifications: {
+    pageTitle: string;
+    pageSubtitle: string;
+    unread: string;
+    markAllRead: string;
+    bellTitle: string;
+    seeAll: string;
+    filters: { all: string; unread: string; critical: string; reminders: string };
+    empty: string;
+  };
+  permissions: {
+    pageTitle: string;
+    pageSubtitle: string;
+    newRole: string;
+    presetBadge: string;
+    customBadge: string;
+    employeesLabel: string;
+    actionsCount: string;
+    role: {
+      back: string;
+      rename: string;
+      duplicate: string;
+      delete: string;
+      bypassToggle: string;
+      bypassNote: string;
+      saveChanges: string;
+      saved: string;
+    };
+  };
+  audit: {
+    pageTitle: string;
+    pageSubtitle: string;
+    filters: { all: string; today: string; thisWeek: string };
+    actorLabel: string;
+    actionLabel: string;
+    dateLabel: string;
+    before: string;
+    after: string;
+    today: string;
+    yesterday: string;
+    empty: string;
+  };
+  portals: {
+    investor: {
+      title: string;
+      hero: string;
+      previewBadge: string;
+      sections: {
+        summary: { title: string; hint: string };
+        contracts: { title: string; hint: string };
+        profits: { title: string; hint: string };
+        recycling: { title: string; hint: string };
+        statements: { title: string; hint: string };
+      };
+    };
+    customer: {
+      title: string;
+      hero: string;
+      previewBadge: string;
+      sections: {
+        installments: { title: string; hint: string };
+        balance: { title: string; hint: string };
+        uploadProof: { title: string; hint: string };
+        documents: { title: string; hint: string };
+        notifications: { title: string; hint: string };
+      };
+    };
+  };
+  searchPlaceholder: string;
 }
 
 const ar: Dictionary = {
   appName: "مُقسِط",
   nav: {
+    operations: "لوحة العمليات",
     dashboard: "لوحة المكتب",
     investments: "عقود الاستثمار",
     contracts: "عقود التقسيط",
     clients: "العملاء",
     investors: "المستثمرون",
     collections: "التحصيلات",
+    approvals: "الموافقات",
+    permissions: "الأدوار والصلاحيات",
+    audit: "سجل العمليات",
+    investorPortal: "بوابة المستثمر",
+    customerPortal: "بوابة العميل",
     financial: "المالية",
     documents: "المستندات",
     reports: "التقارير",
@@ -492,17 +649,25 @@ const ar: Dictionary = {
   },
   navGroups: {
     operations: "العمليات",
+    administration: "الإدارة",
     financial: "المالية",
     archive: "الأرشيف",
+    portals: "البوابات",
     settings: "النظام",
   },
   pages: {
+    operations: { title: "لوحة العمليات اليومية", description: "قائمة عملك اليوم — موافقات، متأخرون، إيصالات." },
     dashboard: { title: "لوحة المكتب", description: "نظرة عامة على تشغيل المكتب." },
     investments: { title: "عقود الاستثمار", description: "إدارة عقود الاستثمار مع المستثمرين." },
     contracts: { title: "عقود التقسيط", description: "عقود التقسيط مع العملاء." },
     clients: { title: "العملاء", description: "إدارة سجلات العملاء وملفاتهم." },
     investors: { title: "المستثمرون", description: "متابعة المستثمرين ومساهماتهم." },
     collections: { title: "التحصيلات", description: "مراجعة إيصالات الدفع وتأكيدها." },
+    approvals: { title: "الموافقات", description: "صندوق الإجراءات بانتظار قرار." },
+    permissions: { title: "الأدوار والصلاحيات", description: "أدوار جاهزة قابلة للتخصيص." },
+    audit: { title: "سجل العمليات", description: "أرشيف الإجراءات التشغيلية." },
+    investorPortal: { title: "بوابة المستثمر", description: "نموذج تجريبي لبوابة المستثمر." },
+    customerPortal: { title: "بوابة العميل", description: "نموذج تجريبي لبوابة العميل." },
     financial: { title: "المالية", description: "العمليات والأرصدة المالية." },
     documents: { title: "المستندات", description: "أرشيف المستندات والملفات." },
     reports: { title: "التقارير", description: "التقارير والتحليلات." },
@@ -1003,30 +1168,219 @@ const ar: Dictionary = {
       customerSender: "العميل",
     },
   },
+  permissionAction: {
+    createInstallmentContract: "إنشاء عقد تقسيط",
+    editInstallments: "تعديل أقساط",
+    rescheduleContract: "إعادة جدولة عقد",
+    deleteAttachment: "حذف مرفق",
+    closeContract: "إغلاق عقد",
+    approvePaymentProof: "اعتماد إيصال دفع",
+    rejectPaymentProof: "رفض إيصال دفع",
+    recordPartialPayment: "تسجيل دفعة جزئية",
+    createCustomer: "إنشاء عميل",
+    approveHighRiskCustomer: "الموافقة على عميل عالي المخاطر",
+    createInvestmentContract: "إنشاء عقد استثمار",
+    distributeProfits: "توزيع الأرباح",
+    exportReport: "تصدير تقرير",
+    managePermissions: "إدارة الصلاحيات",
+  },
+  permissionGroup: {
+    contracts: "العقود",
+    payments: "الدفعات",
+    customers: "العملاء",
+    investors: "المستثمرون",
+    system: "النظام",
+  },
+  permissionState: {
+    allow: "مسموح مباشرة",
+    requireApproval: "يحتاج موافقة",
+    deny: "ممنوع",
+  },
+  approvalStatus: {
+    pending: "بانتظار قرار",
+    approved: "معتمد",
+    rejected: "مرفوض",
+    needsClarification: "بانتظار توضيح",
+    escalated: "تم تصعيده",
+  },
+  approvalPriority: { critical: "عاجل", normal: "عادي", low: "أولوية منخفضة" },
+  notificationType: {
+    overdueCustomer: "عميل متأخر",
+    newPaymentProof: "إيصال دفع جديد",
+    duplicateTransferReference: "رقم تحويل مكرر",
+    pendingApproval: "موافقة بانتظار قرار",
+    investorLowCapital: "رأس مال مستثمر منخفض",
+    contractExpiring: "عقد يقترب من نهايته",
+    ocrLowConfidence: "ثقة OCR منخفضة",
+    rescheduleRequest: "طلب إعادة جدولة",
+  },
+  notificationPriority: { critical: "حرج", warning: "تحذير", info: "للعلم" },
+  operations: {
+    pageTitle: "لوحة العمليات اليومية",
+    pageSubtitle: "ابدأ يومك بقائمة العمل — موافقات، متأخرون، إيصالات تحتاج قراراً.",
+    criticalSection: "إجراءات عاجلة",
+    workQueuesSection: "صناديق العمل",
+    workQueues: {
+      overdue: { label: "أقساط متأخرة", hint: "{n} عميل" },
+      approvals: { label: "موافقات بانتظار قرار", hint: "{n} طلب" },
+      collections: { label: "إيصالات بحاجة مراجعة", hint: "{n} إيصال" },
+      ocr: { label: "ثقة OCR منخفضة", hint: "{n} إيصال" },
+      whatsappFollowups: { label: "متابعات واتساب", hint: "{n} عميل" },
+    },
+    capitalSection: "مستثمرون رأس مالهم على وشك النفاد",
+    capitalLowHint: "متاح {available} من {total} ({pct}%)",
+    expiringSection: "عقود استثمار تنتهي قريباً",
+    expiringHint: "خلال 30 يوماً",
+  },
+  approvals: {
+    pageTitle: "الموافقات",
+    pageSubtitle: "صندوق الإجراءات بانتظار قرار من مدير المكتب.",
+    pendingCount: "{n} بانتظار قرار",
+    filters: {
+      all: "الكل",
+      pending: "بانتظار قرار",
+      critical: "عاجلة",
+      approved: "معتمدة",
+      rejected: "مرفوضة",
+    },
+    columns: {
+      type: "نوع الإجراء",
+      requester: "طلب الموافقة من",
+      entity: "العنصر المرتبط",
+      priority: "الأولوية",
+      ageHours: "العمر",
+      status: "الحالة",
+    },
+    empty: "لا توجد طلبات موافقة في هذه الفئة.",
+    review: {
+      back: "→ الموافقات",
+      requestedBy: "طلب الموافقة من",
+      requestedAt: "تاريخ الطلب",
+      actionDetails: "تفاصيل الإجراء",
+      flags: "تنبيهات",
+      reason: "ملاحظات الطالب",
+      decision: "القرار",
+      decisionNote: "ملاحظة القرار",
+      decisionNotePlaceholder: "أضف ملاحظة...",
+      approve: "موافقة",
+      reject: "رفض",
+      requestClarification: "طلب توضيح",
+      reminderBadge: "🔔 تم التذكير",
+      escalatedBadge: "🚨 تم تصعيده",
+    },
+  },
+  notifications: {
+    pageTitle: "مركز الإشعارات",
+    pageSubtitle: "كل إشعارات النظام في مكان واحد.",
+    unread: "{n} غير مقروء",
+    markAllRead: "اعتبر الكل مقروءاً",
+    bellTitle: "الإشعارات",
+    seeAll: "عرض كل الإشعارات",
+    filters: { all: "الكل", unread: "غير مقروء", critical: "حرج", reminders: "تذكير" },
+    empty: "لا توجد إشعارات حالياً.",
+  },
+  permissions: {
+    pageTitle: "الأدوار والصلاحيات",
+    pageSubtitle: "أدوار جاهزة يمكن تخصيصها بسهولة. كل دور يحدد ما هو مسموح، يحتاج موافقة، أو ممنوع.",
+    newRole: "+ دور جديد",
+    presetBadge: "جاهز",
+    customBadge: "مخصص",
+    employeesLabel: "{n} موظف",
+    actionsCount: "{allow} مسموح · {require} يحتاج موافقة · {deny} ممنوع",
+    role: {
+      back: "→ الأدوار",
+      rename: "إعادة تسمية",
+      duplicate: "نسخ",
+      delete: "حذف",
+      bypassToggle: "موظفون موثوقون — يتجاوزون الموافقات",
+      bypassNote: "عند تفعيل هذا الخيار للموظف، تُنفّذ الإجراءات مباشرة بدون انتظار قرار.",
+      saveChanges: "حفظ التغييرات",
+      saved: "تم الحفظ",
+    },
+  },
+  audit: {
+    pageTitle: "سجل العمليات",
+    pageSubtitle: "أرشيف الإجراءات التشغيلية — من، ماذا، متى، على من.",
+    filters: { all: "الكل", today: "اليوم", thisWeek: "هذا الأسبوع" },
+    actorLabel: "الموظف",
+    actionLabel: "نوع الإجراء",
+    dateLabel: "التاريخ",
+    before: "قبل",
+    after: "بعد",
+    today: "اليوم",
+    yesterday: "أمس",
+    empty: "لا توجد إجراءات في هذه الفئة.",
+  },
+  portals: {
+    investor: {
+      title: "بوابة المستثمر",
+      hero: "نموذج تجريبي لبوابة المستثمر. سيتمكن المستثمر قريباً من الاطلاع على ملخص استثماراته من جواله.",
+      previewBadge: "نموذج تجريبي — لا يفعّل قبل المرحلة المقبلة",
+      sections: {
+        summary: { title: "ملخص الاستثمار", hint: "رأس المال، النسبة، الأرباح المتراكمة." },
+        contracts: { title: "العقود النشطة", hint: "قائمة عقود الاستثمار وحالة كل عقد." },
+        profits: { title: "توزيع الأرباح", hint: "تاريخ التوزيعات الأخيرة والمستحقة." },
+        recycling: { title: "إعادة تدوير رأس المال", hint: "هل المستثمر فعّل خيار الإعادة التلقائية." },
+        statements: { title: "كشوف الحساب", hint: "كشوف شهرية / سنوية قابلة للتنزيل." },
+      },
+    },
+    customer: {
+      title: "بوابة العميل",
+      hero: "نموذج تجريبي لبوابة العميل. سيتمكن العميل قريباً من رفع إيصالاته ومراجعة أقساطه من جواله.",
+      previewBadge: "نموذج تجريبي — لا يفعّل قبل المرحلة المقبلة",
+      sections: {
+        installments: { title: "ملخص الأقساط", hint: "القسط القادم، تاريخه، ومبلغه." },
+        balance: { title: "الرصيد المتبقي", hint: "إجمالي الرصيد المتبقي على العقد." },
+        uploadProof: { title: "رفع إيصال دفع", hint: "تحميل صورة إيصال التحويل أو الإيصال البنكي." },
+        documents: { title: "مستندات العقد", hint: "نسخة من عقد التقسيط للتنزيل." },
+        notifications: { title: "الإشعارات", hint: "تذكيرات الأقساط ونتائج المراجعة." },
+      },
+    },
+  },
+  searchPlaceholder: "ابحث...",
 };
 
 const en: Dictionary = {
   appName: "Muqsit",
   nav: {
+    operations: "Operations",
     dashboard: "Office",
     investments: "Investments",
     contracts: "Installments",
-    clients: "Clients",
+    clients: "Customers",
     investors: "Investors",
     collections: "Collections",
+    approvals: "Approvals",
+    permissions: "Roles & permissions",
+    audit: "Audit log",
+    investorPortal: "Investor portal",
+    customerPortal: "Customer portal",
     financial: "Financial",
     documents: "Documents",
     reports: "Reports",
     settings: "Settings",
   },
-  navGroups: { operations: "Operations", financial: "Financial", archive: "Archive", settings: "System" },
+  navGroups: {
+    operations: "Operations",
+    administration: "Administration",
+    financial: "Financial",
+    archive: "Archive",
+    portals: "Portals",
+    settings: "System",
+  },
   pages: {
+    operations: { title: "Operations center", description: "Today's work — approvals, overdues, proofs." },
     dashboard: { title: "Office", description: "Operational overview of the office." },
     investments: { title: "Investments", description: "Manage investment contracts with investors." },
     contracts: { title: "Installments", description: "Installment contracts with customers." },
-    clients: { title: "Clients", description: "Manage client records and profiles." },
+    clients: { title: "Customers", description: "Manage customer records and profiles." },
     investors: { title: "Investors", description: "Track investors and their contributions." },
     collections: { title: "Collections", description: "Review and verify uploaded payment proofs." },
+    approvals: { title: "Approvals", description: "Inbox of actions awaiting a decision." },
+    permissions: { title: "Roles & permissions", description: "Preset roles that can be customized." },
+    audit: { title: "Audit log", description: "Operational action history." },
+    investorPortal: { title: "Investor portal", description: "Preview of the future investor portal." },
+    customerPortal: { title: "Customer portal", description: "Preview of the future customer portal." },
     financial: { title: "Financial", description: "Financial operations and balances." },
     documents: { title: "Documents", description: "Document archive and files." },
     reports: { title: "Reports", description: "Reports and analytics." },
@@ -1517,6 +1871,172 @@ const en: Dictionary = {
       customerSender: "Customer",
     },
   },
+  permissionAction: {
+    createInstallmentContract: "Create installment contract",
+    editInstallments: "Edit installments",
+    rescheduleContract: "Reschedule contract",
+    deleteAttachment: "Delete attachment",
+    closeContract: "Close contract",
+    approvePaymentProof: "Approve payment proof",
+    rejectPaymentProof: "Reject payment proof",
+    recordPartialPayment: "Record partial payment",
+    createCustomer: "Create customer",
+    approveHighRiskCustomer: "Approve high-risk customer",
+    createInvestmentContract: "Create investment contract",
+    distributeProfits: "Distribute profits",
+    exportReport: "Export report",
+    managePermissions: "Manage permissions",
+  },
+  permissionGroup: {
+    contracts: "Contracts",
+    payments: "Payments",
+    customers: "Customers",
+    investors: "Investors",
+    system: "System",
+  },
+  permissionState: { allow: "Allow", requireApproval: "Require approval", deny: "Deny" },
+  approvalStatus: {
+    pending: "Pending",
+    approved: "Approved",
+    rejected: "Rejected",
+    needsClarification: "Needs clarification",
+    escalated: "Escalated",
+  },
+  approvalPriority: { critical: "Critical", normal: "Normal", low: "Low" },
+  notificationType: {
+    overdueCustomer: "Overdue customer",
+    newPaymentProof: "New payment proof",
+    duplicateTransferReference: "Duplicate transfer reference",
+    pendingApproval: "Pending approval",
+    investorLowCapital: "Investor capital low",
+    contractExpiring: "Contract expiring",
+    ocrLowConfidence: "OCR confidence low",
+    rescheduleRequest: "Reschedule request",
+  },
+  notificationPriority: { critical: "Critical", warning: "Warning", info: "Info" },
+  operations: {
+    pageTitle: "Operations center",
+    pageSubtitle: "Start your day with the work queue — approvals, overdues, proofs needing a decision.",
+    criticalSection: "Critical actions",
+    workQueuesSection: "Work queues",
+    workQueues: {
+      overdue: { label: "Overdue installments", hint: "{n} customers" },
+      approvals: { label: "Approvals pending", hint: "{n} requests" },
+      collections: { label: "Proofs to review", hint: "{n} proofs" },
+      ocr: { label: "Low-confidence OCR", hint: "{n} proofs" },
+      whatsappFollowups: { label: "WhatsApp follow-ups", hint: "{n} customers" },
+    },
+    capitalSection: "Investors with low remaining capital",
+    capitalLowHint: "{available} of {total} ({pct}%)",
+    expiringSection: "Investment contracts expiring soon",
+    expiringHint: "within 30 days",
+  },
+  approvals: {
+    pageTitle: "Approvals",
+    pageSubtitle: "Actions awaiting an Office Manager decision.",
+    pendingCount: "{n} pending",
+    filters: {
+      all: "All",
+      pending: "Pending",
+      critical: "Critical",
+      approved: "Approved",
+      rejected: "Rejected",
+    },
+    columns: {
+      type: "Action",
+      requester: "Requested by",
+      entity: "Related entity",
+      priority: "Priority",
+      ageHours: "Age",
+      status: "Status",
+    },
+    empty: "No approvals in this filter.",
+    review: {
+      back: "← Approvals",
+      requestedBy: "Requested by",
+      requestedAt: "Requested at",
+      actionDetails: "Action details",
+      flags: "Flags",
+      reason: "Requester's note",
+      decision: "Decision",
+      decisionNote: "Decision note",
+      decisionNotePlaceholder: "Add a note…",
+      approve: "Approve",
+      reject: "Reject",
+      requestClarification: "Request clarification",
+      reminderBadge: "🔔 Reminder sent",
+      escalatedBadge: "🚨 Escalated",
+    },
+  },
+  notifications: {
+    pageTitle: "Notifications center",
+    pageSubtitle: "All system notifications in one place.",
+    unread: "{n} unread",
+    markAllRead: "Mark all read",
+    bellTitle: "Notifications",
+    seeAll: "See all notifications",
+    filters: { all: "All", unread: "Unread", critical: "Critical", reminders: "Reminders" },
+    empty: "No notifications.",
+  },
+  permissions: {
+    pageTitle: "Roles & permissions",
+    pageSubtitle: "Preset roles that can be customized. Each role defines what is allowed, requires approval, or denied.",
+    newRole: "+ New role",
+    presetBadge: "Preset",
+    customBadge: "Custom",
+    employeesLabel: "{n} employees",
+    actionsCount: "{allow} allowed · {require} require approval · {deny} denied",
+    role: {
+      back: "← Roles",
+      rename: "Rename",
+      duplicate: "Duplicate",
+      delete: "Delete",
+      bypassToggle: "Trusted employees — bypass approvals",
+      bypassNote: "When enabled for an employee, actions are executed directly without waiting for a decision.",
+      saveChanges: "Save changes",
+      saved: "Saved",
+    },
+  },
+  audit: {
+    pageTitle: "Audit log",
+    pageSubtitle: "Operational action history — who, what, when, on whom.",
+    filters: { all: "All", today: "Today", thisWeek: "This week" },
+    actorLabel: "Employee",
+    actionLabel: "Action",
+    dateLabel: "Date",
+    before: "Before",
+    after: "After",
+    today: "Today",
+    yesterday: "Yesterday",
+    empty: "No actions in this filter.",
+  },
+  portals: {
+    investor: {
+      title: "Investor portal",
+      hero: "Preview of the investor portal. Investors will soon be able to view a summary of their investments on mobile.",
+      previewBadge: "Preview — not active until a later phase",
+      sections: {
+        summary: { title: "Investment summary", hint: "Capital, share, accumulated profits." },
+        contracts: { title: "Active contracts", hint: "List of investment contracts and status." },
+        profits: { title: "Profit distribution", hint: "Last and upcoming distributions." },
+        recycling: { title: "Capital recycling", hint: "Whether the investor enabled auto-recycle." },
+        statements: { title: "Statements", hint: "Monthly / annual downloadable statements." },
+      },
+    },
+    customer: {
+      title: "Customer portal",
+      hero: "Preview of the customer portal. Customers will soon be able to upload proofs and check installments on mobile.",
+      previewBadge: "Preview — not active until a later phase",
+      sections: {
+        installments: { title: "Installment summary", hint: "Next installment, date, amount." },
+        balance: { title: "Remaining balance", hint: "Total remaining on the contract." },
+        uploadProof: { title: "Upload payment proof", hint: "Upload transfer or bank receipt image." },
+        documents: { title: "Contract documents", hint: "Downloadable copy of the installment contract." },
+        notifications: { title: "Notifications", hint: "Installment reminders and review results." },
+      },
+    },
+  },
+  searchPlaceholder: "Search…",
 };
 
 export const dictionaries: Record<Locale, Dictionary> = { ar, en };

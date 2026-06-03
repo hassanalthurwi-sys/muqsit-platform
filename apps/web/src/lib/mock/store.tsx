@@ -12,18 +12,34 @@ import { MOCK_CONTRACTS } from "./contracts";
 import { MOCK_CUSTOMERS } from "./customers";
 import { MOCK_INSTALLMENT_CONTRACTS } from "./installment-contracts";
 import { MOCK_PAYMENT_PROOFS } from "./payment-proofs";
+import { MOCK_APPROVALS } from "./approvals";
+import { MOCK_NOTIFICATIONS } from "./notifications";
+import { MOCK_AUDIT } from "./audit";
+import { MOCK_ROLES, MOCK_EMPLOYEES } from "./employees";
 import type {
+  ApprovalRequest,
+  ApprovalStatus,
+  AppNotification,
+  AuditEntry,
   Customer,
+  Employee,
   InstallmentContract,
   InvestmentContract,
+  NotificationState,
   PaymentProof,
+  PermissionAction,
+  PermissionState,
   ProofStatus,
+  Role,
 } from "./types";
 
 const KEY_INVESTMENT_CONTRACTS = "muqsit_user_contracts";
 const KEY_INSTALLMENT_CONTRACTS = "muqsit_user_installments";
 const KEY_CUSTOMERS = "muqsit_user_customers";
 const KEY_PROOF_DECISIONS = "muqsit_proof_decisions";
+const KEY_APPROVAL_DECISIONS = "muqsit_approval_decisions";
+const KEY_NOTIFICATION_STATES = "muqsit_notification_states";
+const KEY_ROLE_OVERRIDES = "muqsit_role_overrides";
 
 interface ProofDecisionPatch {
   status: ProofStatus;
@@ -32,19 +48,38 @@ interface ProofDecisionPatch {
   decisionReason?: string;
 }
 
+interface ApprovalDecisionPatch {
+  status: ApprovalStatus;
+  decidedById?: string;
+  decidedAt?: string;
+  decisionNote?: string;
+}
+
 interface Store {
-  // investment contracts (Sprint 2)
+  // Sprint 2
   investmentContracts: InvestmentContract[];
   addInvestmentContract: (c: InvestmentContract) => void;
-  // customers (Sprint 3)
+  // Sprint 3
   customers: Customer[];
   addCustomer: (c: Customer) => void;
-  // installment contracts (Sprint 3)
   installmentContracts: InstallmentContract[];
   addInstallmentContract: (c: InstallmentContract) => void;
-  // payment proofs (Sprint 3) — base mock list + decision overlay
   paymentProofs: PaymentProof[];
   decideProof: (proofId: string, patch: ProofDecisionPatch) => void;
+  // Sprint 4
+  employees: Employee[];
+  roles: Role[];
+  updateRolePermission: (
+    roleId: string,
+    action: PermissionAction,
+    state: PermissionState,
+  ) => void;
+  approvals: ApprovalRequest[];
+  decideApproval: (approvalId: string, patch: ApprovalDecisionPatch) => void;
+  notifications: AppNotification[];
+  setNotificationState: (id: string, state: NotificationState) => void;
+  markAllNotificationsRead: () => void;
+  auditEntries: AuditEntry[];
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -72,12 +107,32 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [userCustomers, setUserCustomers] = useState<Customer[]>([]);
   const [userInstallments, setUserInstallments] = useState<InstallmentContract[]>([]);
   const [proofDecisions, setProofDecisions] = useState<Record<string, ProofDecisionPatch>>({});
+  const [approvalDecisions, setApprovalDecisions] = useState<
+    Record<string, ApprovalDecisionPatch>
+  >({});
+  const [notificationStates, setNotificationStates] = useState<Record<string, NotificationState>>(
+    {},
+  );
+  const [roleOverrides, setRoleOverrides] = useState<
+    Record<string, Partial<Record<PermissionAction, PermissionState>>>
+  >({});
 
   useEffect(() => {
     setUserInvestments(safeRead<InvestmentContract[]>(KEY_INVESTMENT_CONTRACTS) ?? []);
     setUserCustomers(safeRead<Customer[]>(KEY_CUSTOMERS) ?? []);
     setUserInstallments(safeRead<InstallmentContract[]>(KEY_INSTALLMENT_CONTRACTS) ?? []);
     setProofDecisions(safeRead<Record<string, ProofDecisionPatch>>(KEY_PROOF_DECISIONS) ?? {});
+    setApprovalDecisions(
+      safeRead<Record<string, ApprovalDecisionPatch>>(KEY_APPROVAL_DECISIONS) ?? {},
+    );
+    setNotificationStates(
+      safeRead<Record<string, NotificationState>>(KEY_NOTIFICATION_STATES) ?? {},
+    );
+    setRoleOverrides(
+      safeRead<Record<string, Partial<Record<PermissionAction, PermissionState>>>>(
+        KEY_ROLE_OVERRIDES,
+      ) ?? {},
+    );
   }, []);
 
   const addInvestmentContract = useCallback((contract: InvestmentContract) => {
@@ -112,11 +167,62 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
+  const decideApproval = useCallback((approvalId: string, patch: ApprovalDecisionPatch) => {
+    setApprovalDecisions((prev) => {
+      const next = { ...prev, [approvalId]: patch };
+      safeWrite(KEY_APPROVAL_DECISIONS, next);
+      return next;
+    });
+  }, []);
+
+  const setNotificationState = useCallback((id: string, state: NotificationState) => {
+    setNotificationStates((prev) => {
+      const next = { ...prev, [id]: state };
+      safeWrite(KEY_NOTIFICATION_STATES, next);
+      return next;
+    });
+  }, []);
+
+  const markAllNotificationsRead = useCallback(() => {
+    setNotificationStates((prev) => {
+      const next = { ...prev };
+      for (const n of MOCK_NOTIFICATIONS) {
+        if (next[n.id] !== "dismissed") next[n.id] = "read";
+      }
+      safeWrite(KEY_NOTIFICATION_STATES, next);
+      return next;
+    });
+  }, []);
+
+  const updateRolePermission = useCallback(
+    (roleId: string, action: PermissionAction, state: PermissionState) => {
+      setRoleOverrides((prev) => {
+        const role = prev[roleId] ?? {};
+        const next = { ...prev, [roleId]: { ...role, [action]: state } };
+        safeWrite(KEY_ROLE_OVERRIDES, next);
+        return next;
+      });
+    },
+    [],
+  );
+
   const value = useMemo<Store>(() => {
-    // Apply decision overlay to base mock proofs
     const proofs = MOCK_PAYMENT_PROOFS.map((p) => {
       const decision = proofDecisions[p.id];
       return decision ? { ...p, ...decision } : p;
+    });
+    const approvals = MOCK_APPROVALS.map((a) => {
+      const decision = approvalDecisions[a.id];
+      return decision ? { ...a, ...decision } : a;
+    });
+    const notifications = MOCK_NOTIFICATIONS.map((n) => {
+      const override = notificationStates[n.id];
+      return override ? { ...n, state: override } : n;
+    });
+    const roles = MOCK_ROLES.map((r) => {
+      const overrides = roleOverrides[r.id];
+      if (!overrides) return r;
+      return { ...r, permissions: { ...r.permissions, ...overrides } };
     });
     return {
       investmentContracts: [...userInvestments, ...MOCK_CONTRACTS],
@@ -127,16 +233,32 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
       addInstallmentContract,
       paymentProofs: proofs,
       decideProof,
+      employees: MOCK_EMPLOYEES,
+      roles,
+      updateRolePermission,
+      approvals,
+      decideApproval,
+      notifications,
+      setNotificationState,
+      markAllNotificationsRead,
+      auditEntries: MOCK_AUDIT,
     };
   }, [
     userInvestments,
     userCustomers,
     userInstallments,
     proofDecisions,
+    approvalDecisions,
+    notificationStates,
+    roleOverrides,
     addInvestmentContract,
     addCustomer,
     addInstallmentContract,
     decideProof,
+    decideApproval,
+    setNotificationState,
+    markAllNotificationsRead,
+    updateRolePermission,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

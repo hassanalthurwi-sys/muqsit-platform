@@ -188,3 +188,117 @@ export interface WhatsAppThread {
   customerId: string;
   messages: WhatsAppMessage[];
 }
+
+// ─── Sprint 4: Permissions · Approvals · Notifications · Audit ──────────────
+
+export type PermissionAction =
+  | "createInstallmentContract"
+  | "editInstallments"
+  | "rescheduleContract"
+  | "deleteAttachment"
+  | "closeContract"
+  | "approvePaymentProof"
+  | "rejectPaymentProof"
+  | "recordPartialPayment"
+  | "createCustomer"
+  | "approveHighRiskCustomer"
+  | "createInvestmentContract"
+  | "distributeProfits"
+  | "exportReport"
+  | "managePermissions";
+
+export type PermissionGroup = "contracts" | "payments" | "customers" | "investors" | "system";
+
+export type PermissionState = "allow" | "requireApproval" | "deny";
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  isPreset: boolean;
+  permissions: Record<PermissionAction, PermissionState>;
+  employeeCount: number;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  roleId: string;
+  roleName: string;
+  bypassApprovals: boolean;
+  active: boolean;
+  joinedAt: string;
+}
+
+export type ApprovalStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "needsClarification"
+  | "escalated";
+
+export type ApprovalPriority = "critical" | "normal" | "low";
+
+export interface ApprovalRequest {
+  id: string;
+  type: PermissionAction;
+  priority: ApprovalPriority;
+  status: ApprovalStatus;
+  requestedById: string;
+  requestedAt: string;
+  reason?: string;
+  flags: string[]; // e.g. "duplicateReference", "highRiskCustomer", "amountAboveThreshold"
+  relatedEntity: {
+    kind: "proof" | "contract" | "customer" | "attachment" | "installment";
+    id: string;
+    label: string;
+  };
+  amount?: number;
+  decidedById?: string;
+  decidedAt?: string;
+  decisionNote?: string;
+  remindersSent: number;
+}
+
+export type NotificationType =
+  | "overdueCustomer"
+  | "newPaymentProof"
+  | "duplicateTransferReference"
+  | "pendingApproval"
+  | "investorLowCapital"
+  | "contractExpiring"
+  | "ocrLowConfidence"
+  | "rescheduleRequest";
+
+export type NotificationPriority = "critical" | "warning" | "info";
+
+export type NotificationState = "unread" | "read" | "dismissed";
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  priority: NotificationPriority;
+  state: NotificationState;
+  title: string;
+  body: string;
+  relatedEntity?: {
+    kind: "customer" | "contract" | "proof" | "investor" | "investmentContract" | "approval";
+    id: string;
+    label: string;
+  };
+  assignedToId?: string;
+  createdAt: string;
+  isReminder?: boolean;
+}
+
+export interface AuditEntry {
+  id: string;
+  ts: string;
+  actorId: string;
+  action: PermissionAction;
+  entity: { kind: string; id: string; label: string };
+  summary: string;
+  before?: string;
+  after?: string;
+}

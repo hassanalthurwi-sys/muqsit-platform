@@ -3,6 +3,7 @@
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
+import { NotificationBell } from "@/components/ui/notification-bell";
 import { useI18n } from "@/components/providers/i18n-provider";
 
 export function TopBar() {
@@ -16,6 +17,7 @@ export function TopBar() {
       </div>
       <div className="hidden md:block" />
       <div className="flex items-center gap-1">
+        <NotificationBell />
         <LanguageToggle />
         <ThemeToggle />
       </div>

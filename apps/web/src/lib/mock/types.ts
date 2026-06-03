@@ -44,6 +44,29 @@ export interface Investor {
 
 export type ContractStatus = "active" | "ended" | "pendingSetup" | "cancelled";
 
+// ─── Forward-looking architecture (not built yet, but informs current shape) ──
+//
+// 1. Profit distribution POLICY is NEVER per-contract.
+//    Two levels only:
+//      a. Office settings — default policy: officeFirst | investorFirst | proportional
+//      b. Investor record — override: useOfficeDefault | officeFirst | investorFirst | proportional
+//    InvestmentContract.operationPct stays as a numeric rate (office share),
+//    but the *policy direction* belongs on the office / investor, not here.
+//
+// 2. "Investor Balance at the Office" will be the operational source for new
+//    investments. It is a derived aggregate, not a new entity:
+//      + investor receipt vouchers
+//      + collected installment payments
+//      + investor-entitled profits
+//      − investment contracts created
+//      − investor payment vouchers
+//    Do not add a stored balance field. The existing receipts/payments already
+//    carry investorId — the balance is a future selector over those streams.
+//
+// Keep both pieces simple. Avoid ERP-style ledgers, journals, or per-contract
+// distribution-policy fields.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface InvestmentContract {
   id: string;
   number: string;

@@ -131,6 +131,47 @@ page. Everything lives inside an existing page.
 | `19-investments-ready-desktop-ar.png` | Investments-ready list (desktop · AR). |
 | `20-recycled-detail-desktop-ar.png` | Recycled detail (desktop · AR). |
 
+## Forward-looking architecture notes
+
+Two product principles are locked in for future sprints. Sprint 7's code does not
+build them; it just avoids structures that would conflict.
+
+### 1. Profit distribution policy is two-level, never per-contract
+
+To keep the system simple, distribution policy lives at two levels only:
+
+| Level | Where configured | Options |
+|---|---|---|
+| Office default | Office settings (once) | `officeFirst` · `investorFirst` · `proportional` |
+| Investor override | Investor record | `useOfficeDefault` · `officeFirst` · `investorFirst` · `proportional` |
+
+The per-contract `operationPct` remains as a numeric office-share rate.
+But the *policy direction* never lives on an investment contract.
+A short comment in `lib/mock/types.ts` documents this so future implementers
+do not accidentally add per-contract policy fields.
+
+### 2. "Investor Balance at the Office" is a derived aggregate
+
+A future operational concept — the office tracks each investor's available
+balance, and new investment activity draws against it.
+
+| Increases | Decreases |
+|---|---|
+| Investor receipt vouchers | Investment contracts created |
+| Collected installment payments | Investor payment vouchers |
+| Investor-entitled profits | |
+
+This is a **selector over existing streams**, not a new entity. Receipts and
+payments already carry `investorId`. The balance is a future query — not a
+stored field, not a ledger, not a journal.
+
+### What this means for Sprint 7
+
+Nothing in Sprint 7 conflicts with these principles. The recycle form's
+percentage input is a one-time rate on the recycled pool — operationally
+different from an ongoing distribution policy. No new policy fields were
+introduced. No balance bucket was introduced. The architecture remains open.
+
 ## Verification
 
 | Check | Result |

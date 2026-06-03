@@ -615,28 +615,253 @@ export interface Dictionary {
     empty: string;
   };
   portals: {
+    brand: { investor: string; customer: string };
+    common: {
+      welcomeBack: string;
+      seeAll: string;
+      backToOffice: string;
+      upload: string;
+      pay: string;
+      download: string;
+      share: string;
+      print: string;
+      next: string;
+      today: string;
+      overdue: string;
+      paid: string;
+      scheduled: string;
+      partial: string;
+      pending: string;
+      approved: string;
+      rejected: string;
+      monthly: string;
+      yearly: string;
+      quarterly: string;
+      refNo: string;
+      poweredBy: string;
+      cancel: string;
+      save: string;
+      profile: string;
+      preferences: string;
+      language: string;
+      theme: string;
+      logout: string;
+      contactSupport: string;
+      memberSince: string;
+      disclaimer: string;
+      backToHome: string;
+      empty: string;
+    };
+    tabs: {
+      investor: {
+        home: string;
+        investments: string;
+        profits: string;
+        notifications: string;
+        account: string;
+      };
+      customer: {
+        home: string;
+        installments: string;
+        payments: string;
+        notifications: string;
+        account: string;
+      };
+    };
     investor: {
-      title: string;
-      hero: string;
-      previewBadge: string;
-      sections: {
-        summary: { title: string; hint: string };
-        contracts: { title: string; hint: string };
-        profits: { title: string; hint: string };
-        recycling: { title: string; hint: string };
-        statements: { title: string; hint: string };
+      dashboard: {
+        greeting: string;
+        capitalCardLabel: string;
+        capitalCardSub: string;
+        utilizedShort: string;
+        unutilizedShort: string;
+        thisMonthLabel: string;
+        ytdLabel: string;
+        activeContractsLabel: string;
+        nextDistributionLabel: string;
+        nextDistributionSub: string;
+        ctaSimulate: string;
+        ctaStatement: string;
+        ctaInvestments: string;
+        activityTitle: string;
+        activityEmpty: string;
+      };
+      investments: {
+        pageTitle: string;
+        countLabel: string;
+        cardPrincipal: string;
+        cardUtilized: string;
+        cardEnds: string;
+        recyclingOn: string;
+        recyclingOff: string;
+        detail: {
+          back: string;
+          share: string;
+          download: string;
+          principal: string;
+          utilized: string;
+          unutilized: string;
+          startDate: string;
+          endDate: string;
+          operationPct: string;
+          recycling: string;
+          recyclingMin: string;
+          profitTerms: string;
+          timelineTitle: string;
+          documentLabel: string;
+        };
+      };
+      profits: {
+        pageTitle: string;
+        ytdTotal: string;
+        lastDistribution: string;
+        nextDistribution: string;
+        historyTitle: string;
+        sourceContract: string;
+        noUpcoming: string;
+      };
+      notifications: {
+        pageTitle: string;
+        filterAll: string;
+        filterUnread: string;
+        empty: string;
+      };
+      account: {
+        pageTitle: string;
+        memberSince: string;
+        sections: {
+          profile: { title: string; hint: string };
+          statements: { title: string; hint: string };
+          simulator: { title: string; hint: string };
+          preferences: { title: string; hint: string };
+          support: { title: string; hint: string };
+        };
+      };
+      simulator: {
+        pageTitle: string;
+        subtitle: string;
+        inputs: {
+          capital: string;
+          period: string;
+          periodOptions: { sixM: string; oneY: string; twoY: string; threeY: string };
+          risk: string;
+          riskOptions: { conservative: string; balanced: string; growth: string };
+          reinvest: string;
+          reinvestHint: string;
+        };
+        outputs: {
+          currentCapital: string;
+          expectedValue: string;
+          cumulativeReturn: string;
+          chartLabel: string;
+        };
+        disclaimer: string;
+      };
+      statements: {
+        pageTitle: string;
+        pickPeriod: string;
+        periodOptions: { monthly: string; quarterly: string; annual: string };
+        downloadHint: string;
+        preview: {
+          docTitle: string;
+          toLabel: string;
+          forPeriod: string;
+          investorIdLabel: string;
+          dateIssued: string;
+          capitalSummary: string;
+          capitalRows: { principal: string; utilized: string; unutilized: string };
+          distributionsTitle: string;
+          colDate: string;
+          colContract: string;
+          colGross: string;
+          colFee: string;
+          colNet: string;
+          totalDistributed: string;
+          notes: string;
+          notesBody: string;
+          signature: string;
+          refNo: string;
+          printHint: string;
+        };
       };
     };
     customer: {
-      title: string;
-      hero: string;
-      previewBadge: string;
-      sections: {
-        installments: { title: string; hint: string };
-        balance: { title: string; hint: string };
-        uploadProof: { title: string; hint: string };
-        documents: { title: string; hint: string };
-        notifications: { title: string; hint: string };
+      dashboard: {
+        greeting: string;
+        nextInstallmentLabel: string;
+        nextInstallmentDueOn: string;
+        remainingLabel: string;
+        paidLabel: string;
+        progressLabel: string;
+        activeContractTitle: string;
+        ctaPayNow: string;
+        ctaUploadProof: string;
+        ctaSchedule: string;
+        paidUpStatus: string;
+        overdueAlertTitle: string;
+        overdueAlertBody: string;
+        contractMeta: string;
+      };
+      installments: {
+        pageTitle: string;
+        contractLabel: string;
+        summary: { total: string; paid: string; remaining: string };
+        rowDue: string;
+        rowUpload: string;
+        status: { paid: string; overdue: string; scheduled: string; partial: string };
+      };
+      payments: {
+        pageTitle: string;
+        uploadCta: string;
+        uploadHint: string;
+        recentTitle: string;
+        empty: string;
+        proofStatus: { pending: string; approved: string; rejected: string };
+      };
+      upload: {
+        pageTitle: string;
+        pickInstallmentTitle: string;
+        pickInstallmentHint: string;
+        installmentRowDue: string;
+        forInstallment: string;
+        amount: string;
+        method: string;
+        methodOptions: { bankTransfer: string; stcPay: string; cash: string };
+        reference: string;
+        referenceHint: string;
+        uploadButton: string;
+        uploadedHint: string;
+        notes: string;
+        submit: string;
+        successTitle: string;
+        successHint: string;
+        backToPayments: string;
+      };
+      notifications: {
+        pageTitle: string;
+        filterAll: string;
+        filterUnread: string;
+        empty: string;
+      };
+      account: {
+        pageTitle: string;
+        memberSince: string;
+        sections: {
+          profile: { title: string; hint: string };
+          documents: { title: string; hint: string };
+          preferences: { title: string; hint: string };
+          support: { title: string; hint: string };
+        };
+      };
+      documents: {
+        pageTitle: string;
+        contract: string;
+        schedule: string;
+        receipts: string;
+        empty: string;
+        download: string;
+        contractDoc: string;
+        scheduleDoc: string;
       };
     };
   };
@@ -1518,28 +1743,261 @@ const ar: Dictionary = {
     empty: "لا توجد إجراءات في هذه الفئة.",
   },
   portals: {
+    brand: { investor: "مُقسِط للمستثمر", customer: "مُقسِط للعملاء" },
+    common: {
+      welcomeBack: "أهلًا بعودتك",
+      seeAll: "عرض الكل",
+      backToOffice: "الرجوع للنظام الإداري",
+      upload: "رفع",
+      pay: "دفع",
+      download: "تنزيل",
+      share: "مشاركة",
+      print: "طباعة",
+      next: "التالي",
+      today: "اليوم",
+      overdue: "متأخر",
+      paid: "مدفوع",
+      scheduled: "مجدول",
+      partial: "جزئي",
+      pending: "قيد المراجعة",
+      approved: "مقبول",
+      rejected: "مرفوض",
+      monthly: "شهري",
+      yearly: "سنوي",
+      quarterly: "ربع سنوي",
+      refNo: "رقم المرجع",
+      poweredBy: "مدعوم من مُقسِط",
+      cancel: "إلغاء",
+      save: "حفظ",
+      profile: "ملفي الشخصي",
+      preferences: "التفضيلات",
+      language: "اللغة",
+      theme: "السمة",
+      logout: "تسجيل الخروج",
+      contactSupport: "تواصل مع المكتب",
+      memberSince: "عضو منذ",
+      disclaimer: "تقدير تقريبي للأغراض الإرشادية فقط — لا يعتبر التزاماً على المكتب.",
+      backToHome: "الرجوع للرئيسية",
+      empty: "لا يوجد عناصر هنا حالياً.",
+    },
+    tabs: {
+      investor: {
+        home: "الرئيسية",
+        investments: "الاستثمارات",
+        profits: "الأرباح",
+        notifications: "الإشعارات",
+        account: "حسابي",
+      },
+      customer: {
+        home: "الرئيسية",
+        installments: "الأقساط",
+        payments: "السداد",
+        notifications: "الإشعارات",
+        account: "حسابي",
+      },
+    },
     investor: {
-      title: "بوابة المستثمر",
-      hero: "نموذج تجريبي لبوابة المستثمر. سيتمكن المستثمر قريباً من الاطلاع على ملخص استثماراته من جواله.",
-      previewBadge: "نموذج تجريبي — لا يفعّل قبل المرحلة المقبلة",
-      sections: {
-        summary: { title: "ملخص الاستثمار", hint: "رأس المال، النسبة، الأرباح المتراكمة." },
-        contracts: { title: "العقود النشطة", hint: "قائمة عقود الاستثمار وحالة كل عقد." },
-        profits: { title: "توزيع الأرباح", hint: "تاريخ التوزيعات الأخيرة والمستحقة." },
-        recycling: { title: "إعادة تدوير رأس المال", hint: "هل المستثمر فعّل خيار الإعادة التلقائية." },
-        statements: { title: "كشوف الحساب", hint: "كشوف شهرية / سنوية قابلة للتنزيل." },
+      dashboard: {
+        greeting: "أهلًا، {name}",
+        capitalCardLabel: "إجمالي رأس مالك",
+        capitalCardSub: "موزّع على {count} عقود نشطة",
+        utilizedShort: "مُستخدم",
+        unutilizedShort: "متاح",
+        thisMonthLabel: "أرباح هذا الشهر",
+        ytdLabel: "أرباح هذه السنة",
+        activeContractsLabel: "عقود نشطة",
+        nextDistributionLabel: "التوزيع القادم",
+        nextDistributionSub: "تقديري — يستحق {date}",
+        ctaSimulate: "محاكاة نمو رأس المال",
+        ctaStatement: "كشف الحساب",
+        ctaInvestments: "عرض الاستثمارات",
+        activityTitle: "آخر الحركة",
+        activityEmpty: "لا توجد حركة بعد.",
+      },
+      investments: {
+        pageTitle: "استثماراتي",
+        countLabel: "{n} عقد نشط",
+        cardPrincipal: "رأس المال",
+        cardUtilized: "المُستخدم",
+        cardEnds: "ينتهي في",
+        recyclingOn: "إعادة تدوير مفعّلة",
+        recyclingOff: "بدون إعادة تدوير",
+        detail: {
+          back: "الرجوع",
+          share: "مشاركة",
+          download: "تنزيل العقد",
+          principal: "رأس المال",
+          utilized: "المُستخدم",
+          unutilized: "المتاح",
+          startDate: "تاريخ البدء",
+          endDate: "تاريخ الانتهاء",
+          operationPct: "نسبة عمليات المكتب",
+          recycling: "إعادة تدوير رأس المال",
+          recyclingMin: "الحد الأدنى للإعادة",
+          profitTerms: "شروط الأرباح",
+          timelineTitle: "حركة العقد",
+          documentLabel: "ملف العقد",
+        },
+      },
+      profits: {
+        pageTitle: "أرباحي",
+        ytdTotal: "إجمالي السنة حتى الآن",
+        lastDistribution: "آخر توزيع",
+        nextDistribution: "التوزيع القادم",
+        historyTitle: "سجل التوزيعات",
+        sourceContract: "من عقد",
+        noUpcoming: "لا يوجد توزيع قادم محدد بعد.",
+      },
+      notifications: {
+        pageTitle: "الإشعارات",
+        filterAll: "الكل",
+        filterUnread: "غير مقروء",
+        empty: "لا توجد إشعارات.",
+      },
+      account: {
+        pageTitle: "حسابي",
+        memberSince: "مستثمر منذ",
+        sections: {
+          profile: { title: "بياناتي", hint: "الاسم، الهوية، التواصل، الحساب البنكي." },
+          statements: { title: "كشوف الحساب", hint: "كشوف شهرية وربع سنوية وسنوية." },
+          simulator: { title: "محاكاة النمو", hint: "احسب توقع نمو رأس مالك." },
+          preferences: { title: "التفضيلات", hint: "اللغة، السمة، الإشعارات." },
+          support: { title: "تواصل مع المكتب", hint: "اتصال أو واتساب مع فريق المكتب." },
+        },
+      },
+      simulator: {
+        pageTitle: "محاكاة نمو رأس المال",
+        subtitle: "غيّر القيم لترى التوقع. هذا تقدير وليس وعداً.",
+        inputs: {
+          capital: "رأس المال",
+          period: "المدة",
+          periodOptions: { sixM: "٦ أشهر", oneY: "سنة", twoY: "سنتان", threeY: "٣ سنوات" },
+          risk: "أسلوب الاستثمار",
+          riskOptions: {
+            conservative: "محافظ",
+            balanced: "متوازن",
+            growth: "نموّ",
+          },
+          reinvest: "إعادة تدوير الأرباح",
+          reinvestHint: "إعادة استثمار الأرباح الشهرية تلقائياً.",
+        },
+        outputs: {
+          currentCapital: "رأس مالك الحالي",
+          expectedValue: "القيمة المتوقعة",
+          cumulativeReturn: "العائد التراكمي المتوقع",
+          chartLabel: "مسار النمو المتوقع",
+        },
+        disclaimer: "هذه التقديرات إرشادية فقط ولا تعتبر التزاماً على المكتب. النتائج الفعلية تختلف حسب أداء العمليات.",
+      },
+      statements: {
+        pageTitle: "كشوف الحساب",
+        pickPeriod: "اختر الفترة",
+        periodOptions: { monthly: "شهري", quarterly: "ربع سنوي", annual: "سنوي" },
+        downloadHint: "اضغط طباعة لحفظ نسخة PDF.",
+        preview: {
+          docTitle: "كشف حساب مستثمر",
+          toLabel: "إلى السادة",
+          forPeriod: "عن الفترة",
+          investorIdLabel: "رقم المستثمر",
+          dateIssued: "تاريخ الإصدار",
+          capitalSummary: "ملخص رأس المال",
+          capitalRows: {
+            principal: "رأس المال الإجمالي",
+            utilized: "المُستخدم في العمليات",
+            unutilized: "المتاح للتخصيص",
+          },
+          distributionsTitle: "حركة التوزيعات",
+          colDate: "التاريخ",
+          colContract: "العقد",
+          colGross: "الربح الإجمالي",
+          colFee: "نسبة المكتب",
+          colNet: "صافي للمستثمر",
+          totalDistributed: "إجمالي المُوزّع",
+          notes: "ملاحظات",
+          notesBody: "هذا الكشف ملخّص حركة الفترة. لأي استفسار يرجى التواصل مع المكتب.",
+          signature: "ختم المكتب",
+          refNo: "رقم المرجع",
+          printHint: "اضغط زر الطباعة في المتصفح لحفظ نسخة PDF.",
+        },
       },
     },
     customer: {
-      title: "بوابة العميل",
-      hero: "نموذج تجريبي لبوابة العميل. سيتمكن العميل قريباً من رفع إيصالاته ومراجعة أقساطه من جواله.",
-      previewBadge: "نموذج تجريبي — لا يفعّل قبل المرحلة المقبلة",
-      sections: {
-        installments: { title: "ملخص الأقساط", hint: "القسط القادم، تاريخه، ومبلغه." },
-        balance: { title: "الرصيد المتبقي", hint: "إجمالي الرصيد المتبقي على العقد." },
-        uploadProof: { title: "رفع إيصال دفع", hint: "تحميل صورة إيصال التحويل أو الإيصال البنكي." },
-        documents: { title: "مستندات العقد", hint: "نسخة من عقد التقسيط للتنزيل." },
-        notifications: { title: "الإشعارات", hint: "تذكيرات الأقساط ونتائج المراجعة." },
+      dashboard: {
+        greeting: "أهلًا، {name}",
+        nextInstallmentLabel: "قسطك القادم",
+        nextInstallmentDueOn: "يستحق {date}",
+        remainingLabel: "المتبقي على عقدك",
+        paidLabel: "المدفوع حتى الآن",
+        progressLabel: "{paid} من {total} قسط",
+        activeContractTitle: "عقدك الحالي",
+        ctaPayNow: "ادفع الآن",
+        ctaUploadProof: "رفع إيصال",
+        ctaSchedule: "عرض جدول الأقساط",
+        paidUpStatus: "كل أقساطك سدادها منتظم — أحسنت.",
+        overdueAlertTitle: "لديك قسط متأخر",
+        overdueAlertBody: "نرجو سداد القسط أو رفع إيصال التحويل اليوم.",
+        contractMeta: "{product} · عقد {number}",
+      },
+      installments: {
+        pageTitle: "جدول الأقساط",
+        contractLabel: "عقد {number} — {product}",
+        summary: { total: "إجمالي العقد", paid: "المدفوع", remaining: "المتبقي" },
+        rowDue: "يستحق",
+        rowUpload: "رفع إيصال",
+        status: { paid: "مدفوع", overdue: "متأخر", scheduled: "مجدول", partial: "جزئي" },
+      },
+      payments: {
+        pageTitle: "السداد",
+        uploadCta: "رفع إيصال جديد",
+        uploadHint: "ارفع صورة التحويل البنكي أو إيصال STC Pay وسيراجعه المكتب.",
+        recentTitle: "إيصالاتك الأخيرة",
+        empty: "لم ترفع أي إيصال بعد.",
+        proofStatus: { pending: "قيد المراجعة", approved: "تم القبول", rejected: "مرفوض" },
+      },
+      upload: {
+        pageTitle: "رفع إيصال دفع",
+        pickInstallmentTitle: "اختر القسط",
+        pickInstallmentHint: "اختر القسط الذي تريد السداد عنه.",
+        installmentRowDue: "يستحق {date}",
+        forInstallment: "عن قسط رقم {n} — يستحق {date}",
+        amount: "المبلغ المُحوّل",
+        method: "طريقة الدفع",
+        methodOptions: { bankTransfer: "تحويل بنكي", stcPay: "STC Pay", cash: "نقداً" },
+        reference: "رقم العملية / المرجع",
+        referenceHint: "اختياري — موجود غالباً على صورة الإيصال.",
+        uploadButton: "اختر صورة الإيصال",
+        uploadedHint: "تم اختيار الصورة — جاهزة للإرسال.",
+        notes: "ملاحظات",
+        submit: "إرسال للمراجعة",
+        successTitle: "تم استلام الإيصال",
+        successHint: "سيراجعه المكتب وستصلك نتيجة المراجعة كإشعار.",
+        backToPayments: "الرجوع لقائمة السداد",
+      },
+      notifications: {
+        pageTitle: "الإشعارات",
+        filterAll: "الكل",
+        filterUnread: "غير مقروء",
+        empty: "لا توجد إشعارات.",
+      },
+      account: {
+        pageTitle: "حسابي",
+        memberSince: "عميل منذ",
+        sections: {
+          profile: { title: "بياناتي", hint: "الاسم، الجوال، العنوان." },
+          documents: { title: "مستندات عقدك", hint: "نسخة العقد وجدول الأقساط للتنزيل." },
+          preferences: { title: "التفضيلات", hint: "اللغة، السمة، الإشعارات." },
+          support: { title: "تواصل مع المكتب", hint: "اتصال أو واتساب مع فريق المكتب." },
+        },
+      },
+      documents: {
+        pageTitle: "مستندات عقدك",
+        contract: "نسخة العقد",
+        schedule: "جدول الأقساط",
+        receipts: "إيصالاتك المعتمدة",
+        empty: "لا توجد مستندات حالياً.",
+        download: "تنزيل",
+        contractDoc: "عقد التقسيط",
+        scheduleDoc: "جدول الأقساط للطباعة",
       },
     },
   },
@@ -2437,28 +2895,261 @@ const en: Dictionary = {
     empty: "No actions in this filter.",
   },
   portals: {
+    brand: { investor: "Muqsit for investors", customer: "Muqsit for customers" },
+    common: {
+      welcomeBack: "Welcome back",
+      seeAll: "See all",
+      backToOffice: "Back to office system",
+      upload: "Upload",
+      pay: "Pay",
+      download: "Download",
+      share: "Share",
+      print: "Print",
+      next: "Next",
+      today: "Today",
+      overdue: "Overdue",
+      paid: "Paid",
+      scheduled: "Scheduled",
+      partial: "Partial",
+      pending: "Under review",
+      approved: "Approved",
+      rejected: "Rejected",
+      monthly: "Monthly",
+      yearly: "Annual",
+      quarterly: "Quarterly",
+      refNo: "Reference No.",
+      poweredBy: "Powered by Muqsit",
+      cancel: "Cancel",
+      save: "Save",
+      profile: "My profile",
+      preferences: "Preferences",
+      language: "Language",
+      theme: "Theme",
+      logout: "Sign out",
+      contactSupport: "Contact the office",
+      memberSince: "Member since",
+      disclaimer: "Indicative estimate only — not a commitment by the office.",
+      backToHome: "Back to home",
+      empty: "Nothing here yet.",
+    },
+    tabs: {
+      investor: {
+        home: "Home",
+        investments: "Investments",
+        profits: "Profits",
+        notifications: "Notifications",
+        account: "Account",
+      },
+      customer: {
+        home: "Home",
+        installments: "Installments",
+        payments: "Payments",
+        notifications: "Notifications",
+        account: "Account",
+      },
+    },
     investor: {
-      title: "Investor portal",
-      hero: "Preview of the investor portal. Investors will soon be able to view a summary of their investments on mobile.",
-      previewBadge: "Preview — not active until a later phase",
-      sections: {
-        summary: { title: "Investment summary", hint: "Capital, share, accumulated profits." },
-        contracts: { title: "Active contracts", hint: "List of investment contracts and status." },
-        profits: { title: "Profit distribution", hint: "Last and upcoming distributions." },
-        recycling: { title: "Capital recycling", hint: "Whether the investor enabled auto-recycle." },
-        statements: { title: "Statements", hint: "Monthly / annual downloadable statements." },
+      dashboard: {
+        greeting: "Hello, {name}",
+        capitalCardLabel: "Your total capital",
+        capitalCardSub: "Across {count} active contracts",
+        utilizedShort: "Utilized",
+        unutilizedShort: "Available",
+        thisMonthLabel: "This month's profit",
+        ytdLabel: "Year-to-date profit",
+        activeContractsLabel: "Active contracts",
+        nextDistributionLabel: "Next distribution",
+        nextDistributionSub: "Estimated — due {date}",
+        ctaSimulate: "Simulate capital growth",
+        ctaStatement: "Statement",
+        ctaInvestments: "View investments",
+        activityTitle: "Recent activity",
+        activityEmpty: "No activity yet.",
+      },
+      investments: {
+        pageTitle: "My investments",
+        countLabel: "{n} active",
+        cardPrincipal: "Principal",
+        cardUtilized: "Utilized",
+        cardEnds: "Ends",
+        recyclingOn: "Recycling on",
+        recyclingOff: "No recycling",
+        detail: {
+          back: "Back",
+          share: "Share",
+          download: "Download contract",
+          principal: "Principal",
+          utilized: "Utilized",
+          unutilized: "Available",
+          startDate: "Start date",
+          endDate: "End date",
+          operationPct: "Office operation fee",
+          recycling: "Capital recycling",
+          recyclingMin: "Minimum threshold",
+          profitTerms: "Profit terms",
+          timelineTitle: "Contract activity",
+          documentLabel: "Contract file",
+        },
+      },
+      profits: {
+        pageTitle: "My profits",
+        ytdTotal: "Year-to-date total",
+        lastDistribution: "Last distribution",
+        nextDistribution: "Next distribution",
+        historyTitle: "Distribution history",
+        sourceContract: "from contract",
+        noUpcoming: "No upcoming distribution scheduled yet.",
+      },
+      notifications: {
+        pageTitle: "Notifications",
+        filterAll: "All",
+        filterUnread: "Unread",
+        empty: "No notifications.",
+      },
+      account: {
+        pageTitle: "Account",
+        memberSince: "Investor since",
+        sections: {
+          profile: { title: "My details", hint: "Name, ID, contact, bank account." },
+          statements: { title: "Statements", hint: "Monthly, quarterly and annual statements." },
+          simulator: { title: "Growth simulation", hint: "Estimate the growth of your capital." },
+          preferences: { title: "Preferences", hint: "Language, theme, notifications." },
+          support: { title: "Contact the office", hint: "Call or WhatsApp the office team." },
+        },
+      },
+      simulator: {
+        pageTitle: "Capital growth simulation",
+        subtitle: "Adjust the inputs to see the estimate. This is an estimate, not a promise.",
+        inputs: {
+          capital: "Capital",
+          period: "Period",
+          periodOptions: { sixM: "6 months", oneY: "1 year", twoY: "2 years", threeY: "3 years" },
+          risk: "Investment style",
+          riskOptions: {
+            conservative: "Conservative",
+            balanced: "Balanced",
+            growth: "Growth",
+          },
+          reinvest: "Reinvest profits",
+          reinvestHint: "Automatically reinvest monthly profits.",
+        },
+        outputs: {
+          currentCapital: "Your current capital",
+          expectedValue: "Expected value",
+          cumulativeReturn: "Expected cumulative return",
+          chartLabel: "Projected growth path",
+        },
+        disclaimer: "These figures are indicative only and not a commitment by the office. Actual results vary with operation performance.",
+      },
+      statements: {
+        pageTitle: "Statements",
+        pickPeriod: "Pick a period",
+        periodOptions: { monthly: "Monthly", quarterly: "Quarterly", annual: "Annual" },
+        downloadHint: "Use the browser print to save as PDF.",
+        preview: {
+          docTitle: "Investor statement",
+          toLabel: "Issued to",
+          forPeriod: "For period",
+          investorIdLabel: "Investor ID",
+          dateIssued: "Issue date",
+          capitalSummary: "Capital summary",
+          capitalRows: {
+            principal: "Total capital",
+            utilized: "Utilized in operations",
+            unutilized: "Available for allocation",
+          },
+          distributionsTitle: "Distributions activity",
+          colDate: "Date",
+          colContract: "Contract",
+          colGross: "Gross profit",
+          colFee: "Office fee",
+          colNet: "Net to investor",
+          totalDistributed: "Total distributed",
+          notes: "Notes",
+          notesBody: "This statement summarizes activity for the period. Contact the office for any clarification.",
+          signature: "Office seal",
+          refNo: "Reference No.",
+          printHint: "Use your browser's print to save a PDF copy.",
+        },
       },
     },
     customer: {
-      title: "Customer portal",
-      hero: "Preview of the customer portal. Customers will soon be able to upload proofs and check installments on mobile.",
-      previewBadge: "Preview — not active until a later phase",
-      sections: {
-        installments: { title: "Installment summary", hint: "Next installment, date, amount." },
-        balance: { title: "Remaining balance", hint: "Total remaining on the contract." },
-        uploadProof: { title: "Upload payment proof", hint: "Upload transfer or bank receipt image." },
-        documents: { title: "Contract documents", hint: "Downloadable copy of the installment contract." },
-        notifications: { title: "Notifications", hint: "Installment reminders and review results." },
+      dashboard: {
+        greeting: "Hello, {name}",
+        nextInstallmentLabel: "Your next installment",
+        nextInstallmentDueOn: "Due {date}",
+        remainingLabel: "Remaining on your contract",
+        paidLabel: "Paid so far",
+        progressLabel: "{paid} of {total} installments",
+        activeContractTitle: "Your active contract",
+        ctaPayNow: "Pay now",
+        ctaUploadProof: "Upload proof",
+        ctaSchedule: "View installment schedule",
+        paidUpStatus: "You're up to date — well done.",
+        overdueAlertTitle: "You have an overdue installment",
+        overdueAlertBody: "Please pay or upload your transfer proof today.",
+        contractMeta: "{product} · Contract {number}",
+      },
+      installments: {
+        pageTitle: "Installment schedule",
+        contractLabel: "Contract {number} — {product}",
+        summary: { total: "Contract total", paid: "Paid", remaining: "Remaining" },
+        rowDue: "Due",
+        rowUpload: "Upload proof",
+        status: { paid: "Paid", overdue: "Overdue", scheduled: "Scheduled", partial: "Partial" },
+      },
+      payments: {
+        pageTitle: "Payments",
+        uploadCta: "Upload new proof",
+        uploadHint: "Upload your bank transfer or STC Pay receipt and the office will review it.",
+        recentTitle: "Your recent proofs",
+        empty: "You haven't uploaded any proof yet.",
+        proofStatus: { pending: "Under review", approved: "Approved", rejected: "Rejected" },
+      },
+      upload: {
+        pageTitle: "Upload payment proof",
+        pickInstallmentTitle: "Pick the installment",
+        pickInstallmentHint: "Choose the installment you're paying.",
+        installmentRowDue: "Due {date}",
+        forInstallment: "For installment #{n} — due {date}",
+        amount: "Transferred amount",
+        method: "Payment method",
+        methodOptions: { bankTransfer: "Bank transfer", stcPay: "STC Pay", cash: "Cash" },
+        reference: "Transaction / Reference No.",
+        referenceHint: "Optional — usually printed on the receipt.",
+        uploadButton: "Choose receipt image",
+        uploadedHint: "Image selected — ready to send.",
+        notes: "Notes",
+        submit: "Send for review",
+        successTitle: "Proof received",
+        successHint: "The office will review it and you'll get a notification with the result.",
+        backToPayments: "Back to payments",
+      },
+      notifications: {
+        pageTitle: "Notifications",
+        filterAll: "All",
+        filterUnread: "Unread",
+        empty: "No notifications.",
+      },
+      account: {
+        pageTitle: "Account",
+        memberSince: "Customer since",
+        sections: {
+          profile: { title: "My details", hint: "Name, mobile, address." },
+          documents: { title: "Contract documents", hint: "Contract copy and schedule, downloadable." },
+          preferences: { title: "Preferences", hint: "Language, theme, notifications." },
+          support: { title: "Contact the office", hint: "Call or WhatsApp the office team." },
+        },
+      },
+      documents: {
+        pageTitle: "Contract documents",
+        contract: "Contract copy",
+        schedule: "Installment schedule",
+        receipts: "Approved receipts",
+        empty: "No documents available.",
+        download: "Download",
+        contractDoc: "Installment contract",
+        scheduleDoc: "Printable schedule",
       },
     },
   },

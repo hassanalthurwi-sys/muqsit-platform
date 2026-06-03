@@ -302,3 +302,104 @@ export interface AuditEntry {
   before?: string;
   after?: string;
 }
+
+// ─── Sprint 5: Financial operations ─────────────────────────────────────────
+
+export type PaymentMethod = "cash" | "bankTransfer" | "stcPay" | "cheque" | "card";
+
+export type VoucherStatus = "draft" | "verified" | "cancelled";
+
+export type ReceiptSource =
+  | "customerInstallment"
+  | "investorDeposit"
+  | "officeIncome"
+  | "other";
+
+export interface ReceiptVoucher {
+  id: string;
+  number: string;
+  date: string;
+  amount: number;
+  method: PaymentMethod;
+  source: ReceiptSource;
+  fromName: string;
+  customerId?: string;
+  investorId?: string;
+  contractId?: string;
+  investmentContractId?: string;
+  reference?: string;
+  notes?: string;
+  createdById: string;
+  createdAt: string;
+  status: VoucherStatus;
+  verifiedById?: string;
+  verifiedAt?: string;
+  attachmentCount: number;
+  flags?: string[];
+}
+
+export type PaymentCategory =
+  | "goodsPurchase"
+  | "investorProfit"
+  | "officeExpense"
+  | "salary"
+  | "rent"
+  | "adminExpense"
+  | "other";
+
+export interface PaymentVoucher {
+  id: string;
+  number: string;
+  date: string;
+  category: PaymentCategory;
+  amount: number;
+  method: PaymentMethod;
+  beneficiaryName: string;
+  customerId?: string;
+  investorId?: string;
+  contractId?: string;
+  investmentContractId?: string;
+  purchaseId?: string;
+  reference?: string;
+  notes?: string;
+  createdById: string;
+  createdAt: string;
+  status: VoucherStatus;
+  needsApproval: boolean;
+  approvalId?: string;
+  attachmentCount: number;
+}
+
+export interface CashLedgerEntry {
+  id: string;
+  date: string;
+  ts: string;
+  direction: "in" | "out";
+  amount: number;
+  method: PaymentMethod;
+  voucherType: "receipt" | "payment";
+  voucherId: string;
+  voucherNumber: string;
+  description: string;
+  entityKind?: "customer" | "investor" | "office" | "supplier";
+  entityId?: string;
+  entityName?: string;
+  employeeId: string;
+}
+
+export type PurchaseStatus = "purchased" | "linkedToContract" | "sold";
+
+export interface GoodsPurchase {
+  id: string;
+  number: string;
+  date: string;
+  supplierName: string;
+  description: string;
+  amount: number;
+  method: PaymentMethod;
+  status: PurchaseStatus;
+  linkedContractId?: string;
+  paymentVoucherId?: string;
+  attachmentCount: number;
+  notes?: string;
+}

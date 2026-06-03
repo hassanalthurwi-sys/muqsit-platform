@@ -60,6 +60,22 @@ export type NotificationTypeKey =
   | "ocrLowConfidence"
   | "rescheduleRequest";
 export type NotificationPriorityKey = "critical" | "warning" | "info";
+export type PaymentMethodKey = "cash" | "bankTransfer" | "stcPay" | "cheque" | "card";
+export type VoucherStatusKey = "draft" | "verified" | "cancelled";
+export type ReceiptSourceKey =
+  | "customerInstallment"
+  | "investorDeposit"
+  | "officeIncome"
+  | "other";
+export type PaymentCategoryKey =
+  | "goodsPurchase"
+  | "investorProfit"
+  | "officeExpense"
+  | "salary"
+  | "rent"
+  | "adminExpense"
+  | "other";
+export type PurchaseStatusKey = "purchased" | "linkedToContract" | "sold";
 
 export interface Dictionary {
   appName: string;
@@ -625,6 +641,196 @@ export interface Dictionary {
     };
   };
   searchPlaceholder: string;
+  // ─── Sprint 5 ───
+  paymentMethod: Record<PaymentMethodKey, string>;
+  voucherStatus: Record<VoucherStatusKey, string>;
+  receiptSource: Record<ReceiptSourceKey, string>;
+  paymentCategory: Record<PaymentCategoryKey, string>;
+  purchaseStatus: Record<PurchaseStatusKey, string>;
+  financialHub: {
+    title: string;
+    subtitle: string;
+    cards: {
+      receipts: { title: string; hint: string };
+      payments: { title: string; hint: string };
+      cashLedger: { title: string; hint: string };
+      balances: { title: string; hint: string };
+      purchases: { title: string; hint: string };
+    };
+    kpis: {
+      cashBalance: string;
+      receiptsMonth: string;
+      paymentsMonth: string;
+      netMonth: string;
+    };
+  };
+  receipts: {
+    pageTitle: string;
+    pageSubtitle: string;
+    newReceipt: string;
+    columns: {
+      number: string;
+      date: string;
+      source: string;
+      from: string;
+      amount: string;
+      method: string;
+      status: string;
+    };
+    detail: {
+      back: string;
+      printVoucher: string;
+      share: string;
+      markVerified: string;
+      verified: string;
+      voucherInfo: string;
+      payer: string;
+      linkedContract: string;
+      linkedInvestmentContract: string;
+      reference: string;
+      notes: string;
+      attachments: string;
+      attachmentsCount: string;
+      createdBy: string;
+      verifiedBy: string;
+      flagDuplicate: string;
+    };
+    form: {
+      sourceLabel: string;
+      sourcePickerHint: string;
+      payerName: string;
+      payerNamePlaceholder: string;
+      amount: string;
+      methodLabel: string;
+      reference: string;
+      referencePlaceholder: string;
+      linkToContract: string;
+      linkToContractPlaceholder: string;
+      notes: string;
+      attachments: string;
+      attachmentsHint: string;
+      submit: string;
+      cancel: string;
+      saveAndPrint: string;
+    };
+  };
+  paymentVouchers: {
+    pageTitle: string;
+    pageSubtitle: string;
+    newPayment: string;
+    needsApprovalBadge: string;
+    columns: {
+      number: string;
+      date: string;
+      category: string;
+      beneficiary: string;
+      amount: string;
+      method: string;
+      status: string;
+    };
+    detail: {
+      back: string;
+      printVoucher: string;
+      share: string;
+      markVerified: string;
+      voucherInfo: string;
+      beneficiary: string;
+      linkedTo: string;
+      reference: string;
+      notes: string;
+      attachments: string;
+      createdBy: string;
+      pendingApproval: string;
+    };
+    form: {
+      categoryLabel: string;
+      beneficiaryName: string;
+      beneficiaryPlaceholder: string;
+      amount: string;
+      methodLabel: string;
+      reference: string;
+      linkLabel: string;
+      linkPlaceholder: string;
+      notes: string;
+      attachments: string;
+      autoApprovalNote: string;
+      submit: string;
+      cancel: string;
+    };
+  };
+  cashLedger: {
+    pageTitle: string;
+    pageSubtitle: string;
+    summary: {
+      opening: string;
+      totalIn: string;
+      totalOut: string;
+      balance: string;
+    };
+    filters: {
+      all: string;
+      incoming: string;
+      outgoing: string;
+      cashOnly: string;
+      bankOnly: string;
+    };
+    columns: {
+      date: string;
+      voucher: string;
+      description: string;
+      method: string;
+      employee: string;
+      amount: string;
+      runningBalance: string;
+    };
+    empty: string;
+  };
+  balances: {
+    pageTitle: string;
+    pageSubtitle: string;
+    officeCash: {
+      title: string;
+      hint: string;
+    };
+    investorsSection: { title: string; hint: string; activeContracts: string };
+    customersSection: { title: string; hint: string; activeContracts: string };
+    columns: {
+      name: string;
+      capital: string;
+      profitDue: string;
+      paid: string;
+      net: string;
+      remaining: string;
+      overdue: string;
+    };
+  };
+  purchases: {
+    pageTitle: string;
+    pageSubtitle: string;
+    newPurchase: string;
+    columns: {
+      number: string;
+      date: string;
+      supplier: string;
+      description: string;
+      amount: string;
+      status: string;
+      linkedContract: string;
+    };
+    form: {
+      supplier: string;
+      description: string;
+      amount: string;
+      method: string;
+      notes: string;
+      submit: string;
+      cancel: string;
+    };
+  };
+  duplicate: {
+    suspectedReference: string;
+    suspectedRefDetail: string;
+  };
 }
 
 const ar: Dictionary = {
@@ -1338,6 +1544,226 @@ const ar: Dictionary = {
     },
   },
   searchPlaceholder: "ابحث...",
+  paymentMethod: {
+    cash: "نقداً",
+    bankTransfer: "تحويل بنكي",
+    stcPay: "STC Pay",
+    cheque: "شيك",
+    card: "بطاقة",
+  },
+  voucherStatus: { draft: "مسودة", verified: "موثّق", cancelled: "ملغى" },
+  receiptSource: {
+    customerInstallment: "قسط عميل",
+    investorDeposit: "إيداع مستثمر",
+    officeIncome: "إيراد المكتب",
+    other: "أخرى",
+  },
+  paymentCategory: {
+    goodsPurchase: "شراء بضاعة",
+    investorProfit: "توزيع أرباح مستثمر",
+    officeExpense: "مصروف مكتب",
+    salary: "راتب",
+    rent: "إيجار",
+    adminExpense: "مصروف إداري",
+    other: "أخرى",
+  },
+  purchaseStatus: {
+    purchased: "تم الشراء",
+    linkedToContract: "مرتبط بعقد",
+    sold: "تم البيع",
+  },
+  financialHub: {
+    title: "المالية",
+    subtitle: "صندوق المكتب، السندات، والأرصدة — حركة بسيطة وواضحة.",
+    cards: {
+      receipts: { title: "سندات القبض", hint: "أقساط، إيداعات، إيرادات." },
+      payments: { title: "سندات الصرف", hint: "مشتريات، أرباح، مصاريف." },
+      cashLedger: { title: "حركة الصندوق", hint: "جميع الحركات الواردة والصادرة." },
+      balances: { title: "الأرصدة", hint: "صندوق المكتب، المستثمرين، العملاء." },
+      purchases: { title: "المشتريات", hint: "البضائع التي اشتراها المكتب." },
+    },
+    kpis: {
+      cashBalance: "رصيد الصندوق الحالي",
+      receiptsMonth: "قبض الشهر",
+      paymentsMonth: "صرف الشهر",
+      netMonth: "صافي الشهر",
+    },
+  },
+  receipts: {
+    pageTitle: "سندات القبض",
+    pageSubtitle: "كل الأموال الواردة للمكتب — أقساط، إيداعات، إيرادات.",
+    newReceipt: "+ سند قبض",
+    columns: {
+      number: "رقم السند",
+      date: "التاريخ",
+      source: "المصدر",
+      from: "من",
+      amount: "المبلغ",
+      method: "الطريقة",
+      status: "الحالة",
+    },
+    detail: {
+      back: "→ سندات القبض",
+      printVoucher: "طباعة السند",
+      share: "مشاركة",
+      markVerified: "اعتبار موثّقاً",
+      verified: "موثّق",
+      voucherInfo: "بيانات السند",
+      payer: "الدافع",
+      linkedContract: "العقد المرتبط",
+      linkedInvestmentContract: "عقد الاستثمار المرتبط",
+      reference: "رقم المرجع",
+      notes: "ملاحظات",
+      attachments: "المرفقات",
+      attachmentsCount: "{n} مرفق",
+      createdBy: "أنشأه",
+      verifiedBy: "وثّقه",
+      flagDuplicate: "⚠ رقم مرجع مكرر — يحتاج مراجعة",
+    },
+    form: {
+      sourceLabel: "مصدر القبض",
+      sourcePickerHint: "اختر مصدر الدفعة قبل المتابعة.",
+      payerName: "اسم الدافع",
+      payerNamePlaceholder: "اسم العميل أو المستثمر",
+      amount: "المبلغ (ر.س)",
+      methodLabel: "طريقة الدفع",
+      reference: "رقم المرجع البنكي",
+      referencePlaceholder: "اختياري — رقم تحويل، شيك، STC Pay",
+      linkToContract: "العقد المرتبط",
+      linkToContractPlaceholder: "اختر العقد...",
+      notes: "ملاحظات",
+      attachments: "المرفقات",
+      attachmentsHint: "(نموذج تجريبي — لا يرفع ملفات حقيقية)",
+      submit: "حفظ السند",
+      cancel: "إلغاء",
+      saveAndPrint: "حفظ وطباعة",
+    },
+  },
+  paymentVouchers: {
+    pageTitle: "سندات الصرف",
+    pageSubtitle: "كل الأموال الصادرة من المكتب — مشتريات، أرباح، مصاريف.",
+    newPayment: "+ سند صرف",
+    needsApprovalBadge: "يحتاج موافقة",
+    columns: {
+      number: "رقم السند",
+      date: "التاريخ",
+      category: "الفئة",
+      beneficiary: "المستفيد",
+      amount: "المبلغ",
+      method: "الطريقة",
+      status: "الحالة",
+    },
+    detail: {
+      back: "→ سندات الصرف",
+      printVoucher: "طباعة السند",
+      share: "مشاركة",
+      markVerified: "اعتبار موثّقاً",
+      voucherInfo: "بيانات السند",
+      beneficiary: "المستفيد",
+      linkedTo: "مرتبط بـ",
+      reference: "رقم المرجع",
+      notes: "ملاحظات",
+      attachments: "المرفقات",
+      createdBy: "أنشأه",
+      pendingApproval: "⏳ بانتظار موافقة مدير المكتب",
+    },
+    form: {
+      categoryLabel: "فئة الصرف",
+      beneficiaryName: "اسم المستفيد",
+      beneficiaryPlaceholder: "اسم المورد أو الموظف",
+      amount: "المبلغ (ر.س)",
+      methodLabel: "طريقة الدفع",
+      reference: "رقم المرجع البنكي",
+      linkLabel: "ربط بعقد / مستثمر / مشترى",
+      linkPlaceholder: "اختياري — اختر العقد...",
+      notes: "ملاحظات",
+      attachments: "المرفقات",
+      autoApprovalNote: "💡 المبلغ يفوق حد الموافقة التلقائية وسيُنشأ طلب موافقة عند الحفظ.",
+      submit: "حفظ السند",
+      cancel: "إلغاء",
+    },
+  },
+  cashLedger: {
+    pageTitle: "حركة الصندوق",
+    pageSubtitle: "كل الأموال الداخلة والخارجة من صندوق المكتب — بترتيب زمني.",
+    summary: {
+      opening: "رصيد افتتاحي",
+      totalIn: "إجمالي القبض",
+      totalOut: "إجمالي الصرف",
+      balance: "الرصيد الحالي",
+    },
+    filters: {
+      all: "الكل",
+      incoming: "وارد",
+      outgoing: "صادر",
+      cashOnly: "نقداً",
+      bankOnly: "تحويل بنكي",
+    },
+    columns: {
+      date: "التاريخ",
+      voucher: "السند",
+      description: "البيان",
+      method: "الطريقة",
+      employee: "الموظف",
+      amount: "المبلغ",
+      runningBalance: "الرصيد بعد الحركة",
+    },
+    empty: "لا توجد حركات في هذه الفئة.",
+  },
+  balances: {
+    pageTitle: "الأرصدة",
+    pageSubtitle: "نظرة سريعة على صندوق المكتب، رؤوس أموال المستثمرين، ومتبقيات العملاء.",
+    officeCash: {
+      title: "صندوق المكتب",
+      hint: "الرصيد الحالي بعد كل الحركات.",
+    },
+    investorsSection: {
+      title: "المستثمرون",
+      hint: "رأس المال، الأرباح المستحقة، والمدفوع.",
+      activeContracts: "{n} عقد نشط",
+    },
+    customersSection: {
+      title: "العملاء",
+      hint: "المتبقي على كل عميل من الأقساط النشطة.",
+      activeContracts: "{n} عقد نشط",
+    },
+    columns: {
+      name: "الاسم",
+      capital: "رأس المال",
+      profitDue: "أرباح مستحقة",
+      paid: "مدفوع",
+      net: "الصافي",
+      remaining: "المتبقي",
+      overdue: "متأخر",
+    },
+  },
+  purchases: {
+    pageTitle: "المشتريات",
+    pageSubtitle: "بضائع وأصول اشتراها المكتب — تُربط لاحقاً بعقود التقسيط.",
+    newPurchase: "+ مشترى جديد",
+    columns: {
+      number: "الرقم",
+      date: "التاريخ",
+      supplier: "المورد",
+      description: "الوصف",
+      amount: "المبلغ",
+      status: "الحالة",
+      linkedContract: "العقد المرتبط",
+    },
+    form: {
+      supplier: "اسم المورد",
+      description: "وصف البضاعة",
+      amount: "المبلغ (ر.س)",
+      method: "طريقة الدفع",
+      notes: "ملاحظات",
+      submit: "حفظ المشترى",
+      cancel: "إلغاء",
+    },
+  },
+  duplicate: {
+    suspectedReference: "رقم مرجع مكرر",
+    suspectedRefDetail: "هذا الرقم مستخدم في سند سابق — راجع قبل التوثيق.",
+  },
 };
 
 const en: Dictionary = {
@@ -2037,6 +2463,226 @@ const en: Dictionary = {
     },
   },
   searchPlaceholder: "Search…",
+  paymentMethod: {
+    cash: "Cash",
+    bankTransfer: "Bank transfer",
+    stcPay: "STC Pay",
+    cheque: "Cheque",
+    card: "Card",
+  },
+  voucherStatus: { draft: "Draft", verified: "Verified", cancelled: "Cancelled" },
+  receiptSource: {
+    customerInstallment: "Customer installment",
+    investorDeposit: "Investor deposit",
+    officeIncome: "Office income",
+    other: "Other",
+  },
+  paymentCategory: {
+    goodsPurchase: "Goods purchase",
+    investorProfit: "Investor profit distribution",
+    officeExpense: "Office expense",
+    salary: "Salary",
+    rent: "Rent",
+    adminExpense: "Admin expense",
+    other: "Other",
+  },
+  purchaseStatus: {
+    purchased: "Purchased",
+    linkedToContract: "Linked to contract",
+    sold: "Sold",
+  },
+  financialHub: {
+    title: "Financial",
+    subtitle: "Office cash, vouchers, and balances — simple and clear flow.",
+    cards: {
+      receipts: { title: "Receipt vouchers", hint: "Installments, deposits, income." },
+      payments: { title: "Payment vouchers", hint: "Purchases, profit, expenses." },
+      cashLedger: { title: "Cash movement", hint: "All incoming and outgoing entries." },
+      balances: { title: "Balances", hint: "Office cash, investors, customers." },
+      purchases: { title: "Purchases", hint: "Goods purchased by the office." },
+    },
+    kpis: {
+      cashBalance: "Cash balance now",
+      receiptsMonth: "Receipts (month)",
+      paymentsMonth: "Payments (month)",
+      netMonth: "Net (month)",
+    },
+  },
+  receipts: {
+    pageTitle: "Receipt vouchers",
+    pageSubtitle: "All money received by the office — installments, deposits, income.",
+    newReceipt: "+ New receipt",
+    columns: {
+      number: "Number",
+      date: "Date",
+      source: "Source",
+      from: "From",
+      amount: "Amount",
+      method: "Method",
+      status: "Status",
+    },
+    detail: {
+      back: "← Receipts",
+      printVoucher: "Print voucher",
+      share: "Share",
+      markVerified: "Mark verified",
+      verified: "Verified",
+      voucherInfo: "Voucher details",
+      payer: "Payer",
+      linkedContract: "Linked contract",
+      linkedInvestmentContract: "Linked investment contract",
+      reference: "Reference",
+      notes: "Notes",
+      attachments: "Attachments",
+      attachmentsCount: "{n} attachment(s)",
+      createdBy: "Created by",
+      verifiedBy: "Verified by",
+      flagDuplicate: "⚠ Duplicate reference — needs review",
+    },
+    form: {
+      sourceLabel: "Receipt source",
+      sourcePickerHint: "Choose the source of the payment before continuing.",
+      payerName: "Payer name",
+      payerNamePlaceholder: "Customer or investor name",
+      amount: "Amount (SAR)",
+      methodLabel: "Payment method",
+      reference: "Bank reference",
+      referencePlaceholder: "Optional — transfer no, cheque, STC Pay",
+      linkToContract: "Linked contract",
+      linkToContractPlaceholder: "Choose contract…",
+      notes: "Notes",
+      attachments: "Attachments",
+      attachmentsHint: "(Prototype — no real upload)",
+      submit: "Save voucher",
+      cancel: "Cancel",
+      saveAndPrint: "Save & print",
+    },
+  },
+  paymentVouchers: {
+    pageTitle: "Payment vouchers",
+    pageSubtitle: "All money paid by the office — purchases, profit, expenses.",
+    newPayment: "+ New payment",
+    needsApprovalBadge: "Needs approval",
+    columns: {
+      number: "Number",
+      date: "Date",
+      category: "Category",
+      beneficiary: "Beneficiary",
+      amount: "Amount",
+      method: "Method",
+      status: "Status",
+    },
+    detail: {
+      back: "← Payments",
+      printVoucher: "Print voucher",
+      share: "Share",
+      markVerified: "Mark verified",
+      voucherInfo: "Voucher details",
+      beneficiary: "Beneficiary",
+      linkedTo: "Linked to",
+      reference: "Reference",
+      notes: "Notes",
+      attachments: "Attachments",
+      createdBy: "Created by",
+      pendingApproval: "⏳ Awaiting Office Manager approval",
+    },
+    form: {
+      categoryLabel: "Payment category",
+      beneficiaryName: "Beneficiary name",
+      beneficiaryPlaceholder: "Supplier or employee name",
+      amount: "Amount (SAR)",
+      methodLabel: "Payment method",
+      reference: "Bank reference",
+      linkLabel: "Link to contract / investor / purchase",
+      linkPlaceholder: "Optional — choose…",
+      notes: "Notes",
+      attachments: "Attachments",
+      autoApprovalNote: "💡 Amount exceeds auto-approval; an approval request will be created on save.",
+      submit: "Save voucher",
+      cancel: "Cancel",
+    },
+  },
+  cashLedger: {
+    pageTitle: "Cash movement",
+    pageSubtitle: "All money in and out of the office cash, chronologically.",
+    summary: {
+      opening: "Opening balance",
+      totalIn: "Total in",
+      totalOut: "Total out",
+      balance: "Current balance",
+    },
+    filters: {
+      all: "All",
+      incoming: "Incoming",
+      outgoing: "Outgoing",
+      cashOnly: "Cash only",
+      bankOnly: "Bank only",
+    },
+    columns: {
+      date: "Date",
+      voucher: "Voucher",
+      description: "Description",
+      method: "Method",
+      employee: "Employee",
+      amount: "Amount",
+      runningBalance: "Running balance",
+    },
+    empty: "No movements in this filter.",
+  },
+  balances: {
+    pageTitle: "Balances",
+    pageSubtitle: "Quick view of office cash, investor capital, and customer remaining.",
+    officeCash: {
+      title: "Office cash",
+      hint: "Current balance after all movements.",
+    },
+    investorsSection: {
+      title: "Investors",
+      hint: "Capital, profit due, and paid out.",
+      activeContracts: "{n} active",
+    },
+    customersSection: {
+      title: "Customers",
+      hint: "Remaining on each customer's active installments.",
+      activeContracts: "{n} active",
+    },
+    columns: {
+      name: "Name",
+      capital: "Capital",
+      profitDue: "Profit due",
+      paid: "Paid",
+      net: "Net",
+      remaining: "Remaining",
+      overdue: "Overdue",
+    },
+  },
+  purchases: {
+    pageTitle: "Purchases",
+    pageSubtitle: "Goods and assets purchased by the office — linked later to installment contracts.",
+    newPurchase: "+ New purchase",
+    columns: {
+      number: "Number",
+      date: "Date",
+      supplier: "Supplier",
+      description: "Description",
+      amount: "Amount",
+      status: "Status",
+      linkedContract: "Linked contract",
+    },
+    form: {
+      supplier: "Supplier name",
+      description: "Goods description",
+      amount: "Amount (SAR)",
+      method: "Payment method",
+      notes: "Notes",
+      submit: "Save purchase",
+      cancel: "Cancel",
+    },
+  },
+  duplicate: {
+    suspectedReference: "Duplicate reference",
+    suspectedRefDetail: "This reference appears on a previous voucher — review before verifying.",
+  },
 };
 
 export const dictionaries: Record<Locale, Dictionary> = { ar, en };

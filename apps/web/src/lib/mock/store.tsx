@@ -16,20 +16,28 @@ import { MOCK_APPROVALS } from "./approvals";
 import { MOCK_NOTIFICATIONS } from "./notifications";
 import { MOCK_AUDIT } from "./audit";
 import { MOCK_ROLES, MOCK_EMPLOYEES } from "./employees";
+import { MOCK_RECEIPTS } from "./receipts";
+import { MOCK_PAYMENTS } from "./payments";
+import { MOCK_PURCHASES } from "./purchases";
+import { buildCashLedger, summary as cashSummary } from "./cash-ledger";
 import type {
   ApprovalRequest,
   ApprovalStatus,
   AppNotification,
   AuditEntry,
+  CashLedgerEntry,
   Customer,
   Employee,
+  GoodsPurchase,
   InstallmentContract,
   InvestmentContract,
   NotificationState,
   PaymentProof,
+  PaymentVoucher,
   PermissionAction,
   PermissionState,
   ProofStatus,
+  ReceiptVoucher,
   Role,
 } from "./types";
 
@@ -40,6 +48,9 @@ const KEY_PROOF_DECISIONS = "muqsit_proof_decisions";
 const KEY_APPROVAL_DECISIONS = "muqsit_approval_decisions";
 const KEY_NOTIFICATION_STATES = "muqsit_notification_states";
 const KEY_ROLE_OVERRIDES = "muqsit_role_overrides";
+const KEY_RECEIPTS = "muqsit_user_receipts";
+const KEY_PAYMENTS = "muqsit_user_payments";
+const KEY_PURCHASES = "muqsit_user_purchases";
 
 interface ProofDecisionPatch {
   status: ProofStatus;
@@ -80,6 +91,15 @@ interface Store {
   setNotificationState: (id: string, state: NotificationState) => void;
   markAllNotificationsRead: () => void;
   auditEntries: AuditEntry[];
+  // Sprint 5
+  receipts: ReceiptVoucher[];
+  addReceipt: (r: ReceiptVoucher) => void;
+  payments: PaymentVoucher[];
+  addPayment: (p: PaymentVoucher) => void;
+  purchases: GoodsPurchase[];
+  addPurchase: (p: GoodsPurchase) => void;
+  cashLedger: CashLedgerEntry[];
+  cashSummary: { totalIn: number; totalOut: number; balance: number; opening: number };
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -116,6 +136,9 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [roleOverrides, setRoleOverrides] = useState<
     Record<string, Partial<Record<PermissionAction, PermissionState>>>
   >({});
+  const [userReceipts, setUserReceipts] = useState<ReceiptVoucher[]>([]);
+  const [userPayments, setUserPayments] = useState<PaymentVoucher[]>([]);
+  const [userPurchases, setUserPurchases] = useState<GoodsPurchase[]>([]);
 
   useEffect(() => {
     setUserInvestments(safeRead<InvestmentContract[]>(KEY_INVESTMENT_CONTRACTS) ?? []);
@@ -133,6 +156,9 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
         KEY_ROLE_OVERRIDES,
       ) ?? {},
     );
+    setUserReceipts(safeRead<ReceiptVoucher[]>(KEY_RECEIPTS) ?? []);
+    setUserPayments(safeRead<PaymentVoucher[]>(KEY_PAYMENTS) ?? []);
+    setUserPurchases(safeRead<GoodsPurchase[]>(KEY_PURCHASES) ?? []);
   }, []);
 
   const addInvestmentContract = useCallback((contract: InvestmentContract) => {
@@ -206,6 +232,30 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     [],
   );
 
+  const addReceipt = useCallback((receipt: ReceiptVoucher) => {
+    setUserReceipts((prev) => {
+      const next = [receipt, ...prev];
+      safeWrite(KEY_RECEIPTS, next);
+      return next;
+    });
+  }, []);
+
+  const addPayment = useCallback((payment: PaymentVoucher) => {
+    setUserPayments((prev) => {
+      const next = [payment, ...prev];
+      safeWrite(KEY_PAYMENTS, next);
+      return next;
+    });
+  }, []);
+
+  const addPurchase = useCallback((purchase: GoodsPurchase) => {
+    setUserPurchases((prev) => {
+      const next = [purchase, ...prev];
+      safeWrite(KEY_PURCHASES, next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo<Store>(() => {
     const proofs = MOCK_PAYMENT_PROOFS.map((p) => {
       const decision = proofDecisions[p.id];
@@ -224,6 +274,10 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
       if (!overrides) return r;
       return { ...r, permissions: { ...r.permissions, ...overrides } };
     });
+    const allReceipts = [...userReceipts, ...MOCK_RECEIPTS];
+    const allPayments = [...userPayments, ...MOCK_PAYMENTS];
+    const allPurchases = [...userPurchases, ...MOCK_PURCHASES];
+    const ledger = buildCashLedger(allReceipts, allPayments);
     return {
       investmentContracts: [...userInvestments, ...MOCK_CONTRACTS],
       addInvestmentContract,
@@ -242,6 +296,14 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
       setNotificationState,
       markAllNotificationsRead,
       auditEntries: MOCK_AUDIT,
+      receipts: allReceipts,
+      addReceipt,
+      payments: allPayments,
+      addPayment,
+      purchases: allPurchases,
+      addPurchase,
+      cashLedger: ledger,
+      cashSummary: cashSummary(ledger),
     };
   }, [
     userInvestments,
@@ -259,6 +321,12 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     setNotificationState,
     markAllNotificationsRead,
     updateRolePermission,
+    userReceipts,
+    userPayments,
+    userPurchases,
+    addReceipt,
+    addPayment,
+    addPurchase,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -20,6 +20,7 @@ import { MOCK_RECEIPTS } from "./receipts";
 import { MOCK_PAYMENTS } from "./payments";
 import { MOCK_PURCHASES } from "./purchases";
 import { buildCashLedger, summary as cashSummary } from "./cash-ledger";
+import { DEFAULT_OFFICE_SETTINGS } from "./office-settings";
 import type {
   ApprovalRequest,
   ApprovalStatus,
@@ -32,6 +33,7 @@ import type {
   InstallmentContract,
   InvestmentContract,
   NotificationState,
+  OfficeSettings,
   PaymentProof,
   PaymentVoucher,
   PermissionAction,
@@ -51,6 +53,7 @@ const KEY_ROLE_OVERRIDES = "muqsit_role_overrides";
 const KEY_RECEIPTS = "muqsit_user_receipts";
 const KEY_PAYMENTS = "muqsit_user_payments";
 const KEY_PURCHASES = "muqsit_user_purchases";
+const KEY_OFFICE_SETTINGS = "muqsit_office_settings";
 
 interface ProofDecisionPatch {
   status: ProofStatus;
@@ -100,6 +103,9 @@ interface Store {
   addPurchase: (p: GoodsPurchase) => void;
   cashLedger: CashLedgerEntry[];
   cashSummary: { totalIn: number; totalOut: number; balance: number; opening: number };
+  // Sprint 8
+  officeSettings: OfficeSettings;
+  updateOfficeSettings: (patch: OfficeSettings) => void;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -139,6 +145,7 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [userReceipts, setUserReceipts] = useState<ReceiptVoucher[]>([]);
   const [userPayments, setUserPayments] = useState<PaymentVoucher[]>([]);
   const [userPurchases, setUserPurchases] = useState<GoodsPurchase[]>([]);
+  const [officeSettings, setOfficeSettings] = useState<OfficeSettings>(DEFAULT_OFFICE_SETTINGS);
 
   useEffect(() => {
     setUserInvestments(safeRead<InvestmentContract[]>(KEY_INVESTMENT_CONTRACTS) ?? []);
@@ -159,6 +166,7 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     setUserReceipts(safeRead<ReceiptVoucher[]>(KEY_RECEIPTS) ?? []);
     setUserPayments(safeRead<PaymentVoucher[]>(KEY_PAYMENTS) ?? []);
     setUserPurchases(safeRead<GoodsPurchase[]>(KEY_PURCHASES) ?? []);
+    setOfficeSettings(safeRead<OfficeSettings>(KEY_OFFICE_SETTINGS) ?? DEFAULT_OFFICE_SETTINGS);
   }, []);
 
   const addInvestmentContract = useCallback((contract: InvestmentContract) => {
@@ -256,6 +264,11 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
+  const updateOfficeSettings = useCallback((patch: OfficeSettings) => {
+    setOfficeSettings(patch);
+    safeWrite(KEY_OFFICE_SETTINGS, patch);
+  }, []);
+
   const value = useMemo<Store>(() => {
     const proofs = MOCK_PAYMENT_PROOFS.map((p) => {
       const decision = proofDecisions[p.id];
@@ -304,6 +317,8 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
       addPurchase,
       cashLedger: ledger,
       cashSummary: cashSummary(ledger),
+      officeSettings,
+      updateOfficeSettings,
     };
   }, [
     userInvestments,
@@ -327,6 +342,8 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     addReceipt,
     addPayment,
     addPurchase,
+    officeSettings,
+    updateOfficeSettings,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

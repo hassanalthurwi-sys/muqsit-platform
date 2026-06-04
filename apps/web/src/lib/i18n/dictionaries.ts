@@ -578,6 +578,82 @@ export interface Dictionary {
       availableLabel: string;
     };
   };
+  officeSettings: {
+    pageTitle: string;
+    pageSubtitle: string;
+    savedLabel: string;
+    sections: {
+      identity: { title: string; hint: string };
+      contact: { title: string; hint: string };
+      workingHours: { title: string; hint: string };
+      approvalDefaults: { title: string; hint: string };
+      investmentDefaults: { title: string; hint: string };
+      profitDistribution: { title: string; hint: string };
+      notifications: { title: string; hint: string };
+    };
+    identity: {
+      nameAr: string;
+      nameEn: string;
+      logoLabel: string;
+      logoChoose: string;
+      logoHint: string;
+      commercialRegistration: string;
+      taxNumber: string;
+      foundedAt: string;
+    };
+    contact: {
+      phone: string;
+      email: string;
+      city: string;
+      neighborhood: string;
+      street: string;
+      website: string;
+    };
+    workingHours: {
+      days: string;
+      openTime: string;
+      closeTime: string;
+      holidays: string;
+      holidaysHint: string;
+      dayLabels: { sat: string; sun: string; mon: string; tue: string; wed: string; thu: string; fri: string };
+    };
+    approvalDefaults: {
+      paymentApprovalAbove: string;
+      paymentApprovalAboveHint: string;
+      reminderAfterDays: string;
+      reminderAfterDaysHint: string;
+      criticalThreshold: string;
+      criticalThresholdHint: string;
+    };
+    investmentDefaults: {
+      recyclingThreshold: string;
+      recyclingThresholdHint: string;
+      officePercentage: string;
+      durationMonths: string;
+    };
+    profitDistribution: {
+      policy: string;
+      policyOptions: { officeFirst: string; investorFirst: string; proportional: string };
+      policyOptionHints: { officeFirst: string; investorFirst: string; proportional: string };
+      futureNote: string;
+    };
+    notifications: {
+      channels: string;
+      channelLabels: { whatsapp: string; sms: string; email: string };
+      quietHoursStart: string;
+      quietHoursEnd: string;
+      quietHoursHint: string;
+      alertTypes: string;
+      alertLabels: {
+        overdueCustomer: string;
+        newPaymentProof: string;
+        pendingApproval: string;
+        contractExpiring: string;
+        lowOcrConfidence: string;
+        investorLowCapital: string;
+      };
+    };
+  };
   approvals: {
     pageTitle: string;
     pageSubtitle: string;
@@ -1747,6 +1823,98 @@ const ar: Dictionary = {
     },
     investorPicker: {
       availableLabel: "متاح للتمويل",
+    },
+  },
+  officeSettings: {
+    pageTitle: "إعدادات المكتب",
+    pageSubtitle: "إعدادات المكتب الأساسية — كل ما يحتاج إلى تخصيص مرة واحدة.",
+    savedLabel: "تم الحفظ · {time}",
+    sections: {
+      identity: { title: "هوية المكتب", hint: "الاسم الذي يظهر على الإيصالات والتقارير." },
+      contact: { title: "بيانات التواصل", hint: "العنوان وأرقام الاتصال للعملاء والمستثمرين." },
+      workingHours: { title: "ساعات العمل", hint: "أيام وساعات الدوام تظهر للعملاء في البوابة." },
+      approvalDefaults: { title: "افتراضيات الموافقات", hint: "حدود التشغيل التي تُولّد طلب موافقة تلقائياً." },
+      investmentDefaults: { title: "افتراضيات الاستثمار", hint: "قيم تظهر مُسبقاً عند إنشاء عقد استثمار جديد." },
+      profitDistribution: { title: "سياسة توزيع الأرباح", hint: "تُستخدم كافتراضي للمستثمرين الجدد." },
+      notifications: { title: "تفضيلات الإشعارات", hint: "كيف يصلك التنبيه عندما يحتاج شيء قراراً." },
+    },
+    identity: {
+      nameAr: "اسم المكتب (عربي)",
+      nameEn: "اسم المكتب (إنجليزي)",
+      logoLabel: "الشعار",
+      logoChoose: "اختر صورة الشعار",
+      logoHint: "PNG أو SVG — يفضّل 256×256.",
+      commercialRegistration: "السجل التجاري",
+      taxNumber: "الرقم الضريبي",
+      foundedAt: "تاريخ التأسيس",
+    },
+    contact: {
+      phone: "الجوال الرئيسي",
+      email: "البريد الإلكتروني",
+      city: "المدينة",
+      neighborhood: "الحي",
+      street: "الشارع / العنوان",
+      website: "الموقع الإلكتروني",
+    },
+    workingHours: {
+      days: "أيام العمل",
+      openTime: "وقت الفتح",
+      closeTime: "وقت الإغلاق",
+      holidays: "أيام العطل الرسمية",
+      holidaysHint: "اكتب الأيام أو المناسبات كنص حر.",
+      dayLabels: {
+        sat: "س",
+        sun: "ح",
+        mon: "ن",
+        tue: "ث",
+        wed: "ر",
+        thu: "خ",
+        fri: "ج",
+      },
+    },
+    approvalDefaults: {
+      paymentApprovalAbove: "حد المبلغ الذي يتطلب موافقة (ر.س)",
+      paymentApprovalAboveHint: "أي سند صرف أعلى من هذا المبلغ يحتاج موافقة المدير.",
+      reminderAfterDays: "أيام التذكير بالموافقات المتأخرة",
+      reminderAfterDaysHint: "بعد هذا العدد من الأيام يُرسل تذكير تلقائي.",
+      criticalThreshold: "حد الأولوية العاجلة (ر.س)",
+      criticalThresholdHint: "أي طلب موافقة بمبلغ أعلى من هذا يصنّف عاجلاً.",
+    },
+    investmentDefaults: {
+      recyclingThreshold: "حد إعادة التشغيل الافتراضي (ر.س)",
+      recyclingThresholdHint: "يُقترح هذا الحد لعقود الاستثمار الجديدة، ويمكن تعديله لكل عقد.",
+      officePercentage: "نسبة المكتب الافتراضية (%)",
+      durationMonths: "مدة العقد الافتراضية (شهر)",
+    },
+    profitDistribution: {
+      policy: "السياسة الافتراضية",
+      policyOptions: {
+        officeFirst: "المكتب أولاً",
+        investorFirst: "المستثمر أولاً",
+        proportional: "تناسبي",
+      },
+      policyOptionHints: {
+        officeFirst: "تُحسم نسبة المكتب أولاً ثم يُوزّع الباقي على المستثمر.",
+        investorFirst: "يحصل المستثمر على رأس ماله أولاً ثم تُحسم النسبة من الربح.",
+        proportional: "يُقسم الربح والنسبة معاً وفق نسب مُتّفق عليها.",
+      },
+      futureNote: "تُستخدم هذه السياسة كافتراضي للمستثمرين. لم تُفعّل بعد في تدفقات التوزيع — قيد التطوير.",
+    },
+    notifications: {
+      channels: "قنوات الإشعار",
+      channelLabels: { whatsapp: "واتساب", sms: "رسائل SMS", email: "بريد إلكتروني" },
+      quietHoursStart: "بداية ساعات الهدوء",
+      quietHoursEnd: "نهاية ساعات الهدوء",
+      quietHoursHint: "خلال هذه الساعات يتم تأجيل الإشعارات غير العاجلة.",
+      alertTypes: "ما الذي يولّد إشعاراً",
+      alertLabels: {
+        overdueCustomer: "عميل متأخر",
+        newPaymentProof: "إيصال جديد للمراجعة",
+        pendingApproval: "طلب موافقة",
+        contractExpiring: "عقد قارب على الانتهاء",
+        lowOcrConfidence: "ثقة OCR منخفضة",
+        investorLowCapital: "رأس مال مستثمر منخفض",
+      },
     },
   },
   approvals: {
@@ -2955,6 +3123,98 @@ const en: Dictionary = {
     },
     investorPicker: {
       availableLabel: "Available for financing",
+    },
+  },
+  officeSettings: {
+    pageTitle: "Office settings",
+    pageSubtitle: "Core office configuration — everything you set once.",
+    savedLabel: "Saved · {time}",
+    sections: {
+      identity: { title: "Office identity", hint: "The name that appears on receipts and reports." },
+      contact: { title: "Contact details", hint: "Address and phone for customers and investors." },
+      workingHours: { title: "Working hours", hint: "Working days and hours shown to customers in the portal." },
+      approvalDefaults: { title: "Approval defaults", hint: "Operational thresholds that auto-create an approval request." },
+      investmentDefaults: { title: "Investment defaults", hint: "Pre-filled values when creating a new investment contract." },
+      profitDistribution: { title: "Profit distribution policy", hint: "Used as the default for new investors." },
+      notifications: { title: "Notification preferences", hint: "How you're alerted when something needs a decision." },
+    },
+    identity: {
+      nameAr: "Office name (Arabic)",
+      nameEn: "Office name (English)",
+      logoLabel: "Logo",
+      logoChoose: "Choose logo image",
+      logoHint: "PNG or SVG — 256×256 recommended.",
+      commercialRegistration: "Commercial Registration",
+      taxNumber: "Tax Number",
+      foundedAt: "Founded date",
+    },
+    contact: {
+      phone: "Primary phone",
+      email: "Email",
+      city: "City",
+      neighborhood: "Neighborhood",
+      street: "Street / Address",
+      website: "Website",
+    },
+    workingHours: {
+      days: "Working days",
+      openTime: "Open time",
+      closeTime: "Close time",
+      holidays: "Official holidays",
+      holidaysHint: "Free text — list days or occasions.",
+      dayLabels: {
+        sat: "Sat",
+        sun: "Sun",
+        mon: "Mon",
+        tue: "Tue",
+        wed: "Wed",
+        thu: "Thu",
+        fri: "Fri",
+      },
+    },
+    approvalDefaults: {
+      paymentApprovalAbove: "Payment amount requiring approval (SAR)",
+      paymentApprovalAboveHint: "Any payment voucher above this needs manager approval.",
+      reminderAfterDays: "Reminder days for stale approvals",
+      reminderAfterDaysHint: "After this many days, a reminder is sent automatically.",
+      criticalThreshold: "Critical priority threshold (SAR)",
+      criticalThresholdHint: "Any approval above this amount is auto-flagged critical.",
+    },
+    investmentDefaults: {
+      recyclingThreshold: "Default recycling threshold (SAR)",
+      recyclingThresholdHint: "Suggested for new investment contracts. Can be overridden per contract.",
+      officePercentage: "Default office percentage (%)",
+      durationMonths: "Default contract duration (months)",
+    },
+    profitDistribution: {
+      policy: "Default policy",
+      policyOptions: {
+        officeFirst: "Office first",
+        investorFirst: "Investor first",
+        proportional: "Proportional",
+      },
+      policyOptionHints: {
+        officeFirst: "Office share is deducted first, then the rest goes to the investor.",
+        investorFirst: "Investor receives their capital first, then the office share is taken from profit.",
+        proportional: "Profit and share are split proportionally per the agreement.",
+      },
+      futureNote: "Used as the default for investors. Not yet consumed by distribution flows — coming later.",
+    },
+    notifications: {
+      channels: "Notification channels",
+      channelLabels: { whatsapp: "WhatsApp", sms: "SMS", email: "Email" },
+      quietHoursStart: "Quiet hours start",
+      quietHoursEnd: "Quiet hours end",
+      quietHoursHint: "During these hours, non-urgent notifications are deferred.",
+      alertTypes: "What triggers a notification",
+      alertLabels: {
+        overdueCustomer: "Overdue customer",
+        newPaymentProof: "New proof to review",
+        pendingApproval: "Pending approval",
+        contractExpiring: "Contract about to end",
+        lowOcrConfidence: "Low OCR confidence",
+        investorLowCapital: "Investor capital running low",
+      },
     },
   },
   approvals: {

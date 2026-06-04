@@ -434,3 +434,72 @@ export interface GoodsPurchase {
   attachmentCount: number;
   notes?: string;
 }
+
+// ─── Sprint 8: Office Settings ──────────────────────────────────────────────
+//
+// Single configuration object for the office. Stored on the mock store.
+// Read by no business logic yet (defaults will be picked up by relevant
+// flows in later sprints). This sprint delivers the settings layer itself.
+//
+// Profit distribution policy follows the locked architectural principle:
+// two levels only — office default here, investor override on the Investor
+// record (not yet built). Never per-contract.
+
+export type WeekDay = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+
+export type ProfitDistributionPolicy = "officeFirst" | "investorFirst" | "proportional";
+
+export type NotificationChannel = "whatsapp" | "sms" | "email";
+
+export type NotificationAlertType =
+  | "overdueCustomer"
+  | "newPaymentProof"
+  | "pendingApproval"
+  | "contractExpiring"
+  | "lowOcrConfidence"
+  | "investorLowCapital";
+
+export interface OfficeSettings {
+  identity: {
+    nameAr: string;
+    nameEn: string;
+    logoFileName?: string;
+    commercialRegistration?: string;
+    taxNumber?: string;
+    foundedAt?: string;
+  };
+  contact: {
+    phone: string;
+    email: string;
+    city: string;
+    neighborhood?: string;
+    street?: string;
+    website?: string;
+  };
+  workingHours: {
+    days: WeekDay[];
+    openTime: string; // HH:MM
+    closeTime: string; // HH:MM
+    holidays?: string;
+  };
+  approvalDefaults: {
+    paymentApprovalAbove: number; // SAR
+    reminderAfterDays: number;
+    criticalThreshold: number; // SAR — anything above is auto-flagged critical
+  };
+  investmentDefaults: {
+    recyclingThreshold: number;
+    officePercentage: number;
+    durationMonths: number;
+  };
+  profitDistribution: {
+    policy: ProfitDistributionPolicy;
+    // Stored only — not consumed by any logic in Sprint 8.
+  };
+  notifications: {
+    channels: NotificationChannel[];
+    quietHoursStart?: string; // HH:MM
+    quietHoursEnd?: string;
+    alertTypes: NotificationAlertType[];
+  };
+}

@@ -232,6 +232,7 @@ export interface Dictionary {
     activityType: {
       receipt: string;
       payment: string;
+      profitDistribution: string;
       contract: string;
       recycledContract: string;
     };
@@ -1426,6 +1427,7 @@ const ar: Dictionary = {
     activityType: {
       receipt: "سند قبض",
       payment: "سند صرف",
+      profitDistribution: "توزيع أرباح",
       contract: "عقد استثمار",
       recycledContract: "عقد استثمار معاد تشغيله",
     },
@@ -2738,6 +2740,7 @@ const en: Dictionary = {
     activityType: {
       receipt: "Receipt voucher",
       payment: "Payment voucher",
+      profitDistribution: "Profit distribution",
       contract: "Investment contract",
       recycledContract: "Investment contract from balance",
     },

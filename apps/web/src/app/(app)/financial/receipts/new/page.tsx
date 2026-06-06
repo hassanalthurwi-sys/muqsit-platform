@@ -43,8 +43,7 @@ function NewReceiptInner() {
   const router = useRouter();
   const search = useSearchParams();
   const { dict } = useI18n();
-  const { receipts, addReceipt, customers, installmentContracts, investmentContracts } =
-    useStore();
+  const { receipts, addReceipt, customers, installmentContracts } = useStore();
   const f = dict.receipts.form;
   const c = dict.receipts.columns;
 
@@ -62,6 +61,9 @@ function NewReceiptInner() {
   const [contractId, setContractId] = useState("");
   const [notes, setNotes] = useState("");
 
+  // Investor deposit receipts must NOT be linked to any investment contract
+  // — investors deposit first, contracts may be created later. Only customer
+  // installment receipts get a linked contract.
   const linkedOptions = useMemo(() => {
     if (source === "customerInstallment") {
       return installmentContracts.map((co) => ({
@@ -69,11 +71,8 @@ function NewReceiptInner() {
         label: `${co.number} · ${customers.find((cu) => cu.id === co.customerId)?.name ?? ""}`,
       }));
     }
-    if (source === "investorDeposit") {
-      return investmentContracts.map((c) => ({ id: c.id, label: c.number }));
-    }
     return [];
-  }, [source, customers, installmentContracts, investmentContracts]);
+  }, [source, customers, installmentContracts]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,8 +92,7 @@ function NewReceiptInner() {
           : undefined,
       contractId: source === "customerInstallment" ? contractId || undefined : undefined,
       investorId: source === "investorDeposit" ? investorId || undefined : undefined,
-      investmentContractId:
-        source === "investorDeposit" ? contractId || undefined : undefined,
+      investmentContractId: undefined,
       reference: reference || undefined,
       notes: notes || undefined,
       createdById: "emp-manager-1",

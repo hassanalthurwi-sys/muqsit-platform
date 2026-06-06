@@ -13,7 +13,19 @@ import { Timeline } from "@/components/ui/timeline";
 import { useStore } from "@/lib/mock/store";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatDate } from "@/lib/format";
-import type { Installment, PaymentSource } from "@/lib/mock/types";
+import type { Installment, PaymentMethod, PaymentSource, ReceiptVoucher } from "@/lib/mock/types";
+
+function paymentSourceToMethod(source: PaymentSource): PaymentMethod {
+  if (source === "cash") return "cash";
+  return "bankTransfer";
+}
+
+function nextReceiptNumber(receipts: ReceiptVoucher[]): string {
+  const max = receipts
+    .map((r) => parseInt(r.number.split("-").at(-1) ?? "0", 10))
+    .reduce((m, n) => (n > m ? n : m), 0);
+  return `RC-2025-${String(max + 1).padStart(3, "0")}`;
+}
 
 export default function InstallmentContractDetailsPage({
   params,
@@ -22,7 +34,7 @@ export default function InstallmentContractDetailsPage({
 }) {
   const { id } = use(params);
   const { dict, locale } = useI18n();
-  const { installmentContracts, customers, investmentContracts } = useStore();
+  const { installmentContracts, customers, investmentContracts, receipts, addReceipt } = useStore();
   const [activeInstallment, setActiveInstallment] = useState<Installment | null>(null);
   const [open, setOpen] = useState(false);
   // Local overlay of payments captured this session (prototype: not pushed to store)
@@ -60,6 +72,32 @@ export default function InstallmentContractDetailsPage({
         [activeInstallment.id]: { paid: Math.min(prevPaid + payment.amount, activeInstallment.amount) },
       };
     });
+    // Auto-generate a receipt voucher for the customer installment payment.
+    // The voucher carries: number, date, amount, customer, installment
+    // contract, installment number. This is the primary receipt-to-contract
+    // relationship in the system.
+    const today = new Date().toISOString().slice(0, 10);
+    const receipt: ReceiptVoucher = {
+      id: `rc-auto-${Date.now()}`,
+      number: nextReceiptNumber(receipts),
+      date: today,
+      amount: payment.amount,
+      method: paymentSourceToMethod(payment.source),
+      source: "customerInstallment",
+      fromName: payment.receiptName ?? customer?.name ?? contract.customerId,
+      customerId: contract.customerId,
+      contractId: contract.id,
+      notes: `قسط ${activeInstallment.index} من ${contract.schedule.length} — ${contract.number}${
+        payment.note ? ` · ${payment.note}` : ""
+      }`,
+      createdById: "emp-collections-1",
+      createdAt: new Date().toISOString(),
+      status: "verified",
+      verifiedById: "emp-collections-1",
+      verifiedAt: new Date().toISOString(),
+      attachmentCount: 0,
+    };
+    addReceipt(receipt);
   };
 
   // Effective schedule with the session overlay applied

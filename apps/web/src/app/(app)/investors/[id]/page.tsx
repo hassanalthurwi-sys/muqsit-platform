@@ -9,6 +9,7 @@ import {
   Mail,
   Phone,
   Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
@@ -25,6 +26,7 @@ import type { InvestorActivityType } from "@/lib/mock/types";
 const ACTIVITY_ICON: Record<InvestorActivityType, typeof ArrowDownToLine> = {
   receipt: ArrowDownToLine,
   payment: ArrowUpFromLine,
+  profitDistribution: TrendingUp,
   contract: FileSignature,
   recycledContract: FileSignature,
 };
@@ -32,9 +34,19 @@ const ACTIVITY_ICON: Record<InvestorActivityType, typeof ArrowDownToLine> = {
 const ACTIVITY_TONE: Record<InvestorActivityType, string> = {
   receipt: "bg-success/10 text-success",
   payment: "bg-muted text-muted-foreground",
+  profitDistribution: "bg-success/10 text-success",
   contract: "bg-primary/10 text-primary",
   recycledContract: "bg-gold-soft text-gold-foreground",
 };
+
+// A payment voucher tagged as a profit distribution in the timeline if its
+// description mentions أرباح / ربح / profit. This keeps the single Payment
+// Voucher concept intact (no separate category) while letting the timeline
+// surface it with clearer business language.
+const PROFIT_KEYWORDS = /(ربح|أرباح|الأرباح|profit)/i;
+function classifyPayment(notes: string | undefined): "payment" | "profitDistribution" {
+  return notes && PROFIT_KEYWORDS.test(notes) ? "profitDistribution" : "payment";
+}
 
 interface TimelineItem {
   ts: string;
@@ -101,7 +113,7 @@ export default function InvestorProfilePage({
     for (const pay of payments.filter((p) => p.investorId === id)) {
       items.push({
         ts: pay.date,
-        type: "payment",
+        type: classifyPayment(pay.notes),
         amount: pay.amount,
         referenceLabel: pay.number,
         referenceHref: `/financial/payments/${pay.id}`,

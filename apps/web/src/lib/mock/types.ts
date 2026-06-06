@@ -22,6 +22,7 @@ export interface BankAccount {
 export type InvestorActivityType =
   | "receipt"
   | "payment"
+  | "profitDistribution"
   | "contract"
   | "recycledContract";
 

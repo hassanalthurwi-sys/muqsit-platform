@@ -585,8 +585,7 @@ export interface Dictionary {
     sections: {
       identity: { title: string; hint: string };
       contact: { title: string; hint: string };
-      workingHours: { title: string; hint: string };
-      approvalDefaults: { title: string; hint: string };
+      bankAccounts: { title: string; hint: string };
       investmentDefaults: { title: string; hint: string };
       profitDistribution: { title: string; hint: string };
       notifications: { title: string; hint: string };
@@ -609,27 +608,18 @@ export interface Dictionary {
       street: string;
       website: string;
     };
-    workingHours: {
-      days: string;
-      openTime: string;
-      closeTime: string;
-      holidays: string;
-      holidaysHint: string;
-      dayLabels: { sat: string; sun: string; mon: string; tue: string; wed: string; thu: string; fri: string };
-    };
-    approvalDefaults: {
-      paymentApprovalAbove: string;
-      paymentApprovalAboveHint: string;
-      reminderAfterDays: string;
-      reminderAfterDaysHint: string;
-      criticalThreshold: string;
-      criticalThresholdHint: string;
+    bankAccounts: {
+      bankName: string;
+      beneficiaryName: string;
+      iban: string;
+      addAccount: string;
+      removeAccount: string;
+      accountIndex: string;
+      empty: string;
     };
     investmentDefaults: {
       recyclingThreshold: string;
       recyclingThresholdHint: string;
-      officePercentage: string;
-      durationMonths: string;
     };
     profitDistribution: {
       policy: string;
@@ -1827,14 +1817,13 @@ const ar: Dictionary = {
   },
   officeSettings: {
     pageTitle: "إعدادات المكتب",
-    pageSubtitle: "إعدادات المكتب الأساسية — كل ما يحتاج إلى تخصيص مرة واحدة.",
+    pageSubtitle: "تفضيلات بسيطة لمكتبك — تضبطها مرة واحدة.",
     savedLabel: "تم الحفظ · {time}",
     sections: {
       identity: { title: "هوية المكتب", hint: "الاسم الذي يظهر على الإيصالات والتقارير." },
       contact: { title: "بيانات التواصل", hint: "العنوان وأرقام الاتصال للعملاء والمستثمرين." },
-      workingHours: { title: "ساعات العمل", hint: "أيام وساعات الدوام تظهر للعملاء في البوابة." },
-      approvalDefaults: { title: "افتراضيات الموافقات", hint: "حدود التشغيل التي تُولّد طلب موافقة تلقائياً." },
-      investmentDefaults: { title: "افتراضيات الاستثمار", hint: "قيم تظهر مُسبقاً عند إنشاء عقد استثمار جديد." },
+      bankAccounts: { title: "الحسابات البنكية للمكتب", hint: "أرقام الحسابات التي تستقبل التحويلات من العملاء والمستثمرين." },
+      investmentDefaults: { title: "افتراضيات الاستثمار", hint: "قيمة تُقترح عند إنشاء عقد استثمار جديد." },
       profitDistribution: { title: "سياسة توزيع الأرباح", hint: "تُستخدم كافتراضي للمستثمرين الجدد." },
       notifications: { title: "تفضيلات الإشعارات", hint: "كيف يصلك التنبيه عندما يحتاج شيء قراراً." },
     },
@@ -1856,35 +1845,18 @@ const ar: Dictionary = {
       street: "الشارع / العنوان",
       website: "الموقع الإلكتروني",
     },
-    workingHours: {
-      days: "أيام العمل",
-      openTime: "وقت الفتح",
-      closeTime: "وقت الإغلاق",
-      holidays: "أيام العطل الرسمية",
-      holidaysHint: "اكتب الأيام أو المناسبات كنص حر.",
-      dayLabels: {
-        sat: "س",
-        sun: "ح",
-        mon: "ن",
-        tue: "ث",
-        wed: "ر",
-        thu: "خ",
-        fri: "ج",
-      },
-    },
-    approvalDefaults: {
-      paymentApprovalAbove: "حد المبلغ الذي يتطلب موافقة (ر.س)",
-      paymentApprovalAboveHint: "أي سند صرف أعلى من هذا المبلغ يحتاج موافقة المدير.",
-      reminderAfterDays: "أيام التذكير بالموافقات المتأخرة",
-      reminderAfterDaysHint: "بعد هذا العدد من الأيام يُرسل تذكير تلقائي.",
-      criticalThreshold: "حد الأولوية العاجلة (ر.س)",
-      criticalThresholdHint: "أي طلب موافقة بمبلغ أعلى من هذا يصنّف عاجلاً.",
+    bankAccounts: {
+      bankName: "اسم البنك",
+      beneficiaryName: "اسم المستفيد",
+      iban: "رقم الآيبان (IBAN)",
+      addAccount: "+ إضافة حساب",
+      removeAccount: "حذف",
+      accountIndex: "حساب {n}",
+      empty: "لا توجد حسابات بنكية بعد — أضف حساباً للبدء.",
     },
     investmentDefaults: {
       recyclingThreshold: "حد إعادة التشغيل الافتراضي (ر.س)",
       recyclingThresholdHint: "يُقترح هذا الحد لعقود الاستثمار الجديدة، ويمكن تعديله لكل عقد.",
-      officePercentage: "نسبة المكتب الافتراضية (%)",
-      durationMonths: "مدة العقد الافتراضية (شهر)",
     },
     profitDistribution: {
       policy: "السياسة الافتراضية",
@@ -3127,14 +3099,13 @@ const en: Dictionary = {
   },
   officeSettings: {
     pageTitle: "Office settings",
-    pageSubtitle: "Core office configuration — everything you set once.",
+    pageSubtitle: "Simple preferences for your office — set them once.",
     savedLabel: "Saved · {time}",
     sections: {
       identity: { title: "Office identity", hint: "The name that appears on receipts and reports." },
       contact: { title: "Contact details", hint: "Address and phone for customers and investors." },
-      workingHours: { title: "Working hours", hint: "Working days and hours shown to customers in the portal." },
-      approvalDefaults: { title: "Approval defaults", hint: "Operational thresholds that auto-create an approval request." },
-      investmentDefaults: { title: "Investment defaults", hint: "Pre-filled values when creating a new investment contract." },
+      bankAccounts: { title: "Office bank accounts", hint: "Accounts that receive transfers from customers and investors." },
+      investmentDefaults: { title: "Investment defaults", hint: "A value suggested when creating a new investment contract." },
       profitDistribution: { title: "Profit distribution policy", hint: "Used as the default for new investors." },
       notifications: { title: "Notification preferences", hint: "How you're alerted when something needs a decision." },
     },
@@ -3156,35 +3127,18 @@ const en: Dictionary = {
       street: "Street / Address",
       website: "Website",
     },
-    workingHours: {
-      days: "Working days",
-      openTime: "Open time",
-      closeTime: "Close time",
-      holidays: "Official holidays",
-      holidaysHint: "Free text — list days or occasions.",
-      dayLabels: {
-        sat: "Sat",
-        sun: "Sun",
-        mon: "Mon",
-        tue: "Tue",
-        wed: "Wed",
-        thu: "Thu",
-        fri: "Fri",
-      },
-    },
-    approvalDefaults: {
-      paymentApprovalAbove: "Payment amount requiring approval (SAR)",
-      paymentApprovalAboveHint: "Any payment voucher above this needs manager approval.",
-      reminderAfterDays: "Reminder days for stale approvals",
-      reminderAfterDaysHint: "After this many days, a reminder is sent automatically.",
-      criticalThreshold: "Critical priority threshold (SAR)",
-      criticalThresholdHint: "Any approval above this amount is auto-flagged critical.",
+    bankAccounts: {
+      bankName: "Bank name",
+      beneficiaryName: "Beneficiary name",
+      iban: "IBAN",
+      addAccount: "+ Add account",
+      removeAccount: "Remove",
+      accountIndex: "Account {n}",
+      empty: "No bank accounts yet — add one to get started.",
     },
     investmentDefaults: {
       recyclingThreshold: "Default recycling threshold (SAR)",
       recyclingThresholdHint: "Suggested for new investment contracts. Can be overridden per contract.",
-      officePercentage: "Default office percentage (%)",
-      durationMonths: "Default contract duration (months)",
     },
     profitDistribution: {
       policy: "Default policy",

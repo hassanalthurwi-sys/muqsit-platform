@@ -19,21 +19,22 @@ export const DEFAULT_OFFICE_SETTINGS: OfficeSettings = {
     street: "شارع الملك فهد",
     website: "https://muqsit.sa",
   },
-  workingHours: {
-    days: ["sun", "mon", "tue", "wed", "thu"],
-    openTime: "09:00",
-    closeTime: "17:00",
-    holidays: "الأعياد الرسمية · اليوم الوطني",
-  },
-  approvalDefaults: {
-    paymentApprovalAbove: 10_000,
-    reminderAfterDays: 2,
-    criticalThreshold: 50_000,
-  },
+  bankAccounts: [
+    {
+      id: "ba-1",
+      bankName: "مصرف الراجحي",
+      beneficiaryName: "مكتب مُقسِط للتمويل",
+      iban: "SA0380000000608010167519",
+    },
+    {
+      id: "ba-2",
+      bankName: "بنك الرياض",
+      beneficiaryName: "مكتب مُقسِط للتمويل",
+      iban: "SA9120000201567432110044",
+    },
+  ],
   investmentDefaults: {
     recyclingThreshold: 50_000,
-    officePercentage: 15,
-    durationMonths: 24,
   },
   profitDistribution: {
     policy: "officeFirst",

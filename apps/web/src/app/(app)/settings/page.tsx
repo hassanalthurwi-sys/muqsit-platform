@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Image as ImageIcon } from "lucide-react";
+import { Check, Image as ImageIcon, Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { DayPicker } from "@/components/ui/day-picker";
+import { Button } from "@/components/ui/button";
 import {
   SettingsSection,
   SettingsField,
@@ -15,9 +15,9 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import type {
   NotificationAlertType,
   NotificationChannel,
+  OfficeBankAccount,
   OfficeSettings,
   ProfitDistributionPolicy,
-  WeekDay,
 } from "@/lib/mock/types";
 
 const CHANNELS: NotificationChannel[] = ["whatsapp", "sms", "email"];
@@ -30,6 +30,10 @@ const ALERTS: NotificationAlertType[] = [
   "investorLowCapital",
 ];
 const POLICIES: ProfitDistributionPolicy[] = ["officeFirst", "investorFirst", "proportional"];
+
+function newAccountId(): string {
+  return `ba-${Date.now().toString(36).slice(-6)}`;
+}
 
 export default function OfficeSettingsPage() {
   const { dict, locale } = useI18n();
@@ -68,16 +72,29 @@ export default function OfficeSettingsPage() {
     setDraft((d) => ({ ...d, identity: { ...d.identity, ...patch } }));
   const setContact = (patch: Partial<OfficeSettings["contact"]>) =>
     setDraft((d) => ({ ...d, contact: { ...d.contact, ...patch } }));
-  const setHours = (patch: Partial<OfficeSettings["workingHours"]>) =>
-    setDraft((d) => ({ ...d, workingHours: { ...d.workingHours, ...patch } }));
-  const setApproval = (patch: Partial<OfficeSettings["approvalDefaults"]>) =>
-    setDraft((d) => ({ ...d, approvalDefaults: { ...d.approvalDefaults, ...patch } }));
   const setInvestment = (patch: Partial<OfficeSettings["investmentDefaults"]>) =>
     setDraft((d) => ({ ...d, investmentDefaults: { ...d.investmentDefaults, ...patch } }));
   const setPolicy = (policy: ProfitDistributionPolicy) =>
     setDraft((d) => ({ ...d, profitDistribution: { policy } }));
   const setNotifications = (patch: Partial<OfficeSettings["notifications"]>) =>
     setDraft((d) => ({ ...d, notifications: { ...d.notifications, ...patch } }));
+
+  // Bank account operations
+  const addBankAccount = () =>
+    setDraft((d) => ({
+      ...d,
+      bankAccounts: [
+        ...d.bankAccounts,
+        { id: newAccountId(), bankName: "", beneficiaryName: "", iban: "" },
+      ],
+    }));
+  const removeBankAccount = (id: string) =>
+    setDraft((d) => ({ ...d, bankAccounts: d.bankAccounts.filter((a) => a.id !== id) }));
+  const updateBankAccount = (id: string, patch: Partial<OfficeBankAccount>) =>
+    setDraft((d) => ({
+      ...d,
+      bankAccounts: d.bankAccounts.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+    }));
 
   const toggleChannel = (ch: NotificationChannel) =>
     setNotifications({
@@ -229,81 +246,75 @@ export default function OfficeSettingsPage() {
         </SettingsGrid>
       </SettingsSection>
 
-      {/* 3. Working hours */}
-      <SettingsSection title={t.sections.workingHours.title} hint={t.sections.workingHours.hint}>
-        <SettingsField label={t.workingHours.days}>
-          <DayPicker value={draft.workingHours.days} onChange={(days: WeekDay[]) => setHours({ days })} />
-        </SettingsField>
-        <SettingsGrid>
-          <SettingsField label={t.workingHours.openTime}>
-            <Input
-              type="time"
-              value={draft.workingHours.openTime}
-              onChange={(e) => setHours({ openTime: e.target.value })}
-              className="num"
-            />
-          </SettingsField>
-          <SettingsField label={t.workingHours.closeTime}>
-            <Input
-              type="time"
-              value={draft.workingHours.closeTime}
-              onChange={(e) => setHours({ closeTime: e.target.value })}
-              className="num"
-            />
-          </SettingsField>
-        </SettingsGrid>
-        <SettingsField label={t.workingHours.holidays} hint={t.workingHours.holidaysHint}>
-          <Input
-            value={draft.workingHours.holidays ?? ""}
-            onChange={(e) => setHours({ holidays: e.target.value })}
-          />
-        </SettingsField>
-      </SettingsSection>
-
-      {/* 4. Approval defaults */}
-      <SettingsSection title={t.sections.approvalDefaults.title} hint={t.sections.approvalDefaults.hint}>
-        <SettingsField
-          label={t.approvalDefaults.paymentApprovalAbove}
-          hint={t.approvalDefaults.paymentApprovalAboveHint}
+      {/* 3. Bank accounts */}
+      <SettingsSection title={t.sections.bankAccounts.title} hint={t.sections.bankAccounts.hint}>
+        {draft.bankAccounts.length === 0 ? (
+          <p className="rounded-lg bg-muted/40 px-3 py-3 text-xs text-muted-foreground">
+            {t.bankAccounts.empty}
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {draft.bankAccounts.map((acc, idx) => (
+              <li
+                key={acc.id}
+                className="rounded-xl border border-border bg-muted/30 p-4 space-y-3"
+              >
+                <header className="flex items-center justify-between gap-3">
+                  <span className="num text-[11px] font-medium text-muted-foreground">
+                    {t.bankAccounts.accountIndex.replace("{n}", String(idx + 1))}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeBankAccount(acc.id)}
+                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-danger-foreground hover:bg-danger-soft"
+                    aria-label={t.bankAccounts.removeAccount}
+                  >
+                    <Trash2 className="size-3.5" aria-hidden />
+                    {t.bankAccounts.removeAccount}
+                  </button>
+                </header>
+                <SettingsGrid>
+                  <SettingsField label={t.bankAccounts.bankName}>
+                    <Input
+                      value={acc.bankName}
+                      onChange={(e) => updateBankAccount(acc.id, { bankName: e.target.value })}
+                    />
+                  </SettingsField>
+                  <SettingsField label={t.bankAccounts.beneficiaryName}>
+                    <Input
+                      value={acc.beneficiaryName}
+                      onChange={(e) => updateBankAccount(acc.id, { beneficiaryName: e.target.value })}
+                    />
+                  </SettingsField>
+                </SettingsGrid>
+                <SettingsField label={t.bankAccounts.iban}>
+                  <Input
+                    value={acc.iban}
+                    onChange={(e) => updateBankAccount(acc.id, { iban: e.target.value.toUpperCase() })}
+                    className="num"
+                    dir="ltr"
+                  />
+                </SettingsField>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addBankAccount}
+          className="w-full gap-1.5 sm:w-auto"
         >
-          <Input
-            type="number"
-            min={0}
-            value={draft.approvalDefaults.paymentApprovalAbove}
-            onChange={(e) => setApproval({ paymentApprovalAbove: num(e.target.value) })}
-            className="num"
-          />
-        </SettingsField>
-        <SettingsGrid>
-          <SettingsField
-            label={t.approvalDefaults.reminderAfterDays}
-            hint={t.approvalDefaults.reminderAfterDaysHint}
-          >
-            <Input
-              type="number"
-              min={0}
-              value={draft.approvalDefaults.reminderAfterDays}
-              onChange={(e) => setApproval({ reminderAfterDays: num(e.target.value) })}
-              className="num"
-            />
-          </SettingsField>
-          <SettingsField
-            label={t.approvalDefaults.criticalThreshold}
-            hint={t.approvalDefaults.criticalThresholdHint}
-          >
-            <Input
-              type="number"
-              min={0}
-              value={draft.approvalDefaults.criticalThreshold}
-              onChange={(e) => setApproval({ criticalThreshold: num(e.target.value) })}
-              className="num"
-            />
-          </SettingsField>
-        </SettingsGrid>
+          <Plus className="size-4" aria-hidden />
+          {t.bankAccounts.addAccount}
+        </Button>
       </SettingsSection>
 
-      {/* 5. Investment defaults */}
-      <SettingsSection title={t.sections.investmentDefaults.title} hint={t.sections.investmentDefaults.hint}>
+      {/* 4. Investment defaults (recycling threshold only) */}
+      <SettingsSection
+        title={t.sections.investmentDefaults.title}
+        hint={t.sections.investmentDefaults.hint}
+      >
         <SettingsField
           label={t.investmentDefaults.recyclingThreshold}
           hint={t.investmentDefaults.recyclingThresholdHint}
@@ -316,31 +327,9 @@ export default function OfficeSettingsPage() {
             className="num"
           />
         </SettingsField>
-        <SettingsGrid>
-          <SettingsField label={t.investmentDefaults.officePercentage}>
-            <Input
-              type="number"
-              min={0}
-              max={100}
-              step={0.5}
-              value={draft.investmentDefaults.officePercentage}
-              onChange={(e) => setInvestment({ officePercentage: Number(e.target.value) || 0 })}
-              className="num"
-            />
-          </SettingsField>
-          <SettingsField label={t.investmentDefaults.durationMonths}>
-            <Input
-              type="number"
-              min={1}
-              value={draft.investmentDefaults.durationMonths}
-              onChange={(e) => setInvestment({ durationMonths: num(e.target.value) })}
-              className="num"
-            />
-          </SettingsField>
-        </SettingsGrid>
       </SettingsSection>
 
-      {/* 6. Profit distribution */}
+      {/* 5. Profit distribution */}
       <SettingsSection title={t.sections.profitDistribution.title} hint={t.sections.profitDistribution.hint}>
         <fieldset className="space-y-2">
           <legend className="mb-2 block text-xs font-medium text-muted-foreground">
@@ -378,7 +367,7 @@ export default function OfficeSettingsPage() {
         </p>
       </SettingsSection>
 
-      {/* 7. Notification preferences */}
+      {/* 6. Notification preferences */}
       <SettingsSection title={t.sections.notifications.title} hint={t.sections.notifications.hint}>
         <SettingsField label={t.notifications.channels}>
           <div className="flex flex-wrap gap-2">

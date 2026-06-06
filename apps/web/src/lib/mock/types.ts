@@ -435,8 +435,9 @@ export interface GoodsPurchase {
   notes?: string;
 }
 
-// ─── Sprint 8: Office Settings ──────────────────────────────────────────────
+// ─── Sprint 8: Office Settings (revised) ────────────────────────────────────
 //
+// Simple office preferences — not an admin / ERP configuration screen.
 // Single configuration object for the office. Stored on the mock store.
 // Read by no business logic yet (defaults will be picked up by relevant
 // flows in later sprints). This sprint delivers the settings layer itself.
@@ -444,8 +445,6 @@ export interface GoodsPurchase {
 // Profit distribution policy follows the locked architectural principle:
 // two levels only — office default here, investor override on the Investor
 // record (not yet built). Never per-contract.
-
-export type WeekDay = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 
 export type ProfitDistributionPolicy = "officeFirst" | "investorFirst" | "proportional";
 
@@ -458,6 +457,13 @@ export type NotificationAlertType =
   | "contractExpiring"
   | "lowOcrConfidence"
   | "investorLowCapital";
+
+export interface OfficeBankAccount {
+  id: string;
+  bankName: string;
+  beneficiaryName: string;
+  iban: string;
+}
 
 export interface OfficeSettings {
   identity: {
@@ -476,21 +482,9 @@ export interface OfficeSettings {
     street?: string;
     website?: string;
   };
-  workingHours: {
-    days: WeekDay[];
-    openTime: string; // HH:MM
-    closeTime: string; // HH:MM
-    holidays?: string;
-  };
-  approvalDefaults: {
-    paymentApprovalAbove: number; // SAR
-    reminderAfterDays: number;
-    criticalThreshold: number; // SAR — anything above is auto-flagged critical
-  };
+  bankAccounts: OfficeBankAccount[];
   investmentDefaults: {
     recyclingThreshold: number;
-    officePercentage: number;
-    durationMonths: number;
   };
   profitDistribution: {
     policy: ProfitDistributionPolicy;

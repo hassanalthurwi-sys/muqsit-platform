@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
 import { SearchInput } from "@/components/ui/search-input";
@@ -10,6 +12,7 @@ import {
   VoucherStatusPill,
 } from "@/components/ui/voucher-pills";
 import { useStore } from "@/lib/mock/store";
+import { findInvestor } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { ReceiptSourceKey } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
@@ -18,8 +21,19 @@ import { formatDate } from "@/lib/format";
 type Filter = "all" | ReceiptSourceKey;
 
 export default function ReceiptsListPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReceiptsListInner />
+    </Suspense>
+  );
+}
+
+function ReceiptsListInner() {
   const { dict, locale } = useI18n();
   const { receipts } = useStore();
+  const search = useSearchParams();
+  const investorId = search.get("investorId");
+  const investor = investorId ? findInvestor(investorId) : undefined;
   const r = dict.receipts;
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
@@ -34,6 +48,7 @@ export default function ReceiptsListPage() {
 
   const rows = useMemo(() => {
     return receipts
+      .filter((rcpt) => (investorId ? rcpt.investorId === investorId : true))
       .filter((rcpt) => (filter === "all" ? true : rcpt.source === filter))
       .filter((rcpt) => {
         if (!query.trim()) return true;
@@ -45,7 +60,7 @@ export default function ReceiptsListPage() {
         );
       })
       .sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [receipts, filter, query]);
+  }, [receipts, filter, query, investorId]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,6 +103,21 @@ export default function ReceiptsListPage() {
         </div>
         <SearchInput value={query} onChange={setQuery} className="max-w-xs" />
       </div>
+
+      {investor ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md bg-primary-soft px-3 py-2 text-xs text-primary-soft-foreground">
+          <span className="font-medium">{dict.investors.pageTitle}:</span>
+          <Link href={`/investors/${investor.id}`} className="hover:underline">
+            {investor.name}
+          </Link>
+          <Link
+            href="/financial/receipts"
+            className="ms-auto inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
+            <X className="size-3" />
+          </Link>
+        </div>
+      ) : null}
 
       <Card>
         <CardContent className="px-0 pb-2 pt-0">

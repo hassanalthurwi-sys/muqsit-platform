@@ -20,7 +20,7 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MOCK_INVESTORS } from "@/lib/mock/investors";
-import { DEFAULT_OFFICE_SETTINGS } from "@/lib/mock/office-settings";
+import { useStore } from "@/lib/mock/store";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { SplitBar } from "@/components/ui/split-bar";
 import { StatusPill } from "@/components/ui/status-pill";
@@ -197,13 +197,13 @@ function Tier1Kpis() {
 
 function SmartAlerts() {
   const { dict, dir } = useI18n();
+  const { getInvestorBalance, officeSettings } = useStore();
   const a = dict.dashboard.alerts;
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
-  // Investors whose current balance crosses the office recycling threshold.
-  // Surfaced as an operational nudge — not a balance category.
+  // Investors whose wallet balance can fund a new contract.
   const recyclableCount = MOCK_INVESTORS.filter(
-    (inv) => inv.currentBalance >= DEFAULT_OFFICE_SETTINGS.investmentDefaults.recyclingThreshold,
+    (inv) => getInvestorBalance(inv.id) >= officeSettings.investmentDefaults.recyclingThreshold,
   ).length;
 
   const items = [

@@ -50,14 +50,19 @@ function NewInvestmentContractRouter() {
 
 function NewInvestmentContractInner() {
   const router = useRouter();
+  const search = useSearchParams();
   const { dict, dir, locale } = useI18n();
   const { addContract } = useContractStore();
+  const { getInvestorBalance } = useStore();
   const c = dict.investments.create;
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
   const BackArrow = dir === "rtl" ? ArrowRight : ArrowLeft;
 
-  const [step, setStep] = useState(0);
-  const [investorId, setInvestorId] = useState<string>("");
+  const prefilledInvestorId = search.get("investorId") ?? "";
+  const isFromBalance = search.get("recycle") === "true";
+
+  const [step, setStep] = useState(prefilledInvestorId ? 1 : 0);
+  const [investorId, setInvestorId] = useState<string>(prefilledInvestorId);
   const [amount, setAmount] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [durationMonths, setDurationMonths] = useState<number>(24);
@@ -126,6 +131,7 @@ function NewInvestmentContractInner() {
       documentName: documentName || undefined,
       timeline: [{ ts: today, text: "إعداد عقد جديد للمستثمر" }],
       linkedInstallmentContractIds: [],
+      fromInvestorBalance: isFromBalance || undefined,
     };
     addContract(contract);
     setTimeout(() => router.push(`/investments/${id}`), 200);
@@ -182,7 +188,7 @@ function NewInvestmentContractInner() {
                     <div className="space-y-0.5">
                       <p className="label">{dict.investors.metric.currentBalance}</p>
                       <p className="num font-medium">
-                        <Currency value={investor.currentBalance} compact />
+                        <Currency value={getInvestorBalance(investor.id)} compact />
                       </p>
                     </div>
                     <div className="space-y-0.5">

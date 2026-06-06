@@ -8,9 +8,7 @@ import {
   FileSignature,
   Mail,
   Phone,
-  RefreshCcw,
   Sparkles,
-  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
@@ -26,19 +24,26 @@ import type { InvestorActivityType } from "@/lib/mock/types";
 
 const ACTIVITY_ICON: Record<InvestorActivityType, typeof ArrowDownToLine> = {
   receipt: ArrowDownToLine,
-  contractCreated: FileSignature,
   payment: ArrowUpFromLine,
-  recycling: RefreshCcw,
-  profitDistribution: TrendingUp,
+  contract: FileSignature,
+  recycledContract: FileSignature,
 };
 
 const ACTIVITY_TONE: Record<InvestorActivityType, string> = {
   receipt: "bg-success/10 text-success",
-  contractCreated: "bg-primary/10 text-primary",
   payment: "bg-muted text-muted-foreground",
-  recycling: "bg-gold-soft text-gold-foreground",
-  profitDistribution: "bg-success/10 text-success",
+  contract: "bg-primary/10 text-primary",
+  recycledContract: "bg-gold-soft text-gold-foreground",
 };
+
+interface TimelineItem {
+  ts: string;
+  type: InvestorActivityType;
+  amount: number;
+  referenceLabel?: string;
+  referenceHref?: string;
+  description?: string;
+}
 
 const INITIAL_VISIBLE_ACTIVITY = 8;
 
@@ -49,7 +54,13 @@ export default function InvestorProfilePage({
 }) {
   const { id } = use(params);
   const { dict, locale } = useI18n();
-  const { investmentContracts: contracts, officeSettings } = useStore();
+  const {
+    investmentContracts: contracts,
+    receipts,
+    payments,
+    officeSettings,
+    getInvestorBalance,
+  } = useStore();
   const investor = findInvestor(id);
   const [activityLimit, setActivityLimit] = useState(INITIAL_VISIBLE_ACTIVITY);
 
@@ -63,6 +74,47 @@ export default function InvestorProfilePage({
     [contracts, id],
   );
 
+  const currentBalance = useMemo(() => getInvestorBalance(id), [getInvestorBalance, id]);
+
+  const timeline: TimelineItem[] = useMemo(() => {
+    const items: TimelineItem[] = [];
+    for (const c of contracts.filter((c) => c.investorId === id)) {
+      const isRecycled = Boolean(c.fromInvestorBalance) || Boolean(c.sourceContractId);
+      items.push({
+        ts: c.startDate,
+        type: isRecycled ? "recycledContract" : "contract",
+        amount: c.amount,
+        referenceLabel: c.number,
+        referenceHref: `/investments/${c.id}`,
+      });
+    }
+    for (const r of receipts.filter((r) => r.investorId === id)) {
+      items.push({
+        ts: r.date,
+        type: "receipt",
+        amount: r.amount,
+        referenceLabel: r.number,
+        referenceHref: `/financial/receipts/${r.id}`,
+        description: r.notes,
+      });
+    }
+    for (const pay of payments.filter((p) => p.investorId === id)) {
+      items.push({
+        ts: pay.date,
+        type: "payment",
+        amount: pay.amount,
+        referenceLabel: pay.number,
+        referenceHref: `/financial/payments/${pay.id}`,
+        description: pay.notes,
+      });
+    }
+    return items.sort((a, b) => b.ts.localeCompare(a.ts));
+  }, [contracts, receipts, payments, id]);
+
+  const visibleActivity = timeline.slice(0, activityLimit);
+  const hasMoreActivity = timeline.length > activityLimit;
+  const lastActivityTs = timeline[0]?.ts;
+
   if (!investor) {
     return (
       <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
@@ -74,13 +126,7 @@ export default function InvestorProfilePage({
   const p = dict.investors.profile;
   const i = dict.investors;
   const recyclingThreshold = officeSettings.investmentDefaults.recyclingThreshold;
-  const eligibleForRecycling = investor.currentBalance >= recyclingThreshold;
-
-  const sortedActivity = [...investor.recentActivity].sort((a, b) =>
-    b.ts.localeCompare(a.ts),
-  );
-  const visibleActivity = sortedActivity.slice(0, activityLimit);
-  const hasMoreActivity = sortedActivity.length > activityLimit;
+  const eligibleForRecycling = currentBalance >= recyclingThreshold;
 
   const identityFields: Array<[string, string]> = (() => {
     const idf = dict.identityFieldLabel;
@@ -146,7 +192,7 @@ export default function InvestorProfilePage({
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MetricCard
           label={i.metric.currentBalance}
-          value={<Currency value={investor.currentBalance} />}
+          value={<Currency value={currentBalance} />}
           accent="primary"
         />
         <MetricCard
@@ -176,20 +222,59 @@ export default function InvestorProfilePage({
                 {i.recycling.eligible}
               </p>
               <p className="text-xs text-muted-foreground">
-                <Currency value={investor.currentBalance} compact />{" "}
+                <Currency value={currentBalance} compact />{" "}
                 <span aria-hidden>·</span>{" "}
                 <Currency value={recyclingThreshold} compact />
               </p>
             </div>
           </div>
           <Link
-            href={`/investments/new?investorId=${investor.id}`}
+            href={`/investments/new?investorId=${investor.id}&recycle=true`}
             className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             {i.recycling.cta}
           </Link>
         </div>
       ) : null}
+
+      {/* Investor balance — رصيد المستثمر */}
+      <Card>
+        <CardHeader className="flex flex-col items-start gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-base font-semibold">{i.wallet.title}</CardTitle>
+            {lastActivityTs ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {i.wallet.lastActivity} · {formatDate(lastActivityTs, locale)}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/financial/receipts/new?investorId=${investor.id}`}
+              className="inline-flex items-center gap-1 rounded-md border border-primary px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10"
+            >
+              {i.wallet.newReceipt}
+            </Link>
+            <Link
+              href={`/financial/payments/new?investorId=${investor.id}`}
+              className="inline-flex items-center gap-1 rounded-md border border-input px-3 py-1.5 text-xs font-medium hover:bg-muted"
+            >
+              {i.wallet.newPayment}
+            </Link>
+            <Link
+              href={`/financial/receipts?investorId=${investor.id}`}
+              className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+            >
+              {i.wallet.viewMovements}
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="num text-2xl font-semibold text-primary sm:text-3xl">
+            <Currency value={currentBalance} />
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Investor details + bank */}
       <div className="grid gap-4 lg:grid-cols-3">
@@ -377,29 +462,25 @@ export default function InvestorProfilePage({
             ) : (
               <ol className="flex flex-col gap-3">
                 {visibleActivity.map((item, idx) => {
-                  const type = item.type ?? "receipt";
-                  const Icon = ACTIVITY_ICON[type];
+                  const Icon = ACTIVITY_ICON[item.type];
+                  const tone = ACTIVITY_TONE[item.type];
                   return (
                     <li key={`${item.ts}-${idx}`} className="flex items-start gap-3">
                       <span
-                        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full ${ACTIVITY_TONE[type]}`}
+                        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full ${tone}`}
                       >
                         <Icon className="size-4" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="text-sm font-medium">
-                            {item.type ? i.activityType[item.type] : item.text}
-                          </p>
-                          {item.amount != null ? (
-                            <span className="num text-sm font-semibold">
-                              <Currency value={item.amount} compact />
-                            </span>
-                          ) : null}
+                          <p className="text-sm font-medium">{i.activityType[item.type]}</p>
+                          <span className="num text-sm font-semibold">
+                            <Currency value={item.amount} compact />
+                          </span>
                         </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {item.type ? item.text : null}
-                        </p>
+                        {item.description ? (
+                          <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
+                        ) : null}
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                           <span className="num">{formatDate(item.ts, locale)}</span>
                           {item.referenceLabel ? (

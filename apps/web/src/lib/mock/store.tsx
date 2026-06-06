@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { MOCK_CONTRACTS } from "./contracts";
+import { MOCK_INVESTORS } from "./investors";
 import { MOCK_CUSTOMERS } from "./customers";
 import { MOCK_INSTALLMENT_CONTRACTS } from "./installment-contracts";
 import { MOCK_PAYMENT_PROOFS } from "./payment-proofs";
@@ -54,6 +55,7 @@ const KEY_RECEIPTS = "muqsit_user_receipts";
 const KEY_PAYMENTS = "muqsit_user_payments";
 const KEY_PURCHASES = "muqsit_user_purchases";
 const KEY_OFFICE_SETTINGS = "muqsit_office_settings";
+const KEY_INVESTOR_BALANCE_DELTAS = "muqsit_investor_balance_deltas";
 
 interface ProofDecisionPatch {
   status: ProofStatus;
@@ -106,6 +108,9 @@ interface Store {
   // Sprint 8
   officeSettings: OfficeSettings;
   updateOfficeSettings: (patch: OfficeSettings) => void;
+  // Sprint 10 — investor wallet
+  investorBalanceDeltas: Record<string, number>;
+  getInvestorBalance: (investorId: string) => number;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -146,6 +151,7 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [userPayments, setUserPayments] = useState<PaymentVoucher[]>([]);
   const [userPurchases, setUserPurchases] = useState<GoodsPurchase[]>([]);
   const [officeSettings, setOfficeSettings] = useState<OfficeSettings>(DEFAULT_OFFICE_SETTINGS);
+  const [investorBalanceDeltas, setInvestorBalanceDeltas] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setUserInvestments(safeRead<InvestmentContract[]>(KEY_INVESTMENT_CONTRACTS) ?? []);
@@ -167,15 +173,30 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     setUserPayments(safeRead<PaymentVoucher[]>(KEY_PAYMENTS) ?? []);
     setUserPurchases(safeRead<GoodsPurchase[]>(KEY_PURCHASES) ?? []);
     setOfficeSettings(safeRead<OfficeSettings>(KEY_OFFICE_SETTINGS) ?? DEFAULT_OFFICE_SETTINGS);
+    setInvestorBalanceDeltas(safeRead<Record<string, number>>(KEY_INVESTOR_BALANCE_DELTAS) ?? {});
   }, []);
 
-  const addInvestmentContract = useCallback((contract: InvestmentContract) => {
-    setUserInvestments((prev) => {
-      const next = [contract, ...prev];
-      safeWrite(KEY_INVESTMENT_CONTRACTS, next);
+  const applyInvestorDelta = useCallback((investorId: string, delta: number) => {
+    setInvestorBalanceDeltas((prev) => {
+      const next = { ...prev, [investorId]: (prev[investorId] ?? 0) + delta };
+      safeWrite(KEY_INVESTOR_BALANCE_DELTAS, next);
       return next;
     });
   }, []);
+
+  const addInvestmentContract = useCallback(
+    (contract: InvestmentContract) => {
+      setUserInvestments((prev) => {
+        const next = [contract, ...prev];
+        safeWrite(KEY_INVESTMENT_CONTRACTS, next);
+        return next;
+      });
+      // Sprint 10 — creating a contract draws the amount from the
+      // investor's wallet balance.
+      applyInvestorDelta(contract.investorId, -contract.amount);
+    },
+    [applyInvestorDelta],
+  );
 
   const addCustomer = useCallback((customer: Customer) => {
     setUserCustomers((prev) => {
@@ -240,21 +261,29 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     [],
   );
 
-  const addReceipt = useCallback((receipt: ReceiptVoucher) => {
-    setUserReceipts((prev) => {
-      const next = [receipt, ...prev];
-      safeWrite(KEY_RECEIPTS, next);
-      return next;
-    });
-  }, []);
+  const addReceipt = useCallback(
+    (receipt: ReceiptVoucher) => {
+      setUserReceipts((prev) => {
+        const next = [receipt, ...prev];
+        safeWrite(KEY_RECEIPTS, next);
+        return next;
+      });
+      if (receipt.investorId) applyInvestorDelta(receipt.investorId, receipt.amount);
+    },
+    [applyInvestorDelta],
+  );
 
-  const addPayment = useCallback((payment: PaymentVoucher) => {
-    setUserPayments((prev) => {
-      const next = [payment, ...prev];
-      safeWrite(KEY_PAYMENTS, next);
-      return next;
-    });
-  }, []);
+  const addPayment = useCallback(
+    (payment: PaymentVoucher) => {
+      setUserPayments((prev) => {
+        const next = [payment, ...prev];
+        safeWrite(KEY_PAYMENTS, next);
+        return next;
+      });
+      if (payment.investorId) applyInvestorDelta(payment.investorId, -payment.amount);
+    },
+    [applyInvestorDelta],
+  );
 
   const addPurchase = useCallback((purchase: GoodsPurchase) => {
     setUserPurchases((prev) => {
@@ -319,6 +348,12 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
       cashSummary: cashSummary(ledger),
       officeSettings,
       updateOfficeSettings,
+      investorBalanceDeltas,
+      getInvestorBalance: (investorId: string) => {
+        const inv = MOCK_INVESTORS.find((i) => i.id === investorId);
+        const seed = inv?.currentBalance ?? 0;
+        return seed + (investorBalanceDeltas[investorId] ?? 0);
+      },
     };
   }, [
     userInvestments,
@@ -344,6 +379,7 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     addPurchase,
     officeSettings,
     updateOfficeSettings,
+    investorBalanceDeltas,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

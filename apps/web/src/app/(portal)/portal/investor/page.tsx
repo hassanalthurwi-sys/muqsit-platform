@@ -8,6 +8,7 @@ import { Currency } from "@/components/ui/currency";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useInvestorIdentity } from "@/lib/portal/use-portal-identity";
 import { investorPortfolioSummary, investorContracts } from "@/lib/portal/data";
+import { useStore } from "@/lib/mock/store";
 import { formatDate } from "@/lib/format";
 
 export default function InvestorDashboardPage() {
@@ -17,6 +18,19 @@ export default function InvestorDashboardPage() {
   const summary = investorPortfolioSummary(investor.id);
   const contracts = investorContracts(investor.id);
   const utilization = summary.principal > 0 ? Math.round((summary.utilized / summary.principal) * 100) : 0;
+  const { receipts, payments, investmentContracts } = useStore();
+
+  const recentActivity = [
+    ...investmentContracts
+      .filter((c) => c.investorId === investor.id)
+      .map((c) => ({ ts: c.startDate, text: `${dict.investors.activityType.contract} · ${c.number}` })),
+    ...receipts
+      .filter((r) => r.investorId === investor.id)
+      .map((r) => ({ ts: r.date, text: `${dict.investors.activityType.receipt} · ${r.number}` })),
+    ...payments
+      .filter((p) => p.investorId === investor.id)
+      .map((p) => ({ ts: p.date, text: `${dict.investors.activityType.payment} · ${p.number}` })),
+  ].sort((a, b) => b.ts.localeCompare(a.ts));
 
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
@@ -134,7 +148,7 @@ export default function InvestorDashboardPage() {
           <h2 className="mb-2 text-sm font-semibold text-foreground">{t.activityTitle}</h2>
           <PortalCard className="!p-0">
             <ul className="divide-y divide-border">
-              {investor.recentActivity.slice(0, 5).map((item) => (
+              {recentActivity.slice(0, 5).map((item) => (
                 <li key={`${item.ts}-${item.text}`} className="flex flex-col gap-1 px-4 py-3">
                   <span className="text-sm text-foreground">{item.text}</span>
                   <span className="num text-[11px] text-muted-foreground">{formatDate(item.ts, locale)}</span>

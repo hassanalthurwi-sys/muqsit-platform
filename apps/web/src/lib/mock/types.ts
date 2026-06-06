@@ -21,20 +21,13 @@ export interface BankAccount {
 
 export type InvestorActivityType =
   | "receipt"
-  | "contractCreated"
   | "payment"
-  | "recycling"
-  | "profitDistribution";
+  | "contract"
+  | "recycledContract";
 
 export interface ActivityItem {
   ts: string; // ISO date
   text: string;
-  // Sprint 9 — optional enrichment for the investor timeline. Older
-  // consumers (e.g. the investor portal) keep working from `text` alone.
-  type?: InvestorActivityType;
-  amount?: number;
-  referenceLabel?: string;
-  referenceHref?: string;
 }
 
 export interface Investor {
@@ -57,7 +50,6 @@ export interface Investor {
   activeContractCount: number;
   bankAccount: BankAccount;
   profitTerms: string;
-  recentActivity: ActivityItem[];
 }
 
 export type ContractStatus = "active" | "ended" | "pendingSetup" | "cancelled";
@@ -111,6 +103,10 @@ export interface InvestmentContract {
   recyclingCycle?: number;
   recycledFromCollected?: number;
   recyclingOfficeMargin?: number;
+  // Sprint 10 — set when a contract is created out of the investor's
+  // wallet balance (the "create a new contract from current balance"
+  // alert). Surfaced in the activity timeline as a recycled contract.
+  fromInvestorBalance?: boolean;
 }
 
 // ─── Sprint 3: Customers · Installment contracts · Payments ───────────────
@@ -389,7 +385,6 @@ export interface ReceiptVoucher {
 
 export type PaymentCategory =
   | "goodsPurchase"
-  | "investorProfit"
   | "officeExpense"
   | "salary"
   | "rent"

@@ -69,7 +69,6 @@ export type ReceiptSourceKey =
   | "other";
 export type PaymentCategoryKey =
   | "goodsPurchase"
-  | "investorProfit"
   | "officeExpense"
   | "salary"
   | "rent"
@@ -232,10 +231,16 @@ export interface Dictionary {
     };
     activityType: {
       receipt: string;
-      contractCreated: string;
       payment: string;
-      recycling: string;
-      profitDistribution: string;
+      contract: string;
+      recycledContract: string;
+    };
+    wallet: {
+      title: string;
+      lastActivity: string;
+      newReceipt: string;
+      newPayment: string;
+      viewMovements: string;
     };
   };
   investments: {
@@ -1337,7 +1342,7 @@ const ar: Dictionary = {
       delay30: "{n} عملاء متأخرون أكثر من 30 يوم",
       delay60: "{n} عميل متعثر أكثر من 60 يوم",
       pendingContracts: "{n} عقود تنتظر إجراء (توقيع أو مراجعة)",
-      recyclableInvestors: "{n} مستثمرون لديهم مبالغ يمكن إعادة تشغيلها",
+      recyclableInvestors: "{n} مستثمرون يمكن إنشاء عقود استثمار من أرصدتهم",
       paymentDocs: "{n} مستندات دفع بحاجة إلى مراجعة",
     },
     profit: {
@@ -1419,11 +1424,17 @@ const ar: Dictionary = {
       showMore: "عرض المزيد",
     },
     activityType: {
-      receipt: "إيصال قبض",
-      contractCreated: "بدء عقد",
+      receipt: "سند قبض",
       payment: "سند صرف",
-      recycling: "إعادة تشغيل رأس مال",
-      profitDistribution: "توزيع أرباح",
+      contract: "عقد استثمار",
+      recycledContract: "عقد استثمار معاد تشغيله",
+    },
+    wallet: {
+      title: "رصيد المستثمر",
+      lastActivity: "آخر حركة",
+      newReceipt: "+ سند قبض",
+      newPayment: "+ سند صرف",
+      viewMovements: "الحركات المالية",
     },
   },
   investments: {
@@ -2288,7 +2299,6 @@ const ar: Dictionary = {
   },
   paymentCategory: {
     goodsPurchase: "شراء بضاعة",
-    investorProfit: "توزيع أرباح مستثمر",
     officeExpense: "مصروف مكتب",
     salary: "راتب",
     rent: "إيجار",
@@ -2649,7 +2659,7 @@ const en: Dictionary = {
       delay30: "{n} customers more than 30 days late",
       delay60: "{n} customer defaulted more than 60 days",
       pendingContracts: "{n} contracts awaiting action (signature or review)",
-      recyclableInvestors: "{n} investors have capital that can be recycled",
+      recyclableInvestors: "{n} investors can fund a new contract from their balance",
       paymentDocs: "{n} payment documents to review",
     },
     profit: {
@@ -2726,11 +2736,17 @@ const en: Dictionary = {
       showMore: "Show more",
     },
     activityType: {
-      receipt: "Receipt",
-      contractCreated: "Contract started",
-      payment: "Payment",
-      recycling: "Capital recycled",
-      profitDistribution: "Profit distribution",
+      receipt: "Receipt voucher",
+      payment: "Payment voucher",
+      contract: "Investment contract",
+      recycledContract: "Investment contract from balance",
+    },
+    wallet: {
+      title: "Investor balance",
+      lastActivity: "Last activity",
+      newReceipt: "+ Receipt voucher",
+      newPayment: "+ Payment voucher",
+      viewMovements: "All movements",
     },
   },
   investments: {
@@ -3592,7 +3608,6 @@ const en: Dictionary = {
   },
   paymentCategory: {
     goodsPurchase: "Goods purchase",
-    investorProfit: "Investor profit distribution",
     officeExpense: "Office expense",
     salary: "Salary",
     rent: "Rent",

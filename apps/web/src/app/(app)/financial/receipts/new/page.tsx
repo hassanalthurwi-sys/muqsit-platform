@@ -1,12 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { Paperclip } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/mock/store";
+import { findInvestor, MOCK_INVESTORS } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type {
   PaymentMethod,
@@ -31,16 +32,31 @@ function nextReceiptNumber(receipts: ReceiptVoucher[]): string {
 }
 
 export default function NewReceiptPage() {
+  return (
+    <Suspense fallback={null}>
+      <NewReceiptInner />
+    </Suspense>
+  );
+}
+
+function NewReceiptInner() {
   const router = useRouter();
+  const search = useSearchParams();
   const { dict } = useI18n();
   const { receipts, addReceipt, customers, installmentContracts, investmentContracts } =
     useStore();
   const f = dict.receipts.form;
   const c = dict.receipts.columns;
 
-  const [source, setSource] = useState<ReceiptSource>("customerInstallment");
+  const prefilledInvestorId = search.get("investorId") ?? "";
+  const prefilledInvestor = prefilledInvestorId ? findInvestor(prefilledInvestorId) : undefined;
+
+  const [source, setSource] = useState<ReceiptSource>(
+    prefilledInvestor ? "investorDeposit" : "customerInstallment",
+  );
   const [method, setMethod] = useState<PaymentMethod>("bankTransfer");
-  const [payerName, setPayerName] = useState("");
+  const [payerName, setPayerName] = useState(prefilledInvestor?.name ?? "");
+  const [investorId, setInvestorId] = useState(prefilledInvestorId);
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
   const [contractId, setContractId] = useState("");
@@ -76,6 +92,7 @@ export default function NewReceiptPage() {
           ? installmentContracts.find((c) => c.id === contractId)?.customerId
           : undefined,
       contractId: source === "customerInstallment" ? contractId || undefined : undefined,
+      investorId: source === "investorDeposit" ? investorId || undefined : undefined,
       investmentContractId:
         source === "investorDeposit" ? contractId || undefined : undefined,
       reference: reference || undefined,
@@ -88,7 +105,11 @@ export default function NewReceiptPage() {
       attachmentCount: 0,
     };
     addReceipt(receipt);
-    router.push(`/financial/receipts/${receipt.id}`);
+    if (prefilledInvestorId) {
+      router.push(`/investors/${prefilledInvestorId}`);
+    } else {
+      router.push(`/financial/receipts/${receipt.id}`);
+    }
   };
 
   return (
@@ -137,6 +158,30 @@ export default function NewReceiptPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardContent className="space-y-4 p-5">
+            {source === "investorDeposit" ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {dict.investors.pageTitle}
+                </label>
+                <select
+                  value={investorId}
+                  onChange={(e) => {
+                    setInvestorId(e.target.value);
+                    const inv = MOCK_INVESTORS.find((i) => i.id === e.target.value);
+                    if (inv) setPayerName(inv.name);
+                  }}
+                  required
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">—</option>
+                  {MOCK_INVESTORS.map((inv) => (
+                    <option key={inv.id} value={inv.id}>
+                      {inv.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">
                 {f.payerName}

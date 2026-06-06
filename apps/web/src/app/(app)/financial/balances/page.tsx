@@ -30,12 +30,7 @@ export default function BalancesPage() {
     // Profit due — mock as ~7% of capital
     const profitDue = Math.round(capital * 0.07);
     const paid = payments
-      .filter(
-        (p) =>
-          p.investorId === investor.id &&
-          p.category === "investorProfit" &&
-          p.status === "verified",
-      )
+      .filter((p) => p.investorId === investor.id && p.status === "verified")
       .reduce((s, p) => s + p.amount, 0);
     return {
       investor,

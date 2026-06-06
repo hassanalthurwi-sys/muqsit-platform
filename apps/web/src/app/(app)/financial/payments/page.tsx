@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
 import { SearchInput } from "@/components/ui/search-input";
@@ -11,6 +13,7 @@ import {
   VoucherStatusPill,
 } from "@/components/ui/voucher-pills";
 import { useStore } from "@/lib/mock/store";
+import { findInvestor } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { PaymentCategoryKey } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
@@ -19,8 +22,19 @@ import { formatDate } from "@/lib/format";
 type Filter = "all" | PaymentCategoryKey;
 
 export default function PaymentsListPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentsListInner />
+    </Suspense>
+  );
+}
+
+function PaymentsListInner() {
   const { dict, locale } = useI18n();
   const { payments } = useStore();
+  const search = useSearchParams();
+  const investorId = search.get("investorId");
+  const investor = investorId ? findInvestor(investorId) : undefined;
   const p = dict.paymentVouchers;
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
@@ -28,7 +42,6 @@ export default function PaymentsListPage() {
   const filters: Array<{ key: Filter; label: string }> = [
     { key: "all", label: dict.cashLedger.filters.all },
     { key: "goodsPurchase", label: dict.paymentCategory.goodsPurchase },
-    { key: "investorProfit", label: dict.paymentCategory.investorProfit },
     { key: "salary", label: dict.paymentCategory.salary },
     { key: "rent", label: dict.paymentCategory.rent },
     { key: "officeExpense", label: dict.paymentCategory.officeExpense },
@@ -37,6 +50,7 @@ export default function PaymentsListPage() {
 
   const rows = useMemo(() => {
     return payments
+      .filter((pv) => (investorId ? pv.investorId === investorId : true))
       .filter((pv) => (filter === "all" ? true : pv.category === filter))
       .filter((pv) => {
         if (!query.trim()) return true;
@@ -47,7 +61,7 @@ export default function PaymentsListPage() {
         );
       })
       .sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [payments, filter, query]);
+  }, [payments, filter, query, investorId]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,6 +104,21 @@ export default function PaymentsListPage() {
         </div>
         <SearchInput value={query} onChange={setQuery} className="max-w-xs" />
       </div>
+
+      {investor ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md bg-primary-soft px-3 py-2 text-xs text-primary-soft-foreground">
+          <span className="font-medium">{dict.investors.pageTitle}:</span>
+          <Link href={`/investors/${investor.id}`} className="hover:underline">
+            {investor.name}
+          </Link>
+          <Link
+            href="/financial/payments"
+            className="ms-auto inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
+            <X className="size-3" />
+          </Link>
+        </div>
+      ) : null}
 
       <Card>
         <CardContent className="px-0 pb-2 pt-0">

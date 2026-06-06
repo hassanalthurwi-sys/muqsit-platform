@@ -31,7 +31,7 @@ function identityValue(id: LegalIdentity): string {
 
 export default function InvestorsPage() {
   const { dict } = useI18n();
-  const { investmentContracts: contracts, officeSettings } = useStore();
+  const { investmentContracts: contracts, officeSettings, getInvestorBalance } = useStore();
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const i = dict.investors;
@@ -47,12 +47,16 @@ export default function InvestorsPage() {
         inv.name.toLowerCase().includes(q) ||
         identityValue(inv.identity).toLowerCase().includes(q)
       );
-    }).map((inv) => ({
-      inv,
-      invested: getInvestedCapital(contracts, inv.id),
-      eligibleForRecycling: inv.currentBalance >= recyclingThreshold,
-    }));
-  }, [contracts, filter, query, recyclingThreshold]);
+    }).map((inv) => {
+      const balance = getInvestorBalance(inv.id);
+      return {
+        inv,
+        balance,
+        invested: getInvestedCapital(contracts, inv.id),
+        eligibleForRecycling: balance >= recyclingThreshold,
+      };
+    });
+  }, [contracts, filter, query, recyclingThreshold, getInvestorBalance]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,7 +102,7 @@ export default function InvestorsPage() {
 
       {/* Mobile card list */}
       <div className="flex flex-col gap-3 md:hidden">
-        {rows.map(({ inv, invested, eligibleForRecycling }) => (
+        {rows.map(({ inv, balance, invested, eligibleForRecycling }) => (
           <Link
             key={inv.id}
             href={`/investors/${inv.id}`}
@@ -120,7 +124,7 @@ export default function InvestorsPage() {
               <div className="space-y-0.5">
                 <p className="label">{i.metric.currentBalance}</p>
                 <p className="num font-semibold">
-                  <Currency value={inv.currentBalance} compact />
+                  <Currency value={balance} compact />
                 </p>
               </div>
               <div className="space-y-0.5">
@@ -167,7 +171,7 @@ export default function InvestorsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map(({ inv, invested, eligibleForRecycling }) => (
+                {rows.map(({ inv, balance, invested, eligibleForRecycling }) => (
                   <tr key={inv.id} className="hover:bg-muted/40">
                     <td className="px-6 py-3">
                       <Link href={`/investors/${inv.id}`} className="flex items-center gap-3">
@@ -189,7 +193,7 @@ export default function InvestorsPage() {
                       </StatusPill>
                     </td>
                     <td className="num px-6 py-3 font-semibold">
-                      <Currency value={inv.currentBalance} compact />
+                      <Currency value={balance} compact />
                     </td>
                     <td className="num px-6 py-3">
                       <Currency value={invested} compact />

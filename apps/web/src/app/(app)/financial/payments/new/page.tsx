@@ -1,12 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Paperclip } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/mock/store";
+import { findInvestor, MOCK_INVESTORS } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type {
   PaymentCategory,
@@ -19,7 +20,6 @@ const AUTO_APPROVAL_LIMIT = 10_000;
 
 const CATEGORIES: PaymentCategory[] = [
   "goodsPurchase",
-  "investorProfit",
   "salary",
   "rent",
   "officeExpense",
@@ -36,14 +36,29 @@ function nextPaymentNumber(payments: PaymentVoucher[]): string {
 }
 
 export default function NewPaymentPage() {
+  return (
+    <Suspense fallback={null}>
+      <NewPaymentInner />
+    </Suspense>
+  );
+}
+
+function NewPaymentInner() {
   const router = useRouter();
+  const search = useSearchParams();
   const { dict } = useI18n();
   const { payments, addPayment } = useStore();
   const f = dict.paymentVouchers.form;
 
-  const [category, setCategory] = useState<PaymentCategory>("officeExpense");
+  const prefilledInvestorId = search.get("investorId") ?? "";
+  const prefilledInvestor = prefilledInvestorId ? findInvestor(prefilledInvestorId) : undefined;
+
+  const [category, setCategory] = useState<PaymentCategory>(
+    prefilledInvestor ? "other" : "officeExpense",
+  );
   const [method, setMethod] = useState<PaymentMethod>("bankTransfer");
-  const [beneficiary, setBeneficiary] = useState("");
+  const [beneficiary, setBeneficiary] = useState(prefilledInvestor?.name ?? "");
+  const [investorId, setInvestorId] = useState(prefilledInvestorId);
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
   const [notes, setNotes] = useState("");
@@ -62,6 +77,7 @@ export default function NewPaymentPage() {
       amount: numericAmount,
       method,
       beneficiaryName: beneficiary,
+      investorId: investorId || undefined,
       reference: reference || undefined,
       notes: notes || undefined,
       createdById: "emp-manager-1",
@@ -72,7 +88,11 @@ export default function NewPaymentPage() {
       attachmentCount: 0,
     };
     addPayment(voucher);
-    router.push(`/financial/payments/${voucher.id}`);
+    if (prefilledInvestorId) {
+      router.push(`/investors/${prefilledInvestorId}`);
+    } else {
+      router.push(`/financial/payments/${voucher.id}`);
+    }
   };
 
   return (
@@ -89,37 +109,63 @@ export default function NewPaymentPage() {
         </h1>
       </header>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">{f.categoryLabel}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {CATEGORIES.map((c) => {
-              const active = category === c;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCategory(c)}
-                  className={cn(
-                    "rounded-lg border px-3 py-2.5 text-start text-sm transition-colors",
-                    active
-                      ? "border-primary bg-primary-soft text-primary-soft-foreground"
-                      : "border-input hover:bg-muted",
-                  )}
-                >
-                  {dict.paymentCategory[c]}
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      {investorId ? null : (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">{f.categoryLabel}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              {CATEGORIES.map((c) => {
+                const active = category === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategory(c)}
+                    className={cn(
+                      "rounded-lg border px-3 py-2.5 text-start text-sm transition-colors",
+                      active
+                        ? "border-primary bg-primary-soft text-primary-soft-foreground"
+                        : "border-input hover:bg-muted",
+                    )}
+                  >
+                    {dict.paymentCategory[c]}
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardContent className="space-y-4 p-5">
+            {prefilledInvestor ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {dict.investors.pageTitle}
+                </label>
+                <select
+                  value={investorId}
+                  onChange={(e) => {
+                    setInvestorId(e.target.value);
+                    const inv = MOCK_INVESTORS.find((i) => i.id === e.target.value);
+                    if (inv) setBeneficiary(inv.name);
+                  }}
+                  required
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">—</option>
+                  {MOCK_INVESTORS.map((inv) => (
+                    <option key={inv.id} value={inv.id}>
+                      {inv.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">
                 {f.beneficiaryName}

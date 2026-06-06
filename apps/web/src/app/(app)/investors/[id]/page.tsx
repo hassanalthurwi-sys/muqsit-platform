@@ -1,19 +1,46 @@
 "use client";
 
-import { useMemo, use } from "react";
+import { useMemo, useState, use } from "react";
 import Link from "next/link";
-import { Mail, Phone } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  FileSignature,
+  Mail,
+  Phone,
+  RefreshCcw,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Currency } from "@/components/ui/currency";
 import { StatusPill } from "@/components/ui/status-pill";
 import { IdentityBadge } from "@/components/ui/identity-badge";
 import { DataRow, DataRows } from "@/components/ui/data-row";
-import { Timeline } from "@/components/ui/timeline";
 import { InvestorAvatar } from "@/components/investor-avatar";
-import { findInvestor } from "@/lib/mock/investors";
-import { useContractStore } from "@/lib/mock/store";
+import { findInvestor, getInvestedCapital } from "@/lib/mock/investors";
+import { useStore } from "@/lib/mock/store";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatIban, formatDate } from "@/lib/format";
+import type { InvestorActivityType } from "@/lib/mock/types";
+
+const ACTIVITY_ICON: Record<InvestorActivityType, typeof ArrowDownToLine> = {
+  receipt: ArrowDownToLine,
+  contractCreated: FileSignature,
+  payment: ArrowUpFromLine,
+  recycling: RefreshCcw,
+  profitDistribution: TrendingUp,
+};
+
+const ACTIVITY_TONE: Record<InvestorActivityType, string> = {
+  receipt: "bg-success/10 text-success",
+  contractCreated: "bg-primary/10 text-primary",
+  payment: "bg-muted text-muted-foreground",
+  recycling: "bg-gold-soft text-gold-foreground",
+  profitDistribution: "bg-success/10 text-success",
+};
+
+const INITIAL_VISIBLE_ACTIVITY = 8;
 
 export default function InvestorProfilePage({
   params,
@@ -22,11 +49,17 @@ export default function InvestorProfilePage({
 }) {
   const { id } = use(params);
   const { dict, locale } = useI18n();
-  const { contracts } = useContractStore();
+  const { investmentContracts: contracts, officeSettings } = useStore();
   const investor = findInvestor(id);
+  const [activityLimit, setActivityLimit] = useState(INITIAL_VISIBLE_ACTIVITY);
 
   const investorContracts = useMemo(
     () => contracts.filter((c) => c.investorId === id),
+    [contracts, id],
+  );
+
+  const investedCapital = useMemo(
+    () => getInvestedCapital(contracts, id),
     [contracts, id],
   );
 
@@ -39,11 +72,16 @@ export default function InvestorProfilePage({
   }
 
   const p = dict.investors.profile;
-  const utilPct = investor.totalCapital
-    ? Math.round((investor.utilizedCapital / investor.totalCapital) * 100)
-    : 0;
+  const i = dict.investors;
+  const recyclingThreshold = officeSettings.investmentDefaults.recyclingThreshold;
+  const eligibleForRecycling = investor.currentBalance >= recyclingThreshold;
 
-  // Identity fields render per kind
+  const sortedActivity = [...investor.recentActivity].sort((a, b) =>
+    b.ts.localeCompare(a.ts),
+  );
+  const visibleActivity = sortedActivity.slice(0, activityLimit);
+  const hasMoreActivity = sortedActivity.length > activityLimit;
+
   const identityFields: Array<[string, string]> = (() => {
     const idf = dict.identityFieldLabel;
     const ident = investor.identity;
@@ -97,14 +135,63 @@ export default function InvestorProfilePage({
           </p>
         </div>
         <Link
-          href="/investments/new"
+          href={`/investments/new?investorId=${investor.id}`}
           className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           {p.newContract}
         </Link>
       </header>
 
-      {/* Top row: contact / capital */}
+      {/* Four-metric strip */}
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <MetricCard
+          label={i.metric.currentBalance}
+          value={<Currency value={investor.currentBalance} />}
+          accent="primary"
+        />
+        <MetricCard
+          label={i.metric.investedCapital}
+          value={<Currency value={investedCapital} />}
+        />
+        <MetricCard
+          label={i.metric.realizedProfit}
+          value={<Currency value={investor.realizedProfit} />}
+          accent="success"
+        />
+        <MetricCard
+          label={i.metric.activeContracts}
+          value={<span className="num">{investor.activeContractCount}</span>}
+        />
+      </section>
+
+      {/* Recycling alert — silent when below threshold */}
+      {eligibleForRecycling ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gold-soft bg-gold-soft/40 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-full bg-gold-soft text-gold-foreground">
+              <Sparkles className="size-4" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-gold-foreground">
+                {i.recycling.eligible}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <Currency value={investor.currentBalance} compact />{" "}
+                <span aria-hidden>·</span>{" "}
+                <Currency value={recyclingThreshold} compact />
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/investments/new?investorId=${investor.id}`}
+            className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            {i.recycling.cta}
+          </Link>
+        </div>
+      ) : null}
+
+      {/* Investor details + bank */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
@@ -141,69 +228,53 @@ export default function InvestorProfilePage({
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">{p.capitalSection}</CardTitle>
+            <CardTitle className="text-base font-semibold">{p.detailsSection}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-1">
-                <p className="label">{dict.investors.columns.totalCapital}</p>
-                <p className="num text-2xl font-semibold">
-                  <Currency value={investor.totalCapital} />
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="label">{dict.investors.columns.utilized}</p>
-                <p className="num text-2xl font-semibold text-primary">
-                  <Currency value={investor.utilizedCapital} />
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="label">{dict.investors.columns.unutilized}</p>
-                <p className="num text-2xl font-semibold">
-                  <Currency value={investor.unutilizedCapital} />
-                </p>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>نسبة الاستخدام</span>
-                <span className="num font-medium text-foreground">{utilPct}%</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${utilPct}%` }} />
-              </div>
-            </div>
+          <CardContent>
+            <DataRows>
+              <DataRow
+                label={p.totalCapitalLabel}
+                value={
+                  <span className="num font-medium">
+                    <Currency value={investor.totalCapital} />
+                  </span>
+                }
+              />
+              <DataRow
+                label={p.joinedAt}
+                value={<span className="num text-xs">{formatDate(investor.joinedAt, locale)}</span>}
+              />
+            </DataRows>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">{dict.bank.sectionTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataRows>
+              <DataRow label={dict.bank.bankName} value={investor.bankAccount.bankName} />
+              <DataRow
+                label={dict.bank.iban}
+                value={
+                  <span className="num" dir="ltr">
+                    {formatIban(investor.bankAccount.iban)}
+                  </span>
+                }
+              />
+              {investor.bankAccount.accountHolder ? (
+                <DataRow
+                  label={dict.bank.accountHolder}
+                  value={investor.bankAccount.accountHolder}
+                />
+              ) : null}
+            </DataRows>
           </CardContent>
         </Card>
       </div>
-
-      {/* Bank account */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">{dict.bank.sectionTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataRows>
-            <DataRow label={dict.bank.bankName} value={investor.bankAccount.bankName} />
-            <DataRow
-              label={dict.bank.iban}
-              value={
-                <span className="num" dir="ltr">
-                  {formatIban(investor.bankAccount.iban)}
-                </span>
-              }
-            />
-            {investor.bankAccount.accountHolder ? (
-              <DataRow
-                label={dict.bank.accountHolder}
-                value={investor.bankAccount.accountHolder}
-              />
-            ) : null}
-          </DataRows>
-        </CardContent>
-      </Card>
 
       {/* Contracts table */}
       <Card>
@@ -285,9 +356,9 @@ export default function InvestorProfilePage({
         </CardContent>
       </Card>
 
-      {/* Profit terms + activity */}
+      {/* Profit terms + activity timeline */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">{p.termsSection}</CardTitle>
           </CardHeader>
@@ -296,20 +367,94 @@ export default function InvestorProfilePage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold">{p.activitySection}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Timeline
-              items={investor.recentActivity.map((a) => ({
-                ts: formatDate(a.ts, locale),
-                text: a.text,
-              }))}
-            />
+            {visibleActivity.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{p.noActivity}</p>
+            ) : (
+              <ol className="flex flex-col gap-3">
+                {visibleActivity.map((item, idx) => {
+                  const type = item.type ?? "receipt";
+                  const Icon = ACTIVITY_ICON[type];
+                  return (
+                    <li key={`${item.ts}-${idx}`} className="flex items-start gap-3">
+                      <span
+                        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full ${ACTIVITY_TONE[type]}`}
+                      >
+                        <Icon className="size-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="text-sm font-medium">
+                            {item.type ? i.activityType[item.type] : item.text}
+                          </p>
+                          {item.amount != null ? (
+                            <span className="num text-sm font-semibold">
+                              <Currency value={item.amount} compact />
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {item.type ? item.text : null}
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                          <span className="num">{formatDate(item.ts, locale)}</span>
+                          {item.referenceLabel ? (
+                            <>
+                              <span aria-hidden>·</span>
+                              {item.referenceHref ? (
+                                <Link
+                                  href={item.referenceHref}
+                                  className="num text-primary hover:underline"
+                                >
+                                  {item.referenceLabel}
+                                </Link>
+                              ) : (
+                                <span className="num">{item.referenceLabel}</span>
+                              )}
+                            </>
+                          ) : null}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+            {hasMoreActivity ? (
+              <button
+                type="button"
+                onClick={() => setActivityLimit((v) => v + INITIAL_VISIBLE_ACTIVITY)}
+                className="mt-3 w-full rounded-md border bg-card py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60"
+              >
+                {p.showMore}
+              </button>
+            ) : null}
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: React.ReactNode;
+  accent?: "primary" | "success";
+}) {
+  const valueClass =
+    accent === "primary" ? "text-primary" : accent === "success" ? "text-success" : "text-foreground";
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <p className="label">{label}</p>
+      <p className={`num mt-1 text-xl font-semibold sm:text-2xl ${valueClass}`}>{value}</p>
     </div>
   );
 }

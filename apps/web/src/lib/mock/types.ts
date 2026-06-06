@@ -19,9 +19,22 @@ export interface BankAccount {
   accountHolder?: string;
 }
 
+export type InvestorActivityType =
+  | "receipt"
+  | "contractCreated"
+  | "payment"
+  | "recycling"
+  | "profitDistribution";
+
 export interface ActivityItem {
   ts: string; // ISO date
   text: string;
+  // Sprint 9 — optional enrichment for the investor timeline. Older
+  // consumers (e.g. the investor portal) keep working from `text` alone.
+  type?: InvestorActivityType;
+  amount?: number;
+  referenceLabel?: string;
+  referenceHref?: string;
 }
 
 export interface Investor {
@@ -33,9 +46,14 @@ export interface Investor {
   phone?: string;
   joinedAt: string;
   status: InvestorStatus;
+  // Historical scale of the relationship with the office. Informational
+  // only — not a primary operational metric.
   totalCapital: number;
-  utilizedCapital: number;
-  unutilizedCapital: number;
+  // Operational headline metrics. Mock-authored for Sprint 9; the exact
+  // derivation will be unified with receipts / payments / profit
+  // distribution policy in a later sprint.
+  currentBalance: number;
+  realizedProfit: number;
   activeContractCount: number;
   bankAccount: BankAccount;
   profitTerms: string;

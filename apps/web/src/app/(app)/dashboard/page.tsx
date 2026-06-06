@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MOCK_INVESTORS } from "@/lib/mock/investors";
+import { DEFAULT_OFFICE_SETTINGS } from "@/lib/mock/office-settings";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { SplitBar } from "@/components/ui/split-bar";
 import { StatusPill } from "@/components/ui/status-pill";
@@ -57,7 +59,6 @@ const MOCK = {
     delay30: 3,
     delay60: 1,
     pendingContracts: 9,
-    unutilizedCapital: 3_970_000,
     paymentDocs: 2,
   },
   installments: [
@@ -195,15 +196,15 @@ function Tier1Kpis() {
 }
 
 function SmartAlerts() {
-  const { dict, dir, locale } = useI18n();
+  const { dict, dir } = useI18n();
   const a = dict.dashboard.alerts;
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
-  // Replace {n} / {amount} placeholders with the relevant mock figure.
-  const fmtCurrency = new Intl.NumberFormat(locale === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  });
+  // Investors whose current balance crosses the office recycling threshold.
+  // Surfaced as an operational nudge — not a balance category.
+  const recyclableCount = MOCK_INVESTORS.filter(
+    (inv) => inv.currentBalance >= DEFAULT_OFFICE_SETTINGS.investmentDefaults.recyclingThreshold,
+  ).length;
 
   const items = [
     {
@@ -231,11 +232,11 @@ function SmartAlerts() {
       href: "/contracts",
     },
     {
-      key: "unutilizedCapital",
+      key: "recyclableInvestors",
       icon: CircleDot,
       tone: "primary" as const,
-      text: a.unutilizedCapital.replace("{amount}", `${fmtCurrency.format(MOCK.alerts.unutilizedCapital)} ${dict.common.currency}`),
-      cta: dict.common.distribute,
+      text: a.recyclableInvestors.replace("{n}", String(recyclableCount)),
+      cta: dict.common.open,
       href: "/investors",
     },
     {

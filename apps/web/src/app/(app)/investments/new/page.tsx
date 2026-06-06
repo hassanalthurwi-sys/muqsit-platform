@@ -178,23 +178,17 @@ function NewInvestmentContractInner() {
                       </div>
                     </div>
                   </div>
-                  <div className="grid gap-2 text-sm sm:grid-cols-3">
+                  <div className="grid gap-2 text-sm sm:grid-cols-2">
                     <div className="space-y-0.5">
-                      <p className="label">{dict.investors.columns.totalCapital}</p>
+                      <p className="label">{dict.investors.metric.currentBalance}</p>
                       <p className="num font-medium">
+                        <Currency value={investor.currentBalance} compact />
+                      </p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="label">{dict.investors.profile.totalCapitalLabel}</p>
+                      <p className="num font-medium text-muted-foreground">
                         <Currency value={investor.totalCapital} compact />
-                      </p>
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="label">{dict.investors.columns.utilized}</p>
-                      <p className="num font-medium">
-                        <Currency value={investor.utilizedCapital} compact />
-                      </p>
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="label">{dict.investors.columns.unutilized}</p>
-                      <p className="num font-medium">
-                        <Currency value={investor.unutilizedCapital} compact />
                       </p>
                     </div>
                   </div>

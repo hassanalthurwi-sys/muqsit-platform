@@ -154,7 +154,7 @@ export interface Dictionary {
       delay30: string;
       delay60: string;
       pendingContracts: string;
-      unutilizedCapital: string;
+      recyclableInvestors: string;
       paymentDocs: string;
     };
     profit: {
@@ -194,26 +194,48 @@ export interface Dictionary {
     pageSubtitle: string;
     newInvestor: string;
     filters: { all: string; internal: string; external: string };
+    searchPlaceholder: string;
     columns: {
       investor: string;
       type: string;
       identity: string;
       totalCapital: string;
-      utilized: string;
-      unutilized: string;
+      currentBalance: string;
+      investedCapital: string;
+      realizedProfit: string;
       activeContracts: string;
       status: string;
     };
+    metric: {
+      currentBalance: string;
+      investedCapital: string;
+      realizedProfit: string;
+      activeContracts: string;
+    };
+    recycling: {
+      eligible: string;
+      cta: string;
+    };
     profile: {
       contactSection: string;
-      capitalSection: string;
+      detailsSection: string;
       contractsSection: string;
       termsSection: string;
       activitySection: string;
+      totalCapitalLabel: string;
       joinedAt: string;
       noContracts: string;
+      noActivity: string;
       viewContract: string;
       newContract: string;
+      showMore: string;
+    };
+    activityType: {
+      receipt: string;
+      contractCreated: string;
+      payment: string;
+      recycling: string;
+      profitDistribution: string;
     };
   };
   investments: {
@@ -1315,7 +1337,7 @@ const ar: Dictionary = {
       delay30: "{n} عملاء متأخرون أكثر من 30 يوم",
       delay60: "{n} عميل متعثر أكثر من 60 يوم",
       pendingContracts: "{n} عقود تنتظر إجراء (توقيع أو مراجعة)",
-      unutilizedCapital: "{amount} رأس مال مستثمر غير مستخدم",
+      recyclableInvestors: "{n} مستثمرون لديهم مبالغ يمكن إعادة تشغيلها",
       paymentDocs: "{n} مستندات دفع بحاجة إلى مراجعة",
     },
     profit: {
@@ -1360,26 +1382,48 @@ const ar: Dictionary = {
     pageSubtitle: "نظرة عامة على شركاء رأس المال — داخلي وخارجي.",
     newInvestor: "+ مستثمر جديد",
     filters: { all: "الكل", internal: "داخلي", external: "خارجي" },
+    searchPlaceholder: "ابحث بالاسم أو رقم الهوية…",
     columns: {
       investor: "المستثمر",
       type: "النوع",
       identity: "الهوية",
-      totalCapital: "رأس المال",
-      utilized: "المُستخدم",
-      unutilized: "غير المُستخدم",
+      totalCapital: "رأس المال الكلي",
+      currentBalance: "الرصيد الحالي",
+      investedCapital: "المُستثمَر",
+      realizedProfit: "الأرباح المحققة",
       activeContracts: "العقود",
       status: "الحالة",
     },
+    metric: {
+      currentBalance: "الرصيد الحالي",
+      investedCapital: "رأس المال المُستثمَر",
+      realizedProfit: "الأرباح المحققة",
+      activeContracts: "العقود النشطة",
+    },
+    recycling: {
+      eligible: "يوجد مبلغ يمكن إعادة تشغيله",
+      cta: "إنشاء عقد جديد",
+    },
     profile: {
       contactSection: "معلومات الاتصال",
-      capitalSection: "ملخص رأس المال",
+      detailsSection: "تفاصيل المستثمر",
       contractsSection: "عقود الاستثمار",
       termsSection: "شروط المشاركة في الأرباح",
       activitySection: "النشاط الأخير",
+      totalCapitalLabel: "إجمالي رأس المال التاريخي",
       joinedAt: "مستثمر منذ",
       noContracts: "لا توجد عقود استثمار حالياً.",
+      noActivity: "لا يوجد نشاط مسجل بعد.",
       viewContract: "عرض العقد",
       newContract: "+ عقد جديد",
+      showMore: "عرض المزيد",
+    },
+    activityType: {
+      receipt: "إيصال قبض",
+      contractCreated: "بدء عقد",
+      payment: "سند صرف",
+      recycling: "إعادة تشغيل رأس مال",
+      profitDistribution: "توزيع أرباح",
     },
   },
   investments: {
@@ -2605,7 +2649,7 @@ const en: Dictionary = {
       delay30: "{n} customers more than 30 days late",
       delay60: "{n} customer defaulted more than 60 days",
       pendingContracts: "{n} contracts awaiting action (signature or review)",
-      unutilizedCapital: "{amount} unutilized investor capital",
+      recyclableInvestors: "{n} investors have capital that can be recycled",
       paymentDocs: "{n} payment documents to review",
     },
     profit: {
@@ -2645,26 +2689,48 @@ const en: Dictionary = {
     pageSubtitle: "Overview of capital partners — internal and external.",
     newInvestor: "+ New investor",
     filters: { all: "All", internal: "Internal", external: "External" },
+    searchPlaceholder: "Search by name or ID…",
     columns: {
       investor: "Investor",
       type: "Type",
       identity: "Identity",
-      totalCapital: "Capital",
-      utilized: "Utilized",
-      unutilized: "Unutilized",
+      totalCapital: "Total capital",
+      currentBalance: "Current balance",
+      investedCapital: "Invested",
+      realizedProfit: "Realized profit",
       activeContracts: "Contracts",
       status: "Status",
     },
+    metric: {
+      currentBalance: "Current balance",
+      investedCapital: "Invested capital",
+      realizedProfit: "Realized profit",
+      activeContracts: "Active contracts",
+    },
+    recycling: {
+      eligible: "Capital available to recycle",
+      cta: "Create new contract",
+    },
     profile: {
       contactSection: "Contact information",
-      capitalSection: "Capital summary",
+      detailsSection: "Investor details",
       contractsSection: "Investment contracts",
       termsSection: "Profit-sharing terms",
       activitySection: "Recent activity",
+      totalCapitalLabel: "Historical total capital",
       joinedAt: "Investor since",
       noContracts: "No investment contracts yet.",
+      noActivity: "No activity recorded yet.",
       viewContract: "View contract",
       newContract: "+ New contract",
+      showMore: "Show more",
+    },
+    activityType: {
+      receipt: "Receipt",
+      contractCreated: "Contract started",
+      payment: "Payment",
+      recycling: "Capital recycled",
+      profitDistribution: "Profit distribution",
     },
   },
   investments: {

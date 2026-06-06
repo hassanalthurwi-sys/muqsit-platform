@@ -11,8 +11,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2023-01-15",
     status: "active",
     totalCapital: 4_100_000,
-    utilizedCapital: 3_500_000,
-    unutilizedCapital: 600_000,
+    currentBalance: 620_000,
+    realizedProfit: 480_000,
     activeContractCount: 2,
     bankAccount: {
       bankName: "البنك السعودي الفرنسي",
@@ -21,9 +21,34 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "حساب داخلي للمكتب — نسبة ربح المستثمر صفر. كل الأرباح للمكتب.",
     recentActivity: [
-      { ts: "2025-04-12", text: "تخصيص إضافي 800,000 ر.س للعقد INV-2025-001" },
-      { ts: "2025-01-15", text: "بدء عقد استثمار جديد INV-2025-001" },
-      { ts: "2024-12-01", text: "تسوية أرباح داخلية 320,000 ر.س" },
+      {
+        ts: "2025-04-12",
+        type: "contractCreated",
+        text: "تخصيص إضافي 800,000 ر.س للعقد INV-2025-001",
+        amount: 800_000,
+        referenceLabel: "INV-2025-001",
+        referenceHref: "/investments/c-2025-001",
+      },
+      {
+        ts: "2025-03-01",
+        type: "profitDistribution",
+        text: "تسوية أرباح داخلية",
+        amount: 160_000,
+      },
+      {
+        ts: "2025-01-15",
+        type: "contractCreated",
+        text: "بدء عقد استثمار جديد",
+        amount: 1_500_000,
+        referenceLabel: "INV-2025-001",
+        referenceHref: "/investments/c-2025-001",
+      },
+      {
+        ts: "2024-12-01",
+        type: "profitDistribution",
+        text: "تسوية أرباح داخلية ربع سنوية",
+        amount: 320_000,
+      },
     ],
   },
   {
@@ -36,8 +61,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-03-10",
     status: "active",
     totalCapital: 2_500_000,
-    utilizedCapital: 1_700_000,
-    unutilizedCapital: 800_000,
+    currentBalance: 165_000,
+    realizedProfit: 285_000,
     activeContractCount: 2,
     bankAccount: {
       bankName: "مصرف الراجحي",
@@ -46,9 +71,42 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "نسبة العمليات للمكتب 13–15%. توزيع شهري. إعادة تدوير رأس المال المُحصَّل مسموحة عند 50,000 ر.س فما فوق.",
     recentActivity: [
-      { ts: "2025-04-15", text: "توزيع أرباح 45,000 ر.س عن العقد INV-2024-001" },
-      { ts: "2024-09-05", text: "بدء عقد INV-2024-007 بقيمة 1,000,000 ر.س" },
-      { ts: "2024-03-15", text: "بدء عقد INV-2024-001 بقيمة 1,500,000 ر.س" },
+      {
+        ts: "2025-04-15",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 45_000,
+        referenceLabel: "INV-2024-001",
+        referenceHref: "/investments/c-2024-001",
+      },
+      {
+        ts: "2025-03-20",
+        type: "payment",
+        text: "صرف أرباح إلى الحساب البنكي",
+        amount: 45_000,
+      },
+      {
+        ts: "2025-02-08",
+        type: "receipt",
+        text: "إيداع رأس مال إضافي",
+        amount: 250_000,
+      },
+      {
+        ts: "2024-09-05",
+        type: "contractCreated",
+        text: "بدء عقد جديد",
+        amount: 1_000_000,
+        referenceLabel: "INV-2024-007",
+        referenceHref: "/investments/c-2024-007",
+      },
+      {
+        ts: "2024-03-15",
+        type: "contractCreated",
+        text: "بدء أول عقد استثمار",
+        amount: 1_500_000,
+        referenceLabel: "INV-2024-001",
+        referenceHref: "/investments/c-2024-001",
+      },
     ],
   },
   {
@@ -61,8 +119,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-05-02",
     status: "active",
     totalCapital: 1_500_000,
-    utilizedCapital: 1_200_000,
-    unutilizedCapital: 300_000,
+    currentBalance: 38_000,
+    realizedProfit: 142_500,
     activeContractCount: 1,
     bankAccount: {
       bankName: "البنك الأهلي السعودي",
@@ -70,9 +128,30 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "نسبة العمليات للمكتب 14%. توزيع ربع سنوي.",
     recentActivity: [
-      { ts: "2025-03-20", text: "توزيع أرباح 22,500 ر.س" },
-      { ts: "2024-12-10", text: "صرف إضافي 400,000 ر.س للعقد INV-2024-003" },
-      { ts: "2024-05-10", text: "بدء عقد INV-2024-003 بقيمة 1,500,000 ر.س" },
+      {
+        ts: "2025-03-20",
+        type: "profitDistribution",
+        text: "توزيع أرباح ربع سنوي",
+        amount: 22_500,
+        referenceLabel: "INV-2024-003",
+        referenceHref: "/investments/c-2024-003",
+      },
+      {
+        ts: "2024-12-10",
+        type: "contractCreated",
+        text: "صرف إضافي على العقد",
+        amount: 400_000,
+        referenceLabel: "INV-2024-003",
+        referenceHref: "/investments/c-2024-003",
+      },
+      {
+        ts: "2024-05-10",
+        type: "contractCreated",
+        text: "بدء عقد استثمار",
+        amount: 1_500_000,
+        referenceLabel: "INV-2024-003",
+        referenceHref: "/investments/c-2024-003",
+      },
     ],
   },
   {
@@ -85,8 +164,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-05-25",
     status: "active",
     totalCapital: 2_500_000,
-    utilizedCapital: 1_600_000,
-    unutilizedCapital: 900_000,
+    currentBalance: 215_000,
+    realizedProfit: 312_000,
     activeContractCount: 2,
     bankAccount: {
       bankName: "بنك الرياض",
@@ -95,9 +174,36 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "نسبة العمليات للمكتب 15–16%. توزيع شهري. إعادة تدوير رأس المال مسموحة عند 100,000 ر.س فما فوق. مراجعة مالية ربع سنوية.",
     recentActivity: [
-      { ts: "2025-04-30", text: "تقرير ربع سنوي مرسل" },
-      { ts: "2024-10-12", text: "بدء عقد INV-2024-008 بقيمة 1,000,000 ر.س" },
-      { ts: "2024-06-01", text: "بدء عقد INV-2024-004 بقيمة 1,500,000 ر.س" },
+      {
+        ts: "2025-04-30",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 28_500,
+      },
+      {
+        ts: "2025-03-12",
+        type: "recycling",
+        text: "إعادة تشغيل رأس مال محصَّل",
+        amount: 150_000,
+        referenceLabel: "INV-2024-004",
+        referenceHref: "/investments/c-2024-004",
+      },
+      {
+        ts: "2024-10-12",
+        type: "contractCreated",
+        text: "بدء عقد",
+        amount: 1_000_000,
+        referenceLabel: "INV-2024-008",
+        referenceHref: "/investments/c-2024-008",
+      },
+      {
+        ts: "2024-06-01",
+        type: "contractCreated",
+        text: "بدء أول عقد",
+        amount: 1_500_000,
+        referenceLabel: "INV-2024-004",
+        referenceHref: "/investments/c-2024-004",
+      },
     ],
   },
   {
@@ -110,8 +216,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-07-08",
     status: "active",
     totalCapital: 800_000,
-    utilizedCapital: 500_000,
-    unutilizedCapital: 300_000,
+    currentBalance: 22_000,
+    realizedProfit: 36_000,
     activeContractCount: 1,
     bankAccount: {
       bankName: "مصرف الإنماء",
@@ -119,8 +225,26 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "نسبة العمليات للمكتب 12%. توزيع شهري.",
     recentActivity: [
-      { ts: "2025-03-15", text: "توزيع أرباح 6,000 ر.س" },
-      { ts: "2024-07-15", text: "بدء عقد INV-2024-005 بقيمة 800,000 ر.س" },
+      {
+        ts: "2025-03-15",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 6_000,
+      },
+      {
+        ts: "2025-02-15",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 6_000,
+      },
+      {
+        ts: "2024-07-15",
+        type: "contractCreated",
+        text: "بدء عقد استثمار",
+        amount: 800_000,
+        referenceLabel: "INV-2024-005",
+        referenceHref: "/investments/c-2024-005",
+      },
     ],
   },
   {
@@ -133,8 +257,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-08-12",
     status: "active",
     totalCapital: 1_200_000,
-    utilizedCapital: 900_000,
-    unutilizedCapital: 300_000,
+    currentBalance: 78_000,
+    realizedProfit: 81_000,
     activeContractCount: 1,
     bankAccount: {
       bankName: "بنك قطر الوطني (QNB)",
@@ -143,8 +267,26 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "نسبة العمليات للمكتب 14%. توزيع شهري بالريال السعودي. إعادة تدوير رأس المال مسموحة.",
     recentActivity: [
-      { ts: "2025-04-01", text: "توزيع أرباح 13,500 ر.س" },
-      { ts: "2024-08-20", text: "بدء عقد INV-2024-006 بقيمة 1,200,000 ر.س" },
+      {
+        ts: "2025-04-01",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 13_500,
+      },
+      {
+        ts: "2025-03-01",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 13_500,
+      },
+      {
+        ts: "2024-08-20",
+        type: "contractCreated",
+        text: "بدء عقد استثمار",
+        amount: 1_200_000,
+        referenceLabel: "INV-2024-006",
+        referenceHref: "/investments/c-2024-006",
+      },
     ],
   },
   {
@@ -157,8 +299,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-10-22",
     status: "active",
     totalCapital: 600_000,
-    utilizedCapital: 400_000,
-    unutilizedCapital: 200_000,
+    currentBalance: 18_500,
+    realizedProfit: 33_600,
     activeContractCount: 1,
     bankAccount: {
       bankName: "HSBC UK",
@@ -167,8 +309,26 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "Operation fee 14%. Monthly distribution in SAR.",
     recentActivity: [
-      { ts: "2025-03-25", text: "Profit distribution 5,600 SAR" },
-      { ts: "2024-11-01", text: "Contract INV-2024-009 started — 600,000 SAR" },
+      {
+        ts: "2025-03-25",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 5_600,
+      },
+      {
+        ts: "2025-02-25",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 5_600,
+      },
+      {
+        ts: "2024-11-01",
+        type: "contractCreated",
+        text: "بدء عقد استثمار",
+        amount: 600_000,
+        referenceLabel: "INV-2024-009",
+        referenceHref: "/investments/c-2024-009",
+      },
     ],
   },
   {
@@ -181,8 +341,8 @@ export const MOCK_INVESTORS: Investor[] = [
     joinedAt: "2024-11-30",
     status: "active",
     totalCapital: 1_000_000,
-    utilizedCapital: 450_000,
-    unutilizedCapital: 550_000,
+    currentBalance: 545_000,
+    realizedProfit: 28_500,
     activeContractCount: 1,
     bankAccount: {
       bankName: "البنك العربي الوطني",
@@ -191,12 +351,44 @@ export const MOCK_INVESTORS: Investor[] = [
     },
     profitTerms: "نسبة العمليات للمكتب 15%. توزيع شهري. إعادة تدوير رأس المال مسموحة عند 200,000 ر.س فما فوق. مراجعة سنوية.",
     recentActivity: [
-      { ts: "2025-04-10", text: "تأكيد استلام تقرير شهري" },
-      { ts: "2024-12-05", text: "بدء عقد INV-2024-010 بقيمة 1,000,000 ر.س" },
+      {
+        ts: "2025-04-10",
+        type: "receipt",
+        text: "إيداع رأس مال إضافي",
+        amount: 500_000,
+      },
+      {
+        ts: "2025-03-15",
+        type: "profitDistribution",
+        text: "توزيع أرباح شهري",
+        amount: 9_500,
+      },
+      {
+        ts: "2024-12-05",
+        type: "contractCreated",
+        text: "بدء عقد استثمار",
+        amount: 1_000_000,
+        referenceLabel: "INV-2024-010",
+        referenceHref: "/investments/c-2024-010",
+      },
     ],
   },
 ];
 
 export function findInvestor(id: string): Investor | undefined {
   return MOCK_INVESTORS.find((i) => i.id === id);
+}
+
+/**
+ * Sum of active contract amounts for an investor — the operational
+ * "Invested Capital" headline. Computed against any contract list so
+ * the caller can pass either MOCK_CONTRACTS or the live store snapshot.
+ */
+export function getInvestedCapital(
+  contracts: { investorId: string; amount: number; status: string }[],
+  investorId: string,
+): number {
+  return contracts
+    .filter((c) => c.investorId === investorId && c.status === "active")
+    .reduce((sum, c) => sum + c.amount, 0);
 }

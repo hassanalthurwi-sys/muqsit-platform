@@ -1390,18 +1390,18 @@ const ar: Dictionary = {
       totalCapital: "رأس المال الكلي",
       currentBalance: "الرصيد الحالي",
       investedCapital: "المُستثمَر",
-      realizedProfit: "الأرباح المحققة",
+      realizedProfit: "أرباح المستثمر",
       activeContracts: "العقود",
       status: "الحالة",
     },
     metric: {
       currentBalance: "الرصيد الحالي",
       investedCapital: "رأس المال المُستثمَر",
-      realizedProfit: "الأرباح المحققة",
+      realizedProfit: "أرباح المستثمر",
       activeContracts: "العقود النشطة",
     },
     recycling: {
-      eligible: "يوجد مبلغ يمكن إعادة تشغيله",
+      eligible: "يمكن إنشاء عقد استثمار جديد من الرصيد الحالي",
       cta: "إنشاء عقد جديد",
     },
     profile: {
@@ -2697,18 +2697,18 @@ const en: Dictionary = {
       totalCapital: "Total capital",
       currentBalance: "Current balance",
       investedCapital: "Invested",
-      realizedProfit: "Realized profit",
+      realizedProfit: "Investor profit",
       activeContracts: "Contracts",
       status: "Status",
     },
     metric: {
       currentBalance: "Current balance",
       investedCapital: "Invested capital",
-      realizedProfit: "Realized profit",
+      realizedProfit: "Investor profit",
       activeContracts: "Active contracts",
     },
     recycling: {
-      eligible: "Capital available to recycle",
+      eligible: "You can create a new investment contract from this balance",
       cta: "Create new contract",
     },
     profile: {

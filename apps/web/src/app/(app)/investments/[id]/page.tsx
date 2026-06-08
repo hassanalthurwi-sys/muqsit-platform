@@ -93,10 +93,6 @@ export default function InvestmentDetailsPage({
                 value={`${contract.durationMonths} ${d.months}`}
               />
               <DataRow
-                label={d.operationPct}
-                value={<span className="num">{contract.operationPct}%</span>}
-              />
-              <DataRow
                 label={d.document}
                 value={
                   contract.documentName ? (
@@ -236,8 +232,8 @@ export default function InvestmentDetailsPage({
                           {ic.number}
                         </Link>
                         <span className="text-xs text-muted-foreground">
-                          {dict.profitPolicy.officeRecovery}: <Currency value={office} compact /> ·
-                          {" "}{dict.profitPolicy.investorRecovery}: <Currency value={investor} compact />
+                          {dict.profitPolicy.officeShort}: <Currency value={office} compact /> ·
+                          {" "}{dict.profitPolicy.investorShort}: <Currency value={investor} compact />
                         </span>
                       </li>
                     );

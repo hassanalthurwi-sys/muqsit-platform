@@ -81,20 +81,23 @@ function NewInvestmentContractInner() {
   );
 
   const isInternal = investor?.type === "internal";
-  const effectiveOpsPct = isInternal ? 0 : Number(operationPct || 0);
 
   // Sprint 11 — profit amounts (absolute, as agreed at contract creation).
   // For internal investors only one field is shown; it stores into
   // investorExpectedProfit (the office is the investor) and office stays 0.
   const officeProfitNum = isInternal ? 0 : Number(officeProfit.replace(/[^\d]/g, "") || 0);
-  const investorProfitNum = isInternal
-    ? Number(investorProfit.replace(/[^\d]/g, "") || 0)
-    : Number(investorProfit.replace(/[^\d]/g, "") || 0);
+  const investorProfitNum = Number(investorProfit.replace(/[^\d]/g, "") || 0);
   const endDate = useMemo(
     () => addMonths(startDate, durationMonths),
     [startDate, durationMonths],
   );
   const amountNum = Number(amount.replace(/[^\d]/g, "") || 0);
+
+  // Derived for legacy compatibility with the operationPct field on the
+  // contract record. Not shown in the UI.
+  const effectiveOpsPct = isInternal || amountNum <= 0
+    ? 0
+    : Math.round((officeProfitNum / amountNum) * 100);
 
   const steps = [
     { key: "investor", label: c.steps.investor },
@@ -268,24 +271,6 @@ function NewInvestmentContractInner() {
                   {endDate || c.step2.endDateAuto}
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="ops-pct">{c.step2.operationPct}</Label>
-                <Input
-                  id="ops-pct"
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={isInternal ? 0 : operationPct}
-                  onChange={(e) => setOperationPct(e.target.value)}
-                  disabled={isInternal}
-                  className="num"
-                />
-                {isInternal ? (
-                  <p className="text-xs text-muted-foreground">
-                    {c.step2.operationPctInternalNote}
-                  </p>
-                ) : null}
-              </div>
 
               {/* Sprint 11 — agreed profit amounts on this contract */}
               <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
@@ -339,29 +324,11 @@ function NewInvestmentContractInner() {
                   </div>
                 )}
                 {(officeProfitNum > 0 || investorProfitNum > 0) ? (
-                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-background p-3 text-xs">
-                    <div>
-                      <p className="text-muted-foreground">{c.step2.totalProfit}</p>
-                      <p className="num font-semibold">
-                        {(officeProfitNum + investorProfitNum).toLocaleString("ar-SA-u-nu-latn")}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">{c.step2.officeShare}</p>
-                      <p className="num font-semibold">
-                        {officeProfitNum + investorProfitNum > 0
-                          ? Math.round((officeProfitNum / (officeProfitNum + investorProfitNum)) * 100)
-                          : 0}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">{c.step2.investorShare}</p>
-                      <p className="num font-semibold">
-                        {officeProfitNum + investorProfitNum > 0
-                          ? Math.round((investorProfitNum / (officeProfitNum + investorProfitNum)) * 100)
-                          : 0}%
-                      </p>
-                    </div>
+                  <div className="flex items-baseline justify-between gap-3 rounded-lg bg-background p-3 text-sm">
+                    <span className="text-muted-foreground">{c.step2.totalProfit}</span>
+                    <span className="num font-semibold">
+                      {(officeProfitNum + investorProfitNum).toLocaleString("ar-SA-u-nu-latn")} ر.س
+                    </span>
                   </div>
                 ) : null}
               </div>
@@ -521,8 +488,12 @@ function NewInvestmentContractInner() {
                     value={`${durationMonths} ${dict.investments.details.months}`}
                   />
                   <DataRow
-                    label={c.step2.operationPct}
-                    value={<span className="num">{effectiveOpsPct}%</span>}
+                    label={c.step2.totalProfit}
+                    value={
+                      <span className="num">
+                        <Currency value={officeProfitNum + investorProfitNum} />
+                      </span>
+                    }
                   />
                 </DataRows>
               </section>

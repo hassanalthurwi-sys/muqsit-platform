@@ -1002,6 +1002,8 @@ export interface Dictionary {
     recoveryTitle: string;
     officeRecovery: string;
     investorRecovery: string;
+    officeShort: string;
+    investorShort: string;
     eventsHint: string;
     contractProfitTitle: string;
     officeExpected: string;
@@ -2326,11 +2328,13 @@ const ar: Dictionary = {
     investorFirst: "المستثمر أولاً",
     proportional: "بالتساوي",
     useOfficeDefault: "استخدام افتراضي المكتب",
-    fromOfficeDefault: "من إعدادات المكتب",
-    fromInvestorOverride: "خاص بهذا المستثمر",
+    fromOfficeDefault: "افتراضي المكتب",
+    fromInvestorOverride: "خاص بالمستثمر",
     recoveryTitle: "توزيع التحصيلات",
-    officeRecovery: "حصة المكتب من هذا التقسيط",
-    investorRecovery: "حصة المستثمر من هذا التقسيط",
+    officeRecovery: "ما حصّله المكتب",
+    investorRecovery: "ما حصّله المستثمر",
+    officeShort: "المكتب",
+    investorShort: "المستثمر",
     eventsHint: "تم تطبيق {n} عملية تقسيم على هذا التقسيط",
     contractProfitTitle: "ربح العقد",
     officeExpected: "ربح المكتب المتوقع",
@@ -3653,11 +3657,13 @@ const en: Dictionary = {
     investorFirst: "Investor first",
     proportional: "Proportional",
     useOfficeDefault: "Use office default",
-    fromOfficeDefault: "From office settings",
+    fromOfficeDefault: "Office default",
     fromInvestorOverride: "Investor-specific",
     recoveryTitle: "Collection split",
-    officeRecovery: "Office share from this contract",
-    investorRecovery: "Investor share from this contract",
+    officeRecovery: "Office share recovered",
+    investorRecovery: "Investor share recovered",
+    officeShort: "Office",
+    investorShort: "Investor",
     eventsHint: "{n} splits applied on this contract",
     contractProfitTitle: "Contract profit",
     officeExpected: "Office expected profit",

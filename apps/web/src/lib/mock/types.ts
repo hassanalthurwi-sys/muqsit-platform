@@ -51,6 +51,10 @@ export interface Investor {
   activeContractCount: number;
   bankAccount: BankAccount;
   profitTerms: string;
+  // Sprint 11 — optional override of the office-wide profit policy.
+  // When absent or set to "useOfficeDefault", the investor uses
+  // OfficeSettings.profitDistribution.policy.
+  profitPolicyOverride?: "useOfficeDefault" | ProfitDistributionPolicy;
 }
 
 export type ContractStatus = "active" | "ended" | "pendingSetup" | "cancelled";
@@ -96,10 +100,12 @@ export interface InvestmentContract {
   documentName?: string;
   timeline: ActivityItem[];
   linkedInstallmentContractIds: string[];
-  // Optional capital-recycling tracking. When sourceContractId is set, this
-  // contract was created by recycling — but the source is intentionally not
-  // surfaced in the UI. recycledFromCollected and recyclingOfficeMargin are
-  // informational (rendered on the recycled contract detail).
+  // Sprint 11 — agreed expected profit amounts for THIS contract. For
+  // external investors, both can be > 0. For internal investors,
+  // officeExpectedProfit is always 0 and investorExpectedProfit captures
+  // the full profit (since the office IS the investor).
+  officeExpectedProfit: number;
+  investorExpectedProfit: number;
   sourceContractId?: string;
   recyclingCycle?: number;
   recycledFromCollected?: number;
@@ -186,6 +192,11 @@ export interface InstallmentContract {
   startDate: string;
   endDate: string;
   status: InstallmentContractStatus;
+  // Sprint 11 — running counters for profit distribution.
+  // Updated automatically on every installment collection. Capped at
+  // the office/investor expected totals computed for this contract.
+  officeRecoveredSoFar: number;
+  investorRecoveredSoFar: number;
   schedule: Installment[];
   notes?: string;
   documentName?: string;
@@ -400,6 +411,8 @@ export interface ReceiptVoucher {
   customerId?: string;
   investorId?: string;
   contractId?: string;
+  installmentId?: string;       // Sprint 11 — for auto-receipts on
+  installmentIndex?: number;    //   customer installment collections.
   investmentContractId?: string;
   reference?: string;
   notes?: string;
@@ -481,6 +494,32 @@ export interface GoodsPurchase {
 // record (not yet built). Never per-contract.
 
 export type ProfitDistributionPolicy = "officeFirst" | "investorFirst" | "proportional";
+
+// Sprint 11 — Event log for every split that happens when a customer
+// installment is collected. The policy applied is snapshotted on the
+// event; changing the office/investor policy later does not retroactively
+// affect historical events. The source-of-truth for the per-investor
+// activity timeline.
+export type ProfitPolicySource = "officeDefault" | "investorOverride";
+
+export interface ProfitDistribution {
+  id: string;
+  date: string;             // ISO date
+  investorId: string;
+  investmentContractId: string;
+  installmentContractId: string;
+  installmentId: string;
+  installmentIndex: number;
+  amountCollected: number;  // the customer's installment payment
+  officeShare: number;
+  investorShare: number;
+  // The investor share split for the realized-profit metric:
+  investorProfitPortion: number;  // counted in realizedProfit
+  investorCapitalPortion: number; // counted in currentBalance only
+  policyApplied: ProfitDistributionPolicy;
+  policySource: ProfitPolicySource;
+  createdAt: string;
+}
 
 export type NotificationChannel = "whatsapp" | "sms" | "email";
 

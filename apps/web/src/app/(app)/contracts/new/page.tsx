@@ -172,6 +172,9 @@ export default function NewInstallmentContractPage() {
       startDate,
       endDate,
       status: "active",
+      // Sprint 11 — fresh contract starts with no recovery yet.
+      officeRecoveredSoFar: 0,
+      investorRecoveredSoFar: 0,
       schedule,
       timeline: [{ ts: startDate, text: `إنشاء عقد التقسيط ${number} — ${productType}` }],
     };

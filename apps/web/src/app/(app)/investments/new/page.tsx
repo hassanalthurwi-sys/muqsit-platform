@@ -67,6 +67,8 @@ function NewInvestmentContractInner() {
   const [startDate, setStartDate] = useState<string>("");
   const [durationMonths, setDurationMonths] = useState<number>(24);
   const [operationPct, setOperationPct] = useState<string>("15");
+  const [officeProfit, setOfficeProfit] = useState<string>("");
+  const [investorProfit, setInvestorProfit] = useState<string>("");
   const [profitNotes, setProfitNotes] = useState<string>("");
   const [recyclingEnabled, setRecyclingEnabled] = useState<boolean>(true);
   const [recyclingThreshold, setRecyclingThreshold] = useState<string>("");
@@ -80,6 +82,14 @@ function NewInvestmentContractInner() {
 
   const isInternal = investor?.type === "internal";
   const effectiveOpsPct = isInternal ? 0 : Number(operationPct || 0);
+
+  // Sprint 11 — profit amounts (absolute, as agreed at contract creation).
+  // For internal investors only one field is shown; it stores into
+  // investorExpectedProfit (the office is the investor) and office stays 0.
+  const officeProfitNum = isInternal ? 0 : Number(officeProfit.replace(/[^\d]/g, "") || 0);
+  const investorProfitNum = isInternal
+    ? Number(investorProfit.replace(/[^\d]/g, "") || 0)
+    : Number(investorProfit.replace(/[^\d]/g, "") || 0);
   const endDate = useMemo(
     () => addMonths(startDate, durationMonths),
     [startDate, durationMonths],
@@ -121,6 +131,8 @@ function NewInvestmentContractInner() {
       endDate,
       durationMonths,
       operationPct: effectiveOpsPct,
+      officeExpectedProfit: officeProfitNum,
+      investorExpectedProfit: investorProfitNum,
       utilized: 0,
       remaining: amountNum,
       status: "pendingSetup",
@@ -272,6 +284,85 @@ function NewInvestmentContractInner() {
                   <p className="text-xs text-muted-foreground">
                     {c.step2.operationPctInternalNote}
                   </p>
+                ) : null}
+              </div>
+
+              {/* Sprint 11 — agreed profit amounts on this contract */}
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold">{c.step2.profitTitle}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isInternal ? c.step2.profitHintInternal : c.step2.profitHintExternal}
+                  </p>
+                </div>
+                {isInternal ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="office-profit-internal">
+                      {c.step2.investorProfitInternal}
+                    </Label>
+                    <Input
+                      id="office-profit-internal"
+                      type="number"
+                      min="0"
+                      value={investorProfit}
+                      onChange={(e) => setInvestorProfit(e.target.value)}
+                      className="num"
+                      placeholder="0"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="office-profit">{c.step2.officeProfit}</Label>
+                      <Input
+                        id="office-profit"
+                        type="number"
+                        min="0"
+                        value={officeProfit}
+                        onChange={(e) => setOfficeProfit(e.target.value)}
+                        className="num"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="investor-profit">{c.step2.investorProfit}</Label>
+                      <Input
+                        id="investor-profit"
+                        type="number"
+                        min="0"
+                        value={investorProfit}
+                        onChange={(e) => setInvestorProfit(e.target.value)}
+                        className="num"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                )}
+                {(officeProfitNum > 0 || investorProfitNum > 0) ? (
+                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-background p-3 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">{c.step2.totalProfit}</p>
+                      <p className="num font-semibold">
+                        {(officeProfitNum + investorProfitNum).toLocaleString("ar-SA-u-nu-latn")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">{c.step2.officeShare}</p>
+                      <p className="num font-semibold">
+                        {officeProfitNum + investorProfitNum > 0
+                          ? Math.round((officeProfitNum / (officeProfitNum + investorProfitNum)) * 100)
+                          : 0}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">{c.step2.investorShare}</p>
+                      <p className="num font-semibold">
+                        {officeProfitNum + investorProfitNum > 0
+                          ? Math.round((investorProfitNum / (officeProfitNum + investorProfitNum)) * 100)
+                          : 0}%
+                      </p>
+                    </div>
+                  </div>
                 ) : null}
               </div>
             </CardContent>
@@ -589,6 +680,10 @@ function RecycleForm({ sourceId }: { sourceId: string }) {
       })(),
       durationMonths: 12,
       operationPct: pct,
+      // Sprint 11 — recycled contracts derive profit amounts from the
+      // operations percentage on the recycled capital.
+      officeExpectedProfit: Math.round(financing * pct / 100),
+      investorExpectedProfit: Math.round(financing * pct / 100 * 1.3),
       utilized: 0,
       remaining: financing,
       status: "active",

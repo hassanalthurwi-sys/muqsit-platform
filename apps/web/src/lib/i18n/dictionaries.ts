@@ -299,6 +299,15 @@ export interface Dictionary {
         endDateAuto: string;
         operationPct: string;
         operationPctInternalNote: string;
+        profitTitle: string;
+        profitHintExternal: string;
+        profitHintInternal: string;
+        officeProfit: string;
+        investorProfit: string;
+        investorProfitInternal: string;
+        totalProfit: string;
+        officeShare: string;
+        investorShare: string;
       };
       step3: {
         title: string;
@@ -983,6 +992,23 @@ export interface Dictionary {
   paymentMethod: Record<PaymentMethodKey, string>;
   voucherStatus: Record<VoucherStatusKey, string>;
   partyType: Record<PartyTypeKey, string>;
+  profitPolicy: {
+    officeFirst: string;
+    investorFirst: string;
+    proportional: string;
+    useOfficeDefault: string;
+    fromOfficeDefault: string;
+    fromInvestorOverride: string;
+    recoveryTitle: string;
+    officeRecovery: string;
+    investorRecovery: string;
+    eventsHint: string;
+    contractProfitTitle: string;
+    officeExpected: string;
+    investorExpected: string;
+    investorPolicyLabel: string;
+    investorPolicyHint: string;
+  };
   purchaseStatus: Record<PurchaseStatusKey, string>;
   financialHub: {
     title: string;
@@ -1493,6 +1519,15 @@ const ar: Dictionary = {
         endDateAuto: "يُحسب تلقائياً من تاريخ البداية والمدة",
         operationPct: "نسبة العمليات للمكتب (%)",
         operationPctInternalNote: "للمستثمر الداخلي تثبت النسبة عند 0%.",
+        profitTitle: "ربح هذا العقد",
+        profitHintExternal: "ادخل المبلغ المتفق عليه لكل طرف من إجمالي ربح العقد.",
+        profitHintInternal: "المستثمر داخلي — كل الأرباح للمكتب. ادخل ربح المكتب المتوقع.",
+        officeProfit: "ربح المكتب المتوقع (ر.س)",
+        investorProfit: "ربح المستثمر المتوقع (ر.س)",
+        investorProfitInternal: "ربح المكتب من هذا العقد (ر.س)",
+        totalProfit: "إجمالي الربح",
+        officeShare: "نسبة المكتب",
+        investorShare: "نسبة المستثمر",
       },
       step3: {
         title: "تفضيلات ومستندات",
@@ -2286,6 +2321,23 @@ const ar: Dictionary = {
     customer: "عميل",
     other: "أخرى",
   },
+  profitPolicy: {
+    officeFirst: "المكتب أولاً",
+    investorFirst: "المستثمر أولاً",
+    proportional: "بالتساوي",
+    useOfficeDefault: "استخدام افتراضي المكتب",
+    fromOfficeDefault: "من إعدادات المكتب",
+    fromInvestorOverride: "خاص بهذا المستثمر",
+    recoveryTitle: "توزيع التحصيلات",
+    officeRecovery: "حصة المكتب من هذا التقسيط",
+    investorRecovery: "حصة المستثمر من هذا التقسيط",
+    eventsHint: "تم تطبيق {n} عملية تقسيم على هذا التقسيط",
+    contractProfitTitle: "ربح العقد",
+    officeExpected: "ربح المكتب المتوقع",
+    investorExpected: "ربح المستثمر المتوقع",
+    investorPolicyLabel: "سياسة توزيع الأرباح",
+    investorPolicyHint: "تُلغي افتراضي المكتب لهذا المستثمر فقط.",
+  },
   purchaseStatus: {
     purchased: "تم الشراء",
     linkedToContract: "مرتبط بعقد",
@@ -2797,6 +2849,15 @@ const en: Dictionary = {
         endDateAuto: "Computed from start date + duration",
         operationPct: "Office operation (%)",
         operationPctInternalNote: "For internal investors the operation % is locked at 0%.",
+        profitTitle: "Profit on this contract",
+        profitHintExternal: "Enter the agreed profit amount each side will receive from this contract.",
+        profitHintInternal: "Internal investor — the office keeps all profit. Enter the office's expected profit.",
+        officeProfit: "Office expected profit (SAR)",
+        investorProfit: "Investor expected profit (SAR)",
+        investorProfitInternal: "Office profit from this contract (SAR)",
+        totalProfit: "Total profit",
+        officeShare: "Office share",
+        investorShare: "Investor share",
       },
       step3: {
         title: "Preferences and documents",
@@ -3586,6 +3647,23 @@ const en: Dictionary = {
     investor: "Investor",
     customer: "Customer",
     other: "Other",
+  },
+  profitPolicy: {
+    officeFirst: "Office first",
+    investorFirst: "Investor first",
+    proportional: "Proportional",
+    useOfficeDefault: "Use office default",
+    fromOfficeDefault: "From office settings",
+    fromInvestorOverride: "Investor-specific",
+    recoveryTitle: "Collection split",
+    officeRecovery: "Office share from this contract",
+    investorRecovery: "Investor share from this contract",
+    eventsHint: "{n} splits applied on this contract",
+    contractProfitTitle: "Contract profit",
+    officeExpected: "Office expected profit",
+    investorExpected: "Investor expected profit",
+    investorPolicyLabel: "Profit distribution policy",
+    investorPolicyHint: "Overrides the office default for this investor only.",
   },
   purchaseStatus: {
     purchased: "Purchased",

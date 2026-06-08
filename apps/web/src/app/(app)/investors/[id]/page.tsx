@@ -72,6 +72,10 @@ export default function InvestorProfilePage({
     payments,
     officeSettings,
     getInvestorBalance,
+    getInvestorRealizedProfit,
+    getEffectivePolicyFor,
+    setInvestorPolicyOverride,
+    profitDistributions,
   } = useStore();
   const investor = findInvestor(id);
   const [activityLimit, setActivityLimit] = useState(INITIAL_VISIBLE_ACTIVITY);
@@ -120,8 +124,18 @@ export default function InvestorProfilePage({
         description: pay.notes,
       });
     }
+    // Sprint 11 — real profit distribution events from the store
+    for (const e of profitDistributions.filter((e) => e.investorId === id)) {
+      items.push({
+        ts: e.date,
+        type: "profitDistribution",
+        amount: e.investorShare,
+        referenceLabel: `#${e.installmentIndex}`,
+        referenceHref: `/contracts/${e.installmentContractId}`,
+      });
+    }
     return items.sort((a, b) => b.ts.localeCompare(a.ts));
-  }, [contracts, receipts, payments, id]);
+  }, [contracts, receipts, payments, profitDistributions, id]);
 
   const visibleActivity = timeline.slice(0, activityLimit);
   const hasMoreActivity = timeline.length > activityLimit;
@@ -213,7 +227,7 @@ export default function InvestorProfilePage({
         />
         <MetricCard
           label={i.metric.realizedProfit}
-          value={<Currency value={investor.realizedProfit} />}
+          value={<Currency value={getInvestorRealizedProfit(id)} />}
           accent="success"
         />
         <MetricCard
@@ -343,6 +357,39 @@ export default function InvestorProfilePage({
                 label={p.joinedAt}
                 value={<span className="num text-xs">{formatDate(investor.joinedAt, locale)}</span>}
               />
+              {(() => {
+                const pol = getEffectivePolicyFor(id);
+                const polLabel =
+                  pol.policy === "officeFirst" ? dict.profitPolicy.officeFirst :
+                  pol.policy === "investorFirst" ? dict.profitPolicy.investorFirst :
+                  dict.profitPolicy.proportional;
+                const sourceLabel = pol.source === "officeDefault"
+                  ? dict.profitPolicy.fromOfficeDefault
+                  : dict.profitPolicy.fromInvestorOverride;
+                return (
+                  <DataRow
+                    label={dict.profitPolicy.investorPolicyLabel}
+                    value={
+                      <div className="flex flex-col items-end gap-1.5">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-medium text-primary-soft-foreground">
+                          {polLabel}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{sourceLabel}</span>
+                        <select
+                          className="h-7 rounded-md border border-input bg-card px-2 text-[11px]"
+                          value={investor.profitPolicyOverride ?? "useOfficeDefault"}
+                          onChange={(e) => setInvestorPolicyOverride(id, e.target.value as never)}
+                        >
+                          <option value="useOfficeDefault">{dict.profitPolicy.useOfficeDefault}</option>
+                          <option value="officeFirst">{dict.profitPolicy.officeFirst}</option>
+                          <option value="investorFirst">{dict.profitPolicy.investorFirst}</option>
+                          <option value="proportional">{dict.profitPolicy.proportional}</option>
+                        </select>
+                      </div>
+                    }
+                  />
+                );
+              })()}
             </DataRows>
           </CardContent>
         </Card>

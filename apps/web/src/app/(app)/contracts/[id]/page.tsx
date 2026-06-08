@@ -34,7 +34,15 @@ export default function InstallmentContractDetailsPage({
 }) {
   const { id } = use(params);
   const { dict, locale } = useI18n();
-  const { installmentContracts, customers, investmentContracts, receipts, addReceipt } = useStore();
+  const {
+    installmentContracts,
+    customers,
+    investmentContracts,
+    receipts,
+    addReceipt,
+    profitDistributions,
+    getEffectivePolicyFor,
+  } = useStore();
   const [activeInstallment, setActiveInstallment] = useState<Installment | null>(null);
   const [open, setOpen] = useState(false);
   // Local overlay of payments captured this session (prototype: not pushed to store)
@@ -87,6 +95,8 @@ export default function InstallmentContractDetailsPage({
       fromName: payment.receiptName ?? customer?.name ?? contract.customerId,
       customerId: contract.customerId,
       contractId: contract.id,
+      installmentId: activeInstallment.id,
+      installmentIndex: activeInstallment.index,
       notes: `قسط ${activeInstallment.index} من ${contract.schedule.length} — ${contract.number}${
         payment.note ? ` · ${payment.note}` : ""
       }`,
@@ -238,6 +248,75 @@ export default function InstallmentContractDetailsPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Sprint 11 — توزيع التحصيلات */}
+      {fundingContract ? (() => {
+        const installmentProfit = Math.max(0, contract.installmentPrice - contract.cashPrice);
+        const totalParent = fundingContract.officeExpectedProfit + fundingContract.investorExpectedProfit;
+        const officeRatio = totalParent > 0 ? fundingContract.officeExpectedProfit / totalParent : 0;
+        const officeExpected = installmentProfit * officeRatio;
+        const investorExpected = contract.cashPrice + installmentProfit * (1 - officeRatio);
+        // Live counters from this contract's events
+        const liveEvents = profitDistributions.filter((e) => e.installmentContractId === contract.id);
+        const officeRec = contract.officeRecoveredSoFar +
+          liveEvents.reduce((s, e) => s + e.officeShare, 0);
+        const investorRec = contract.investorRecoveredSoFar +
+          liveEvents.reduce((s, e) => s + e.investorShare, 0);
+        const pol = getEffectivePolicyFor(fundingContract.investorId);
+        const policyLabel =
+          pol.policy === "officeFirst" ? dict.profitPolicy.officeFirst :
+          pol.policy === "investorFirst" ? dict.profitPolicy.investorFirst :
+          dict.profitPolicy.proportional;
+        const sourceLabel = pol.source === "officeDefault"
+          ? dict.profitPolicy.fromOfficeDefault
+          : dict.profitPolicy.fromInvestorOverride;
+        const officePct = officeExpected > 0 ? Math.min(100, Math.round((officeRec / officeExpected) * 100)) : 0;
+        const investorPct = investorExpected > 0 ? Math.min(100, Math.round((investorRec / investorExpected) * 100)) : 0;
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">{dict.profitPolicy.recoveryTitle}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary-soft-foreground">
+                  {policyLabel}
+                </span>
+                <span className="text-xs text-muted-foreground">{sourceLabel}</span>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <div className="mb-1 flex items-baseline justify-between">
+                    <span className="text-sm font-medium">{dict.profitPolicy.officeRecovery}</span>
+                    <span className="num text-xs text-muted-foreground">
+                      <Currency value={officeRec} /> / <Currency value={officeExpected} />
+                    </span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="h-full bg-primary" style={{ width: `${officePct}%` }} />
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1 flex items-baseline justify-between">
+                    <span className="text-sm font-medium">{dict.profitPolicy.investorRecovery}</span>
+                    <span className="num text-xs text-muted-foreground">
+                      <Currency value={investorRec} /> / <Currency value={investorExpected} />
+                    </span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="h-full bg-success" style={{ width: `${investorPct}%` }} />
+                  </div>
+                </div>
+              </div>
+              {liveEvents.length > 0 ? (
+                <div className="rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground">
+                  {dict.profitPolicy.eventsHint.replace("{n}", String(liveEvents.length))}
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        );
+      })() : null}
 
       {/* Schedule */}
       <Card>

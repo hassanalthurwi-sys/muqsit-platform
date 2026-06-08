@@ -39,10 +39,12 @@ import type {
   PaymentVoucher,
   PermissionAction,
   PermissionState,
+  ProfitDistribution,
   ProofStatus,
   ReceiptVoucher,
   Role,
 } from "./types";
+import { getEffectivePolicy, splitInstallmentPayment } from "./profit";
 
 const KEY_INVESTMENT_CONTRACTS = "muqsit_user_contracts";
 const KEY_INSTALLMENT_CONTRACTS = "muqsit_user_installments";
@@ -56,6 +58,10 @@ const KEY_PAYMENTS = "muqsit_user_payments";
 const KEY_PURCHASES = "muqsit_user_purchases";
 const KEY_OFFICE_SETTINGS = "muqsit_office_settings";
 const KEY_INVESTOR_BALANCE_DELTAS = "muqsit_investor_balance_deltas";
+const KEY_INVESTOR_PROFIT_DELTAS = "muqsit_investor_profit_deltas";
+const KEY_PROFIT_DISTRIBUTIONS = "muqsit_profit_distributions";
+const KEY_INSTALLMENT_RECOVERY = "muqsit_installment_recovery";
+const KEY_INVESTOR_POLICY_OVERRIDES = "muqsit_investor_policy_overrides";
 
 interface ProofDecisionPatch {
   status: ProofStatus;
@@ -111,6 +117,17 @@ interface Store {
   // Sprint 10 — investor wallet
   investorBalanceDeltas: Record<string, number>;
   getInvestorBalance: (investorId: string) => number;
+  // Sprint 11 — profit distribution
+  profitDistributions: ProfitDistribution[];
+  getInvestorRealizedProfit: (investorId: string) => number;
+  getEffectivePolicyFor: (investorId: string) => {
+    policy: import("./types").ProfitDistributionPolicy;
+    source: import("./types").ProfitPolicySource;
+  };
+  setInvestorPolicyOverride: (
+    investorId: string,
+    override: "useOfficeDefault" | import("./types").ProfitDistributionPolicy,
+  ) => void;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -152,6 +169,12 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [userPurchases, setUserPurchases] = useState<GoodsPurchase[]>([]);
   const [officeSettings, setOfficeSettings] = useState<OfficeSettings>(DEFAULT_OFFICE_SETTINGS);
   const [investorBalanceDeltas, setInvestorBalanceDeltas] = useState<Record<string, number>>({});
+  const [investorProfitDeltas, setInvestorProfitDeltas] = useState<Record<string, number>>({});
+  const [profitDistributions, setProfitDistributions] = useState<ProfitDistribution[]>([]);
+  const [installmentRecovery, setInstallmentRecovery] = useState<Record<string, { office: number; investor: number }>>({});
+  const [investorPolicyOverrides, setInvestorPolicyOverrides] = useState<
+    Record<string, "useOfficeDefault" | import("./types").ProfitDistributionPolicy>
+  >({});
 
   useEffect(() => {
     setUserInvestments(safeRead<InvestmentContract[]>(KEY_INVESTMENT_CONTRACTS) ?? []);
@@ -174,6 +197,14 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     setUserPurchases(safeRead<GoodsPurchase[]>(KEY_PURCHASES) ?? []);
     setOfficeSettings(safeRead<OfficeSettings>(KEY_OFFICE_SETTINGS) ?? DEFAULT_OFFICE_SETTINGS);
     setInvestorBalanceDeltas(safeRead<Record<string, number>>(KEY_INVESTOR_BALANCE_DELTAS) ?? {});
+    setInvestorProfitDeltas(safeRead<Record<string, number>>(KEY_INVESTOR_PROFIT_DELTAS) ?? {});
+    setProfitDistributions(safeRead<ProfitDistribution[]>(KEY_PROFIT_DISTRIBUTIONS) ?? []);
+    setInstallmentRecovery(safeRead<Record<string, { office: number; investor: number }>>(KEY_INSTALLMENT_RECOVERY) ?? {});
+    setInvestorPolicyOverrides(
+      safeRead<Record<string, "useOfficeDefault" | import("./types").ProfitDistributionPolicy>>(
+        KEY_INVESTOR_POLICY_OVERRIDES,
+      ) ?? {},
+    );
   }, []);
 
   const applyInvestorDelta = useCallback((investorId: string, delta: number) => {
@@ -269,8 +300,103 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
         return next;
       });
       if (receipt.investorId) applyInvestorDelta(receipt.investorId, receipt.amount);
+
+      // Sprint 11 — when the receipt is a customer-installment receipt,
+      // cascade into the profit-split mechanism. The receipt itself was
+      // already recorded above; this is purely the split + counter +
+      // event-log step.
+      if (
+        receipt.partyType === "customer" &&
+        receipt.contractId &&
+        receipt.installmentId
+      ) {
+        const installmentContract = MOCK_INSTALLMENT_CONTRACTS.find(
+          (c) => c.id === receipt.contractId,
+        );
+        const investmentContract = installmentContract
+          ? MOCK_CONTRACTS.find((c) => c.id === installmentContract.investmentContractId)
+          : undefined;
+        const investor = investmentContract
+          ? MOCK_INVESTORS.find((i) => i.id === investmentContract.investorId)
+          : undefined;
+        if (installmentContract && investmentContract && investor) {
+          const policyOverride =
+            investorPolicyOverrides[investor.id] ?? investor.profitPolicyOverride;
+          const { policy, source } = getEffectivePolicy(
+            { profitPolicyOverride: policyOverride },
+            officeSettings,
+          );
+          const liveRec =
+            installmentRecovery[installmentContract.id] ?? {
+              office: installmentContract.officeRecoveredSoFar,
+              investor: installmentContract.investorRecoveredSoFar,
+            };
+          const split = splitInstallmentPayment({
+            amount: receipt.amount,
+            installmentContract: {
+              cashPrice: installmentContract.cashPrice,
+              installmentPrice: installmentContract.installmentPrice,
+              officeRecoveredSoFar: liveRec.office,
+              investorRecoveredSoFar: liveRec.investor,
+            },
+            investmentContract: {
+              officeExpectedProfit: investmentContract.officeExpectedProfit,
+              investorExpectedProfit: investmentContract.investorExpectedProfit,
+            },
+            policy,
+          });
+
+          // Update recovery counters
+          const nextRecovery = {
+            ...installmentRecovery,
+            [installmentContract.id]: {
+              office: liveRec.office + split.officeShare,
+              investor: liveRec.investor + split.investorShare,
+            },
+          };
+          setInstallmentRecovery(nextRecovery);
+          safeWrite(KEY_INSTALLMENT_RECOVERY, nextRecovery);
+
+          // Record event
+          const event: ProfitDistribution = {
+            id: `pd-${Date.now()}`,
+            date: receipt.date,
+            investorId: investor.id,
+            investmentContractId: investmentContract.id,
+            installmentContractId: installmentContract.id,
+            installmentId: receipt.installmentId,
+            installmentIndex: receipt.installmentIndex ?? 0,
+            amountCollected: receipt.amount,
+            officeShare: split.officeShare,
+            investorShare: split.investorShare,
+            investorProfitPortion: split.investorProfitPortion,
+            investorCapitalPortion: split.investorCapitalPortion,
+            policyApplied: policy,
+            policySource: source,
+            createdAt: new Date().toISOString(),
+          };
+          setProfitDistributions((prev) => {
+            const next = [event, ...prev];
+            safeWrite(KEY_PROFIT_DISTRIBUTIONS, next);
+            return next;
+          });
+
+          // Apply investor wallet effects:
+          //   - currentBalance += investorShare (capital + profit both flow back)
+          //   - realizedProfit += investorProfitPortion (only the profit slice)
+          applyInvestorDelta(investor.id, split.investorShare);
+          setInvestorProfitDeltas((prev) => {
+            const next = {
+              ...prev,
+              [investor.id]: (prev[investor.id] ?? 0) + split.investorProfitPortion,
+            };
+            safeWrite(KEY_INVESTOR_PROFIT_DELTAS, next);
+            return next;
+          });
+        }
+      }
     },
-    [applyInvestorDelta],
+    [applyInvestorDelta, officeSettings, investorPolicyOverrides, installmentRecovery],
   );
 
   const addPayment = useCallback(
@@ -354,6 +480,28 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
         const seed = inv?.currentBalance ?? 0;
         return seed + (investorBalanceDeltas[investorId] ?? 0);
       },
+      profitDistributions,
+      getInvestorRealizedProfit: (investorId: string) => {
+        const inv = MOCK_INVESTORS.find((i) => i.id === investorId);
+        const seed = inv?.realizedProfit ?? 0;
+        return seed + (investorProfitDeltas[investorId] ?? 0);
+      },
+      getEffectivePolicyFor: (investorId: string) => {
+        const inv = MOCK_INVESTORS.find((i) => i.id === investorId);
+        const override =
+          investorPolicyOverrides[investorId] ?? inv?.profitPolicyOverride;
+        return getEffectivePolicy({ profitPolicyOverride: override }, officeSettings);
+      },
+      setInvestorPolicyOverride: (
+        investorId: string,
+        override: "useOfficeDefault" | import("./types").ProfitDistributionPolicy,
+      ) => {
+        setInvestorPolicyOverrides((prev) => {
+          const next = { ...prev, [investorId]: override };
+          safeWrite(KEY_INVESTOR_POLICY_OVERRIDES, next);
+          return next;
+        });
+      },
     };
   }, [
     userInvestments,
@@ -380,6 +528,9 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     officeSettings,
     updateOfficeSettings,
     investorBalanceDeltas,
+    investorProfitDeltas,
+    profitDistributions,
+    investorPolicyOverrides,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

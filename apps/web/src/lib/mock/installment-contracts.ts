@@ -1,4 +1,5 @@
 import type { Installment, InstallmentContract, InstallmentStatus } from "./types";
+import { MOCK_CONTRACTS } from "./contracts";
 
 // Used to compute relative dates for mock schedules — a deterministic "today".
 const REFERENCE_TODAY = "2025-06-01";
@@ -119,6 +120,11 @@ function deriveContract(c: ContractInit): InstallmentContract {
     startDate: c.startDate,
     endDate,
     status,
+    // Sprint 11 — backfilled below from the total amount paid so far and
+    // the parent investment contract's profit split, assuming the default
+    // "office first" policy at seed time.
+    officeRecoveredSoFar: 0,
+    investorRecoveredSoFar: 0,
     schedule,
     documentName: c.documentName,
     notes: c.notes,
@@ -250,6 +256,26 @@ export function findInstallmentContract(id: string): InstallmentContract | undef
 
 export function customerContracts(customerId: string): InstallmentContract[] {
   return MOCK_INSTALLMENT_CONTRACTS.filter((c) => c.customerId === customerId);
+}
+
+// Sprint 11 backfill: pretend the office-first policy has been applied to
+// every paid installment so far, so the per-investment-contract progress
+// bars and per-investor realized profit show a believable starting state.
+for (const ic of MOCK_INSTALLMENT_CONTRACTS) {
+  const parent = MOCK_CONTRACTS.find((c) => c.id === ic.investmentContractId);
+  if (!parent) continue;
+  const totalPaid = ic.schedule.reduce((sum, s) => sum + s.paidAmount, 0);
+  if (totalPaid <= 0) continue;
+  const installmentProfit = Math.max(0, ic.installmentPrice - ic.cashPrice);
+  const totalParent = parent.officeExpectedProfit + parent.investorExpectedProfit;
+  const officeRatio = totalParent > 0 ? parent.officeExpectedProfit / totalParent : 0;
+  const officeExpected = installmentProfit * officeRatio;
+  const investorExpected = ic.cashPrice + (installmentProfit - officeExpected);
+  // Office first: office gets paid until cap, then investor.
+  const officeRec = Math.min(totalPaid, officeExpected);
+  const investorRec = Math.min(totalPaid - officeRec, investorExpected);
+  ic.officeRecoveredSoFar = officeRec;
+  ic.investorRecoveredSoFar = investorRec;
 }
 
 export { REFERENCE_TODAY, addMonthsIso };

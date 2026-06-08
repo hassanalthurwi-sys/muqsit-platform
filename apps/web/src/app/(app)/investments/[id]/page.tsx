@@ -10,7 +10,7 @@ import { IdentityBadge } from "@/components/ui/identity-badge";
 import { RecycledBadge } from "@/components/ui/recycled-badge";
 import { DataRow, DataRows } from "@/components/ui/data-row";
 import { Timeline } from "@/components/ui/timeline";
-import { useContractStore } from "@/lib/mock/store";
+import { useContractStore, useStore } from "@/lib/mock/store";
 import { findInvestor } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatDate } from "@/lib/format";
@@ -23,6 +23,7 @@ export default function InvestmentDetailsPage({
   const { id } = use(params);
   const { dict, locale } = useI18n();
   const { contracts } = useContractStore();
+  const { installmentContracts, profitDistributions } = useStore();
   const contract = useMemo(() => contracts.find((c) => c.id === id), [contracts, id]);
 
   if (!contract) {
@@ -178,6 +179,73 @@ export default function InvestmentDetailsPage({
               </span>
             </span>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Sprint 11 — ربح العقد */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold">
+            {dict.profitPolicy.contractProfitTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border bg-card p-3">
+              <p className="label">{dict.profitPolicy.officeExpected}</p>
+              <p className="num mt-1 text-lg font-semibold text-primary">
+                <Currency value={contract.officeExpectedProfit} />
+              </p>
+            </div>
+            <div className="rounded-xl border bg-card p-3">
+              <p className="label">{dict.profitPolicy.investorExpected}</p>
+              <p className="num mt-1 text-lg font-semibold text-success">
+                <Currency value={contract.investorExpectedProfit} />
+              </p>
+            </div>
+            <div className="rounded-xl border bg-muted/30 p-3">
+              <p className="label">{dict.investments.create.step2.totalProfit}</p>
+              <p className="num mt-1 text-lg font-semibold">
+                <Currency value={contract.officeExpectedProfit + contract.investorExpectedProfit} />
+              </p>
+            </div>
+          </div>
+          {(() => {
+            const linked = installmentContracts.filter((ic) => ic.investmentContractId === contract.id);
+            if (linked.length === 0) return null;
+            const liveEventsByIC = new Map<string, { office: number; investor: number }>();
+            for (const e of profitDistributions) {
+              const cur = liveEventsByIC.get(e.installmentContractId) ?? { office: 0, investor: 0 };
+              cur.office += e.officeShare;
+              cur.investor += e.investorShare;
+              liveEventsByIC.set(e.installmentContractId, cur);
+            }
+            return (
+              <div className="rounded-xl border bg-card">
+                <div className="border-b px-4 py-2 text-xs font-medium text-muted-foreground">
+                  {locale === "ar" ? "عقود التقسيط المرتبطة" : "Linked installment contracts"} ({linked.length})
+                </div>
+                <ul className="divide-y divide-border">
+                  {linked.slice(0, 5).map((ic) => {
+                    const live = liveEventsByIC.get(ic.id) ?? { office: 0, investor: 0 };
+                    const office = ic.officeRecoveredSoFar + live.office;
+                    const investor = ic.investorRecoveredSoFar + live.investor;
+                    return (
+                      <li key={ic.id} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2 text-sm">
+                        <Link href={`/contracts/${ic.id}`} className="num font-medium text-primary hover:underline">
+                          {ic.number}
+                        </Link>
+                        <span className="text-xs text-muted-foreground">
+                          {dict.profitPolicy.officeRecovery}: <Currency value={office} compact /> ·
+                          {" "}{dict.profitPolicy.investorRecovery}: <Currency value={investor} compact />
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 

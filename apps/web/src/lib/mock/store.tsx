@@ -61,6 +61,7 @@ const KEY_INVESTOR_BALANCE_DELTAS = "muqsit_investor_balance_deltas";
 const KEY_INVESTOR_PROFIT_DELTAS = "muqsit_investor_profit_deltas";
 const KEY_PROFIT_DISTRIBUTIONS = "muqsit_profit_distributions";
 const KEY_INSTALLMENT_RECOVERY = "muqsit_installment_recovery";
+const KEY_INVESTMENT_UTILIZATION = "muqsit_investment_utilization";
 const KEY_INVESTOR_POLICY_OVERRIDES = "muqsit_investor_policy_overrides";
 
 interface ProofDecisionPatch {
@@ -172,6 +173,9 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [investorProfitDeltas, setInvestorProfitDeltas] = useState<Record<string, number>>({});
   const [profitDistributions, setProfitDistributions] = useState<ProfitDistribution[]>([]);
   const [installmentRecovery, setInstallmentRecovery] = useState<Record<string, { office: number; investor: number }>>({});
+  // Sprint 11 — capital drawn from each investment contract by its child
+  // installment contracts. Applied on top of seed `utilized` / `remaining`.
+  const [investmentUtilizationDeltas, setInvestmentUtilizationDeltas] = useState<Record<string, number>>({});
   const [investorPolicyOverrides, setInvestorPolicyOverrides] = useState<
     Record<string, "useOfficeDefault" | import("./types").ProfitDistributionPolicy>
   >({});
@@ -200,6 +204,7 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     setInvestorProfitDeltas(safeRead<Record<string, number>>(KEY_INVESTOR_PROFIT_DELTAS) ?? {});
     setProfitDistributions(safeRead<ProfitDistribution[]>(KEY_PROFIT_DISTRIBUTIONS) ?? []);
     setInstallmentRecovery(safeRead<Record<string, { office: number; investor: number }>>(KEY_INSTALLMENT_RECOVERY) ?? {});
+    setInvestmentUtilizationDeltas(safeRead<Record<string, number>>(KEY_INVESTMENT_UTILIZATION) ?? {});
     setInvestorPolicyOverrides(
       safeRead<Record<string, "useOfficeDefault" | import("./types").ProfitDistributionPolicy>>(
         KEY_INVESTOR_POLICY_OVERRIDES,
@@ -243,6 +248,19 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
       safeWrite(KEY_INSTALLMENT_CONTRACTS, next);
       return next;
     });
+    // Sprint 11 — creating an installment contract draws its cash price
+    // from the parent investment contract's available capital.
+    if (contract.investmentContractId && contract.cashPrice > 0) {
+      setInvestmentUtilizationDeltas((prev) => {
+        const next = {
+          ...prev,
+          [contract.investmentContractId]:
+            (prev[contract.investmentContractId] ?? 0) + contract.cashPrice,
+        };
+        safeWrite(KEY_INVESTMENT_UTILIZATION, next);
+        return next;
+      });
+    }
   }, []);
 
   const decideProof = useCallback((proofId: string, patch: ProofDecisionPatch) => {
@@ -447,7 +465,15 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     const allPurchases = [...userPurchases, ...MOCK_PURCHASES];
     const ledger = buildCashLedger(allReceipts, allPayments);
     return {
-      investmentContracts: [...userInvestments, ...MOCK_CONTRACTS],
+      investmentContracts: [...userInvestments, ...MOCK_CONTRACTS].map((c) => {
+        const delta = investmentUtilizationDeltas[c.id] ?? 0;
+        if (delta === 0) return c;
+        return {
+          ...c,
+          utilized: c.utilized + delta,
+          remaining: Math.max(0, c.remaining - delta),
+        };
+      }),
       addInvestmentContract,
       customers: [...userCustomers, ...MOCK_CUSTOMERS],
       addCustomer,
@@ -531,6 +557,7 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     investorProfitDeltas,
     profitDistributions,
     investorPolicyOverrides,
+    investmentUtilizationDeltas,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

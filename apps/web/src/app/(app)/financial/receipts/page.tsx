@@ -14,11 +14,11 @@ import {
 import { useStore } from "@/lib/mock/store";
 import { findInvestor } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
-import type { ReceiptSourceKey } from "@/lib/i18n/dictionaries";
+import type { PartyTypeKey } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 
-type Filter = "all" | ReceiptSourceKey;
+type Filter = "all" | PartyTypeKey;
 
 export default function ReceiptsListPage() {
   return (
@@ -40,16 +40,15 @@ function ReceiptsListInner() {
 
   const filters: Array<{ key: Filter; label: string }> = [
     { key: "all", label: dict.cashLedger.filters.all },
-    { key: "customerInstallment", label: dict.receiptSource.customerInstallment },
-    { key: "investorDeposit", label: dict.receiptSource.investorDeposit },
-    { key: "officeIncome", label: dict.receiptSource.officeIncome },
-    { key: "other", label: dict.receiptSource.other },
+    { key: "investor", label: dict.partyType.investor },
+    { key: "customer", label: dict.partyType.customer },
+    { key: "other", label: dict.partyType.other },
   ];
 
   const rows = useMemo(() => {
     return receipts
       .filter((rcpt) => (investorId ? rcpt.investorId === investorId : true))
-      .filter((rcpt) => (filter === "all" ? true : rcpt.source === filter))
+      .filter((rcpt) => (filter === "all" ? true : rcpt.partyType === filter))
       .filter((rcpt) => {
         if (!query.trim()) return true;
         const q = query.trim().toLowerCase();
@@ -132,7 +131,7 @@ function ReceiptsListInner() {
                   <tr className="text-[11px] uppercase text-muted-foreground">
                     <th className="px-6 py-3 text-start font-medium">{r.columns.number}</th>
                     <th className="px-6 py-3 text-start font-medium">{r.columns.date}</th>
-                    <th className="px-6 py-3 text-start font-medium">{r.columns.source}</th>
+                    <th className="px-6 py-3 text-start font-medium">{r.columns.party}</th>
                     <th className="px-6 py-3 text-start font-medium">{r.columns.from}</th>
                     <th className="px-6 py-3 text-end font-medium">{r.columns.amount}</th>
                     <th className="px-6 py-3 text-start font-medium">{r.columns.method}</th>
@@ -159,7 +158,7 @@ function ReceiptsListInner() {
                         {formatDate(rcpt.date, locale)}
                       </td>
                       <td className="px-6 py-3 text-muted-foreground">
-                        {dict.receiptSource[rcpt.source]}
+                        {dict.partyType[rcpt.partyType]}
                       </td>
                       <td className="px-6 py-3">{rcpt.fromName}</td>
                       <td className="num px-6 py-3 text-end font-semibold text-success-foreground">

@@ -83,7 +83,7 @@ export default function InstallmentContractDetailsPage({
       date: today,
       amount: payment.amount,
       method: paymentSourceToMethod(payment.source),
-      source: "customerInstallment",
+      partyType: "customer",
       fromName: payment.receiptName ?? customer?.name ?? contract.customerId,
       customerId: contract.customerId,
       contractId: contract.id,

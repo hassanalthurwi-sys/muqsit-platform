@@ -62,18 +62,7 @@ export type NotificationTypeKey =
 export type NotificationPriorityKey = "critical" | "warning" | "info";
 export type PaymentMethodKey = "cash" | "bankTransfer" | "stcPay" | "cheque" | "card";
 export type VoucherStatusKey = "draft" | "verified" | "cancelled";
-export type ReceiptSourceKey =
-  | "customerInstallment"
-  | "investorDeposit"
-  | "officeIncome"
-  | "other";
-export type PaymentCategoryKey =
-  | "goodsPurchase"
-  | "officeExpense"
-  | "salary"
-  | "rent"
-  | "adminExpense"
-  | "other";
+export type PartyTypeKey = "investor" | "customer" | "other";
 export type PurchaseStatusKey = "purchased" | "linkedToContract" | "sold";
 
 export interface Dictionary {
@@ -993,8 +982,7 @@ export interface Dictionary {
   // ─── Sprint 5 ───
   paymentMethod: Record<PaymentMethodKey, string>;
   voucherStatus: Record<VoucherStatusKey, string>;
-  receiptSource: Record<ReceiptSourceKey, string>;
-  paymentCategory: Record<PaymentCategoryKey, string>;
+  partyType: Record<PartyTypeKey, string>;
   purchaseStatus: Record<PurchaseStatusKey, string>;
   financialHub: {
     title: string;
@@ -1020,7 +1008,7 @@ export interface Dictionary {
     columns: {
       number: string;
       date: string;
-      source: string;
+      party: string;
       from: string;
       amount: string;
       method: string;
@@ -1045,8 +1033,8 @@ export interface Dictionary {
       flagDuplicate: string;
     };
     form: {
-      sourceLabel: string;
-      sourcePickerHint: string;
+      partyLabel: string;
+      partyHint: string;
       payerName: string;
       payerNamePlaceholder: string;
       amount: string;
@@ -1071,7 +1059,7 @@ export interface Dictionary {
     columns: {
       number: string;
       date: string;
-      category: string;
+      party: string;
       beneficiary: string;
       amount: string;
       method: string;
@@ -2293,18 +2281,9 @@ const ar: Dictionary = {
     card: "بطاقة",
   },
   voucherStatus: { draft: "مسودة", verified: "موثّق", cancelled: "ملغى" },
-  receiptSource: {
-    customerInstallment: "قسط عميل",
-    investorDeposit: "إيداع مستثمر",
-    officeIncome: "إيراد المكتب",
-    other: "أخرى",
-  },
-  paymentCategory: {
-    goodsPurchase: "شراء بضاعة",
-    officeExpense: "مصروف مكتب",
-    salary: "راتب",
-    rent: "إيجار",
-    adminExpense: "مصروف إداري",
+  partyType: {
+    investor: "مستثمر",
+    customer: "عميل",
     other: "أخرى",
   },
   purchaseStatus: {
@@ -2336,7 +2315,7 @@ const ar: Dictionary = {
     columns: {
       number: "رقم السند",
       date: "التاريخ",
-      source: "المصدر",
+      party: "الطرف",
       from: "من",
       amount: "المبلغ",
       method: "الطريقة",
@@ -2361,8 +2340,8 @@ const ar: Dictionary = {
       flagDuplicate: "⚠ رقم مرجع مكرر — يحتاج مراجعة",
     },
     form: {
-      sourceLabel: "مصدر القبض",
-      sourcePickerHint: "اختر مصدر الدفعة قبل المتابعة.",
+      partyLabel: "نوع الطرف",
+      partyHint: "اختر إذا كان الدفع من مستثمر أو عميل أو طرف آخر.",
       payerName: "اسم الدافع",
       payerNamePlaceholder: "اسم العميل أو المستثمر",
       amount: "المبلغ (ر.س)",
@@ -2387,7 +2366,7 @@ const ar: Dictionary = {
     columns: {
       number: "رقم السند",
       date: "التاريخ",
-      category: "الفئة",
+      party: "الطرف",
       beneficiary: "المستفيد",
       amount: "المبلغ",
       method: "الطريقة",
@@ -3603,18 +3582,9 @@ const en: Dictionary = {
     card: "Card",
   },
   voucherStatus: { draft: "Draft", verified: "Verified", cancelled: "Cancelled" },
-  receiptSource: {
-    customerInstallment: "Customer installment",
-    investorDeposit: "Investor deposit",
-    officeIncome: "Office income",
-    other: "Other",
-  },
-  paymentCategory: {
-    goodsPurchase: "Goods purchase",
-    officeExpense: "Office expense",
-    salary: "Salary",
-    rent: "Rent",
-    adminExpense: "Admin expense",
+  partyType: {
+    investor: "Investor",
+    customer: "Customer",
     other: "Other",
   },
   purchaseStatus: {
@@ -3646,7 +3616,7 @@ const en: Dictionary = {
     columns: {
       number: "Number",
       date: "Date",
-      source: "Source",
+      party: "Party",
       from: "From",
       amount: "Amount",
       method: "Method",
@@ -3671,8 +3641,8 @@ const en: Dictionary = {
       flagDuplicate: "⚠ Duplicate reference — needs review",
     },
     form: {
-      sourceLabel: "Receipt source",
-      sourcePickerHint: "Choose the source of the payment before continuing.",
+      partyLabel: "Party type",
+      partyHint: "Select whether this receipt is from an investor, customer, or other party.",
       payerName: "Payer name",
       payerNamePlaceholder: "Customer or investor name",
       amount: "Amount (SAR)",
@@ -3697,7 +3667,7 @@ const en: Dictionary = {
     columns: {
       number: "Number",
       date: "Date",
-      category: "Category",
+      party: "Party",
       beneficiary: "Beneficiary",
       amount: "Amount",
       method: "Method",

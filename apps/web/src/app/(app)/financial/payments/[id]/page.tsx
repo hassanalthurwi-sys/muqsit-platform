@@ -72,7 +72,7 @@ export default function PaymentDetailPage({
             ) : null}
           </div>
           <p className="text-sm text-muted-foreground">
-            {dict.paymentCategory[payment.category]} · {payment.beneficiaryName}
+            {dict.partyType[payment.partyType]} · {payment.beneficiaryName}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -115,8 +115,8 @@ export default function PaymentDetailPage({
                 }
               />
               <DataRow
-                label={dict.paymentVouchers.columns.category}
-                value={dict.paymentCategory[payment.category]}
+                label={dict.paymentVouchers.columns.party}
+                value={dict.partyType[payment.partyType]}
               />
               <DataRow
                 label={dict.paymentVouchers.columns.method}

@@ -15,11 +15,11 @@ import {
 import { useStore } from "@/lib/mock/store";
 import { findInvestor } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
-import type { PaymentCategoryKey } from "@/lib/i18n/dictionaries";
+import type { PartyTypeKey } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 
-type Filter = "all" | PaymentCategoryKey;
+type Filter = "all" | PartyTypeKey;
 
 export default function PaymentsListPage() {
   return (
@@ -41,17 +41,15 @@ function PaymentsListInner() {
 
   const filters: Array<{ key: Filter; label: string }> = [
     { key: "all", label: dict.cashLedger.filters.all },
-    { key: "goodsPurchase", label: dict.paymentCategory.goodsPurchase },
-    { key: "salary", label: dict.paymentCategory.salary },
-    { key: "rent", label: dict.paymentCategory.rent },
-    { key: "officeExpense", label: dict.paymentCategory.officeExpense },
-    { key: "adminExpense", label: dict.paymentCategory.adminExpense },
+    { key: "investor", label: dict.partyType.investor },
+    { key: "customer", label: dict.partyType.customer },
+    { key: "other", label: dict.partyType.other },
   ];
 
   const rows = useMemo(() => {
     return payments
       .filter((pv) => (investorId ? pv.investorId === investorId : true))
-      .filter((pv) => (filter === "all" ? true : pv.category === filter))
+      .filter((pv) => (filter === "all" ? true : pv.partyType === filter))
       .filter((pv) => {
         if (!query.trim()) return true;
         const q = query.trim().toLowerCase();
@@ -133,7 +131,7 @@ function PaymentsListInner() {
                   <tr className="text-[11px] uppercase text-muted-foreground">
                     <th className="px-6 py-3 text-start font-medium">{p.columns.number}</th>
                     <th className="px-6 py-3 text-start font-medium">{p.columns.date}</th>
-                    <th className="px-6 py-3 text-start font-medium">{p.columns.category}</th>
+                    <th className="px-6 py-3 text-start font-medium">{p.columns.party}</th>
                     <th className="px-6 py-3 text-start font-medium">{p.columns.beneficiary}</th>
                     <th className="px-6 py-3 text-end font-medium">{p.columns.amount}</th>
                     <th className="px-6 py-3 text-start font-medium">{p.columns.method}</th>
@@ -160,7 +158,7 @@ function PaymentsListInner() {
                         {formatDate(pv.date, locale)}
                       </td>
                       <td className="px-6 py-3 text-muted-foreground">
-                        {dict.paymentCategory[pv.category]}
+                        {dict.partyType[pv.partyType]}
                       </td>
                       <td className="px-6 py-3">{pv.beneficiaryName}</td>
                       <td className="num px-6 py-3 text-end font-semibold text-danger-foreground">

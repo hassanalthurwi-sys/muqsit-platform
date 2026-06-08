@@ -72,7 +72,7 @@ export default function ReceiptDetailPage({
             <VoucherStatusPill status={receipt.status} />
           </div>
           <p className="text-sm text-muted-foreground">
-            {dict.receiptSource[receipt.source]} · {receipt.fromName}
+            {dict.partyType[receipt.partyType]} · {receipt.fromName}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -142,7 +142,7 @@ export default function ReceiptDetailPage({
           </CardHeader>
           <CardContent>
             <DataRows>
-              <DataRow label={dict.receipts.columns.source} value={dict.receiptSource[receipt.source]} />
+              <DataRow label={dict.receipts.columns.party} value={dict.partyType[receipt.partyType]} />
               <DataRow label={dict.receipts.columns.from} value={receipt.fromName} />
               {customer ? (
                 <DataRow

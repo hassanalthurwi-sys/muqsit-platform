@@ -10,18 +10,13 @@ import { useStore } from "@/lib/mock/store";
 import { findInvestor, MOCK_INVESTORS } from "@/lib/mock/investors";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type {
+  PartyType,
   PaymentMethod,
-  ReceiptSource,
   ReceiptVoucher,
 } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
 
-const SOURCES: ReceiptSource[] = [
-  "customerInstallment",
-  "investorDeposit",
-  "officeIncome",
-  "other",
-];
+const PARTY_TYPES: PartyType[] = ["investor", "customer", "other"];
 const METHODS: PaymentMethod[] = ["bankTransfer", "cash", "stcPay", "cheque", "card"];
 
 function nextReceiptNumber(receipts: ReceiptVoucher[]): string {
@@ -50,49 +45,46 @@ function NewReceiptInner() {
   const prefilledInvestorId = search.get("investorId") ?? "";
   const prefilledInvestor = prefilledInvestorId ? findInvestor(prefilledInvestorId) : undefined;
 
-  const [source, setSource] = useState<ReceiptSource>(
-    prefilledInvestor ? "investorDeposit" : "customerInstallment",
-  );
+  const [partyType, setPartyType] = useState<PartyType>(prefilledInvestor ? "investor" : "customer");
   const [method, setMethod] = useState<PaymentMethod>("bankTransfer");
-  const [payerName, setPayerName] = useState(prefilledInvestor?.name ?? "");
   const [investorId, setInvestorId] = useState(prefilledInvestorId);
+  const [customerId, setCustomerId] = useState("");
+  const [otherName, setOtherName] = useState("");
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
-  const [contractId, setContractId] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Investor deposit receipts must NOT be linked to any investment contract
-  // — investors deposit first, contracts may be created later. Only customer
-  // installment receipts get a linked contract.
-  const linkedOptions = useMemo(() => {
-    if (source === "customerInstallment") {
-      return installmentContracts.map((co) => ({
-        id: co.id,
-        label: `${co.number} · ${customers.find((cu) => cu.id === co.customerId)?.name ?? ""}`,
-      }));
-    }
-    return [];
-  }, [source, customers, installmentContracts]);
+  // Customer installments are the only receipts that carry a contract link;
+  // the link surfaces once a customer is chosen.
+  const customerInstallments = useMemo(
+    () => (partyType === "customer" && customerId
+      ? installmentContracts.filter((co) => co.customerId === customerId)
+      : []),
+    [partyType, customerId, installmentContracts],
+  );
+  const [contractId, setContractId] = useState("");
+
+  const resolvedFromName = (() => {
+    if (partyType === "investor") return MOCK_INVESTORS.find((i) => i.id === investorId)?.name ?? "";
+    if (partyType === "customer") return customers.find((cu) => cu.id === customerId)?.name ?? "";
+    return otherName;
+  })();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const numericAmount = parseFloat(amount);
-    if (!payerName || !numericAmount || numericAmount <= 0) return;
+    if (!resolvedFromName || !numericAmount || numericAmount <= 0) return;
     const receipt: ReceiptVoucher = {
       id: `rc-u-${Date.now()}`,
       number: nextReceiptNumber(receipts),
       date: new Date("2025-05-31").toISOString().slice(0, 10),
       amount: numericAmount,
       method,
-      source,
-      fromName: payerName,
-      customerId:
-        source === "customerInstallment"
-          ? installmentContracts.find((c) => c.id === contractId)?.customerId
-          : undefined,
-      contractId: source === "customerInstallment" ? contractId || undefined : undefined,
-      investorId: source === "investorDeposit" ? investorId || undefined : undefined,
-      investmentContractId: undefined,
+      partyType,
+      fromName: resolvedFromName,
+      customerId: partyType === "customer" ? customerId || undefined : undefined,
+      contractId: partyType === "customer" ? contractId || undefined : undefined,
+      investorId: partyType === "investor" ? investorId || undefined : undefined,
       reference: reference || undefined,
       notes: notes || undefined,
       createdById: "emp-manager-1",
@@ -126,18 +118,18 @@ function NewReceiptInner() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">{f.sourceLabel}</CardTitle>
-          <p className="text-xs text-muted-foreground">{f.sourcePickerHint}</p>
+          <CardTitle className="text-base font-semibold">{f.partyLabel}</CardTitle>
+          <p className="text-xs text-muted-foreground">{f.partyHint}</p>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {SOURCES.map((s) => {
-              const active = source === s;
+          <div className="grid gap-2 sm:grid-cols-3">
+            {PARTY_TYPES.map((pt) => {
+              const active = partyType === pt;
               return (
                 <button
-                  key={s}
+                  key={pt}
                   type="button"
-                  onClick={() => setSource(s)}
+                  onClick={() => setPartyType(pt)}
                   className={cn(
                     "rounded-lg border px-3 py-2.5 text-start text-sm transition-colors",
                     active
@@ -145,7 +137,7 @@ function NewReceiptInner() {
                       : "border-input hover:bg-muted",
                   )}
                 >
-                  {dict.receiptSource[s]}
+                  {dict.partyType[pt]}
                 </button>
               );
             })}
@@ -156,18 +148,14 @@ function NewReceiptInner() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardContent className="space-y-4 p-5">
-            {source === "investorDeposit" ? (
+            {partyType === "investor" ? (
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">
-                  {dict.investors.pageTitle}
+                  {dict.partyType.investor}
                 </label>
                 <select
                   value={investorId}
-                  onChange={(e) => {
-                    setInvestorId(e.target.value);
-                    const inv = MOCK_INVESTORS.find((i) => i.id === e.target.value);
-                    if (inv) setPayerName(inv.name);
-                  }}
+                  onChange={(e) => setInvestorId(e.target.value)}
                   required
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
@@ -179,19 +167,42 @@ function NewReceiptInner() {
                   ))}
                 </select>
               </div>
-            ) : null}
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                {f.payerName}
-              </label>
-              <input
-                value={payerName}
-                onChange={(e) => setPayerName(e.target.value)}
-                placeholder={f.payerNamePlaceholder}
-                required
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-              />
-            </div>
+            ) : partyType === "customer" ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {dict.partyType.customer}
+                </label>
+                <select
+                  value={customerId}
+                  onChange={(e) => {
+                    setCustomerId(e.target.value);
+                    setContractId("");
+                  }}
+                  required
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">—</option>
+                  {customers.map((cu) => (
+                    <option key={cu.id} value={cu.id}>
+                      {cu.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {f.payerName}
+                </label>
+                <input
+                  value={otherName}
+                  onChange={(e) => setOtherName(e.target.value)}
+                  placeholder={f.payerNamePlaceholder}
+                  required
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                />
+              </div>
+            )}
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">{f.amount}</label>
               <input
@@ -243,7 +254,7 @@ function NewReceiptInner() {
                 className="num flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               />
             </div>
-            {linkedOptions.length > 0 ? (
+            {customerInstallments.length > 0 ? (
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">
                   {f.linkToContract}
@@ -254,9 +265,9 @@ function NewReceiptInner() {
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
                   <option value="">{f.linkToContractPlaceholder}</option>
-                  {linkedOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.label}
+                  {customerInstallments.map((co) => (
+                    <option key={co.id} value={co.id}>
+                      {co.number}
                     </option>
                   ))}
                 </select>

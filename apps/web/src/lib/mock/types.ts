@@ -355,11 +355,10 @@ export type PaymentMethod = "cash" | "bankTransfer" | "stcPay" | "cheque" | "car
 
 export type VoucherStatus = "draft" | "verified" | "cancelled";
 
-export type ReceiptSource =
-  | "customerInstallment"
-  | "investorDeposit"
-  | "officeIncome"
-  | "other";
+// Sprint 10 — a single voucher classifier. Every receipt and payment is
+// generic; the only thing that distinguishes them is the *party* the
+// office transacted with.
+export type PartyType = "investor" | "customer" | "other";
 
 export interface ReceiptVoucher {
   id: string;
@@ -367,7 +366,7 @@ export interface ReceiptVoucher {
   date: string;
   amount: number;
   method: PaymentMethod;
-  source: ReceiptSource;
+  partyType: PartyType;
   fromName: string;
   customerId?: string;
   investorId?: string;
@@ -384,19 +383,11 @@ export interface ReceiptVoucher {
   flags?: string[];
 }
 
-export type PaymentCategory =
-  | "goodsPurchase"
-  | "officeExpense"
-  | "salary"
-  | "rent"
-  | "adminExpense"
-  | "other";
-
 export interface PaymentVoucher {
   id: string;
   number: string;
   date: string;
-  category: PaymentCategory;
+  partyType: PartyType;
   amount: number;
   method: PaymentMethod;
   beneficiaryName: string;

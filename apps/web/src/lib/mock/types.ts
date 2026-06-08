@@ -360,6 +360,35 @@ export type VoucherStatus = "draft" | "verified" | "cancelled";
 // office transacted with.
 export type PartyType = "investor" | "customer" | "other";
 
+// ─── Voucher model — forward-looking extension points ─────────────────
+//
+// Sprint 10 deliberately keeps the voucher model spare. The fields below
+// are designed so the following future capabilities don't require a
+// schema rewrite — none of them are implemented yet:
+//
+//   1. Printable receiver / sender on the voucher.
+//      Today: the office side is implicit. Tomorrow: derive from
+//      `officeSettings` at print time. If a per-voucher override is
+//      needed later, add optional `receiverName` / `senderName`.
+//
+//   2. Richer status workflow (e.g. Draft → Approved → Cancelled).
+//      Today: `VoucherStatus` is a string union — extend or rename in
+//      place. `PaymentVoucher.needsApproval` + `approvalId` already
+//      seed the workflow.
+//
+//   3. Optional contract reference on manually-created vouchers.
+//      Today: both voucher types already carry optional `contractId`
+//      (installment) and `investmentContractId`. The UI hides the link
+//      for some flows; the schema does not enforce that.
+//
+//   4. Printable voucher template.
+//      All printable fields (number, date, party, amount, method,
+//      reference, description, signatures-by-id) are already on the
+//      voucher and joinable to office / investor / customer for the
+//      rest. Only the print template and an Arabic-amount-in-words
+//      utility are missing — additive, no schema impact.
+// ──────────────────────────────────────────────────────────────────────
+
 export interface ReceiptVoucher {
   id: string;
   number: string;

@@ -111,7 +111,6 @@ function InvestmentsList() {
                   <th className="px-6 py-3 text-start font-medium">{inv.columns.amount}</th>
                   <th className="px-6 py-3 text-start font-medium">{inv.columns.start}</th>
                   <th className="px-6 py-3 text-start font-medium">{inv.columns.end}</th>
-                  <th className="px-6 py-3 text-start font-medium">{inv.columns.ops}</th>
                   <th className="px-6 py-3 text-start font-medium">{inv.columns.utilized}</th>
                   <th className="px-6 py-3 text-start font-medium">{inv.columns.remaining}</th>
                   <th className="px-6 py-3 text-start font-medium">{inv.columns.status}</th>
@@ -168,7 +167,6 @@ function InvestmentsList() {
                       <td className="num px-6 py-3 text-muted-foreground">
                         {formatDate(c.endDate, locale)}
                       </td>
-                      <td className="num px-6 py-3">{c.operationPct}%</td>
                       <td className="num px-6 py-3">
                         <span className="inline-flex items-center gap-2">
                           <Currency value={c.utilized} compact />

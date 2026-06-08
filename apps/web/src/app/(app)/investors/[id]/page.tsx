@@ -448,9 +448,6 @@ export default function InvestorProfilePage({
                       {dict.investments.columns.end}
                     </th>
                     <th className="px-6 py-2 text-start font-medium">
-                      {dict.investments.columns.ops}
-                    </th>
-                    <th className="px-6 py-2 text-start font-medium">
                       {dict.investments.columns.status}
                     </th>
                   </tr>
@@ -475,7 +472,6 @@ export default function InvestorProfilePage({
                       <td className="num px-6 py-2.5 text-muted-foreground">
                         {formatDate(c.endDate, locale)}
                       </td>
-                      <td className="num px-6 py-2.5">{c.operationPct}%</td>
                       <td className="px-6 py-2.5">
                         <StatusPill
                           tone={

@@ -420,10 +420,6 @@ export default function NewInstallmentContractPage() {
                       label={dict.investments.columns.remaining}
                       value={<Currency value={availableInChosen} />}
                     />
-                    <DataRow
-                      label={dict.investments.details.operationPct}
-                      value={<span className="num">{chosenInvContract.operationPct}%</span>}
-                    />
                   </DataRows>
                 </div>
               ) : null}

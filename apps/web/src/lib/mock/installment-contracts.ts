@@ -140,15 +140,20 @@ export const MOCK_INSTALLMENT_CONTRACTS: InstallmentContract[] = [
     id: "ins-2025-001",
     number: "INS-2025-001",
     customerId: "cus-1",
-    productType: "iPhone 15 Pro 256GB",
-    cashPrice: 4_000,
-    installmentPrice: 5_200,
-    downPayment: 600,
-    installmentsCount: 12,
+    productType: "حاسب آلي للأعمال",
+    // Showcase numbers chosen to make the policy math easy to follow:
+    //   Cash price 10,000 — Installment price 17,000 — Markup 7,000.
+    //   17 monthly installments of 1,000 each, no down payment.
+    //   Under Office First, the office collects its 3,000 share over the
+    //   first 3 installments; investor recovers over the remaining 14.
+    cashPrice: 10_000,
+    installmentPrice: 17_000,
+    downPayment: 0,
+    installmentsCount: 17,
     startDate: "2025-02-15",
     investmentContractId: "c-2024-001",
     documentName: "INS-2025-001-contract.pdf",
-    schedule: { paidThrough: 2, overrides: { 3: { paidAmount: 200, status: "partiallyPaid" } } },
+    schedule: { paidThrough: 3 },
   }),
   deriveContract({
     id: "ins-2024-018",

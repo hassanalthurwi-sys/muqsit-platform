@@ -38,6 +38,8 @@ import type {
   PaymentProof,
   PaymentVoucher,
   PermissionAction,
+  MigrationStepKey,
+  MigrationStepState,
   PermissionState,
   ProfitDistribution,
   ProofStatus,
@@ -63,6 +65,8 @@ const KEY_PROFIT_DISTRIBUTIONS = "muqsit_profit_distributions";
 const KEY_INSTALLMENT_RECOVERY = "muqsit_installment_recovery";
 const KEY_INVESTMENT_UTILIZATION = "muqsit_investment_utilization";
 const KEY_INVESTOR_POLICY_OVERRIDES = "muqsit_investor_policy_overrides";
+const KEY_MIGRATION_PROGRESS = "muqsit_migration_progress";
+const KEY_MIGRATION_COMPLETED = "muqsit_migration_completed";
 
 interface ProofDecisionPatch {
   status: ProofStatus;
@@ -129,6 +133,12 @@ interface Store {
     investorId: string,
     override: "useOfficeDefault" | import("./types").ProfitDistributionPolicy,
   ) => void;
+  // Sprint 12 — migration journey
+  migrationProgress: Partial<Record<MigrationStepKey, MigrationStepState>>;
+  migrationCompleted: boolean;
+  updateMigrationStep: (step: MigrationStepKey, patch: Partial<MigrationStepState>) => void;
+  completeMigration: () => void;
+  resetMigration: () => void;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -179,6 +189,11 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
   const [investorPolicyOverrides, setInvestorPolicyOverrides] = useState<
     Record<string, "useOfficeDefault" | import("./types").ProfitDistributionPolicy>
   >({});
+  // Sprint 12 — migration journey
+  const [migrationProgress, setMigrationProgress] = useState<
+    Partial<Record<MigrationStepKey, MigrationStepState>>
+  >({});
+  const [migrationCompleted, setMigrationCompleted] = useState<boolean>(false);
 
   useEffect(() => {
     setUserInvestments(safeRead<InvestmentContract[]>(KEY_INVESTMENT_CONTRACTS) ?? []);
@@ -210,6 +225,10 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
         KEY_INVESTOR_POLICY_OVERRIDES,
       ) ?? {},
     );
+    setMigrationProgress(
+      safeRead<Partial<Record<MigrationStepKey, MigrationStepState>>>(KEY_MIGRATION_PROGRESS) ?? {},
+    );
+    setMigrationCompleted(safeRead<boolean>(KEY_MIGRATION_COMPLETED) ?? false);
   }, []);
 
   const applyInvestorDelta = useCallback((investorId: string, delta: number) => {
@@ -528,6 +547,30 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
           return next;
         });
       },
+      migrationProgress,
+      migrationCompleted,
+      updateMigrationStep: (step, patch) => {
+        setMigrationProgress((prev) => {
+          const current = prev[step] ?? {
+            status: "notStarted" as const,
+            rows: [],
+            matches: [],
+          };
+          const next = { ...prev, [step]: { ...current, ...patch } };
+          safeWrite(KEY_MIGRATION_PROGRESS, next);
+          return next;
+        });
+      },
+      completeMigration: () => {
+        setMigrationCompleted(true);
+        safeWrite(KEY_MIGRATION_COMPLETED, true);
+      },
+      resetMigration: () => {
+        setMigrationProgress({});
+        setMigrationCompleted(false);
+        safeWrite(KEY_MIGRATION_PROGRESS, {});
+        safeWrite(KEY_MIGRATION_COMPLETED, false);
+      },
     };
   }, [
     userInvestments,
@@ -558,6 +601,8 @@ export function ContractStoreProvider({ children }: { children: React.ReactNode 
     profitDistributions,
     investorPolicyOverrides,
     investmentUtilizationDeltas,
+    migrationProgress,
+    migrationCompleted,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

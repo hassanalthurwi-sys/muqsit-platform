@@ -14,6 +14,7 @@ import {
   FileSignature,
   ScrollText,
   ShieldAlert,
+  Sparkles,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -129,6 +130,34 @@ function ProgressBar({ value, className }: { value: number; className?: string }
 }
 
 // ─── Sections ───
+
+function MigrationBanner() {
+  const { dict, dir } = useI18n();
+  const { migrationProgress, migrationCompleted } = useStore();
+  const m = dict.migration;
+  if (migrationCompleted) return null;
+  // Hide if user has explicitly skipped or finished all steps already
+  return (
+    <Link
+      href="/migration"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold-soft bg-gold-soft/30 px-5 py-4 transition-colors hover:bg-gold-soft/50"
+    >
+      <div className="flex items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground">
+          <Sparkles className="size-5" />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-gold-foreground">{m.bannerTitle}</p>
+          <p className="text-xs text-muted-foreground">{m.bannerHint}</p>
+        </div>
+      </div>
+      <span className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
+        {Object.keys(migrationProgress).length > 0 ? m.resumeCta : m.bannerCta}
+        {dir === "rtl" ? <ArrowLeft className="size-3" /> : <ArrowRight className="size-3" />}
+      </span>
+    </Link>
+  );
+}
 
 function Tier1Kpis() {
   const { dict } = useI18n();
@@ -597,6 +626,7 @@ export default function DashboardPage() {
         <p className="text-sm text-muted-foreground">{dict.dashboard.subtitle}</p>
       </header>
 
+      <MigrationBanner />
       <Tier1Kpis />
       <SmartAlerts />
 

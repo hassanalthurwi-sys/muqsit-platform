@@ -570,3 +570,48 @@ export interface OfficeSettings {
     alertTypes: NotificationAlertType[];
   };
 }
+
+// ─── Sprint 12 — Migration Journey ────────────────────────────────────
+
+export type MigrationStepKey =
+  | "investors"
+  | "investmentContracts"
+  | "customers"
+  | "installmentContracts"
+  | "receipts"
+  | "payments"
+  | "review";
+
+export type MigrationInputMethod = "excel" | "pdf" | "scan" | "manual";
+
+export type MigrationStepStatus =
+  | "notStarted"
+  | "selectingMethod"
+  | "analyzing"
+  | "needsReview"
+  | "completed"
+  | "skipped";
+
+export type MigrationFieldStatus = "confirmed" | "needsReview" | "missing";
+
+// One imported row — a row in the review table.
+export interface MigrationRow {
+  id: string;
+  cells: Record<string, { value: string; status: MigrationFieldStatus }>;
+}
+
+// One pairing question — "are these the same?"
+export interface MigrationMatchPrompt {
+  id: string;
+  importedLabel: string;   // e.g. "محمد السبيعي"
+  existingLabel: string;   // e.g. "محمد بن عبدالله السبيعي"
+  context: string;         // e.g. "من عقد استثمار 100,000 ر.س"
+  resolution?: "same" | "different";  // user's answer
+}
+
+export interface MigrationStepState {
+  status: MigrationStepStatus;
+  method?: MigrationInputMethod;
+  rows: MigrationRow[];
+  matches: MigrationMatchPrompt[];
+}

@@ -1011,6 +1011,50 @@ export interface Dictionary {
     investorPolicyLabel: string;
     investorPolicyHint: string;
   };
+  migration: {
+    title: string;
+    subtitle: string;
+    journeyTitle: string;
+    bannerTitle: string;
+    bannerHint: string;
+    bannerCta: string;
+    startCta: string;
+    resumeCta: string;
+    skipStep: string;
+    backToOverview: string;
+    nextStep: string;
+    approveStep: string;
+    steps: Record<"investors" | "investmentContracts" | "customers" | "installmentContracts" | "receipts" | "payments" | "review", { title: string; subtitle: string }>;
+    stepStatus: Record<"notStarted" | "inProgress" | "completed" | "skipped", string>;
+    methodQuestion: string;
+    methods: Record<"excel" | "pdf" | "scan" | "manual", { label: string; hint: string }>;
+    uploadHint: string;
+    chooseFile: string;
+    analyzingTitle: string;
+    analyzingHint: string;
+    extractedCount: string;
+    reviewTableTitle: string;
+    cellConfirmed: string;
+    cellNeedsReview: string;
+    cellMissing: string;
+    summaryConfirmed: string;
+    summaryNeedsReview: string;
+    summaryMissing: string;
+    reconciliationTitle: string;
+    reconciliationHint: string;
+    samePerson: string;
+    differentPerson: string;
+    reconciliationDone: string;
+    finalReviewTitle: string;
+    finalReviewHint: string;
+    finalApprove: string;
+    finalApproveConfirm: string;
+    completedTitle: string;
+    completedSubtitle: string;
+    completedCount: string;
+    completedCta: string;
+    columnLabels: Record<string, string>;
+  };
   purchaseStatus: Record<PurchaseStatusKey, string>;
   financialHub: {
     title: string;
@@ -2342,6 +2386,97 @@ const ar: Dictionary = {
     investorPolicyLabel: "سياسة توزيع الأرباح",
     investorPolicyHint: "تُلغي افتراضي المكتب لهذا المستثمر فقط.",
   },
+  migration: {
+    title: "الانتقال إلى مُقسِّط",
+    subtitle: "ساعد فريقنا في نقل بيانات مكتبك القديمة خطوة بخطوة.",
+    journeyTitle: "رحلة الانتقال",
+    bannerTitle: "هل عندك بيانات قديمة تريد نقلها؟",
+    bannerHint: "ساعدك خطوة بخطوة — إكسل، PDF، أو حتى صور — نتولى الباقي.",
+    bannerCta: "ابدأ رحلة الانتقال",
+    startCta: "ابدأ من هنا",
+    resumeCta: "استكمل من حيث وقفت",
+    skipStep: "تخطّي هذه الخطوة",
+    backToOverview: "العودة للرحلة",
+    nextStep: "الخطوة التالية",
+    approveStep: "اعتماد هذه البيانات",
+    steps: {
+      investors: { title: "المستثمرون", subtitle: "بيانات شركاء رأس المال" },
+      investmentContracts: { title: "عقود الاستثمار", subtitle: "ربط رأس المال بكل مستثمر" },
+      customers: { title: "العملاء", subtitle: "بيانات عملاء التقسيط" },
+      installmentContracts: { title: "عقود التقسيط", subtitle: "السلع المباعة بالتقسيط" },
+      receipts: { title: "سندات القبض", subtitle: "كل ما دخل المكتب من أموال" },
+      payments: { title: "سندات الصرف", subtitle: "كل ما خرج من المكتب من أموال" },
+      review: { title: "المراجعة النهائية", subtitle: "اعتماد الانتقال إلى مُقسِّط" },
+    },
+    stepStatus: {
+      notStarted: "لم تُبدأ",
+      inProgress: "قيد المراجعة",
+      completed: "مكتملة",
+      skipped: "متخطّاة",
+    },
+    methodQuestion: "ما نوع الملفات المتوفرة لديك؟",
+    methods: {
+      excel: { label: "ملف Excel", hint: "تحليل دقيق — يستخرج كل الحقول تقريباً." },
+      pdf: { label: "ملفات PDF", hint: "تحليل جيد — قد تحتاج بعض الحقول مراجعة." },
+      scan: { label: "صور أو مسح ضوئي", hint: "تحليل أوّلي — راجع الحقول المهمة." },
+      manual: { label: "إدخال يدوي", hint: "ابدأ بسجل فارغ وأضف كل سجل بنفسك." },
+    },
+    uploadHint: "اسحب الملفات هنا أو اضغط للاختيار (نموذج تجريبي — لا يرفع ملفات حقيقية)",
+    chooseFile: "اختيار ملف",
+    analyzingTitle: "جاري تحليل بياناتك...",
+    analyzingHint: "نقرأ الملفات ونستخرج السجلات. لحظات قليلة.",
+    extractedCount: "تم التعرف على {n} سجلاً",
+    reviewTableTitle: "راجع البيانات المُستخرجة",
+    cellConfirmed: "مؤكد",
+    cellNeedsReview: "يحتاج مراجعة",
+    cellMissing: "ناقص",
+    summaryConfirmed: "{n} مؤكدة",
+    summaryNeedsReview: "{n} تحتاج مراجعة",
+    summaryMissing: "{n} ناقصة",
+    reconciliationTitle: "هل هذان نفس الشخص؟",
+    reconciliationHint: "وجدنا تشابهاً بين بيانات استوردتها وبيانات موجودة في النظام.",
+    samePerson: "نعم، نفس الشخص",
+    differentPerson: "لا، أشخاص مختلفون",
+    reconciliationDone: "تم الربط",
+    finalReviewTitle: "كل شيء جاهز للانتقال",
+    finalReviewHint: "راجع الأعداد قبل الاعتماد النهائي. تستطيع الرجوع لأي خطوة بالضغط عليها.",
+    finalApprove: "اعتماد الانتقال إلى مُقسِّط",
+    finalApproveConfirm: "سيُضاف ما اعتمدته إلى نظامك بشكل نهائي.",
+    completedTitle: "أهلاً بك في مُقسِّط ✨",
+    completedSubtitle: "تم نقل بياناتك بنجاح. مكتبك جاهز للعمل.",
+    completedCount: "{n} سجل تم نقله",
+    completedCta: "ابدأ استخدام النظام",
+    columnLabels: {
+      name: "الاسم",
+      identityType: "نوع الهوية",
+      identityNumber: "رقم الهوية",
+      phone: "الجوال",
+      email: "البريد",
+      bank: "البنك",
+      iban: "رقم الآيبان",
+      investor: "المستثمر",
+      capital: "رأس المال",
+      officeProfit: "ربح المكتب",
+      investorProfit: "ربح المستثمر",
+      startDate: "تاريخ البداية",
+      durationMonths: "المدة (شهر)",
+      city: "المدينة",
+      employer: "صاحب العمل",
+      monthlySalary: "الراتب الشهري",
+      customer: "العميل",
+      product: "السلعة",
+      cashPrice: "قيمة كاش",
+      installmentPrice: "قيمة تقسيطاً",
+      installmentsCount: "عدد الأقساط",
+      fundedBy: "مموَّل من",
+      date: "التاريخ",
+      party: "الطرف",
+      partyType: "نوع الطرف",
+      amount: "المبلغ",
+      method: "طريقة الدفع",
+      description: "الوصف",
+    },
+  },
   purchaseStatus: {
     purchased: "تم الشراء",
     linkedToContract: "مرتبط بعقد",
@@ -3670,6 +3805,97 @@ const en: Dictionary = {
     investorExpected: "Investor expected profit",
     investorPolicyLabel: "Profit distribution policy",
     investorPolicyHint: "Overrides the office default for this investor only.",
+  },
+  migration: {
+    title: "Move to Muqsit",
+    subtitle: "We'll help your office bring its old data over, one step at a time.",
+    journeyTitle: "Migration journey",
+    bannerTitle: "Have old data to bring across?",
+    bannerHint: "Excel, PDFs, or even photos — we walk you through it.",
+    bannerCta: "Start the journey",
+    startCta: "Start here",
+    resumeCta: "Resume where you left off",
+    skipStep: "Skip this step",
+    backToOverview: "Back to journey",
+    nextStep: "Next step",
+    approveStep: "Approve this data",
+    steps: {
+      investors: { title: "Investors", subtitle: "Your capital partners" },
+      investmentContracts: { title: "Investment contracts", subtitle: "Link capital to each investor" },
+      customers: { title: "Customers", subtitle: "Your installment customers" },
+      installmentContracts: { title: "Installment contracts", subtitle: "Items sold on installments" },
+      receipts: { title: "Receipt vouchers", subtitle: "Money that came in" },
+      payments: { title: "Payment vouchers", subtitle: "Money that went out" },
+      review: { title: "Final review", subtitle: "Approve the migration" },
+    },
+    stepStatus: {
+      notStarted: "Not started",
+      inProgress: "In review",
+      completed: "Done",
+      skipped: "Skipped",
+    },
+    methodQuestion: "What kind of files do you have?",
+    methods: {
+      excel: { label: "Excel file", hint: "Cleanest extraction — almost every field captured." },
+      pdf: { label: "PDF files", hint: "Good extraction — a few fields may need review." },
+      scan: { label: "Photos or scans", hint: "Initial extraction — review the important fields." },
+      manual: { label: "Manual entry", hint: "Start blank and add each record yourself." },
+    },
+    uploadHint: "Drop files here or click to choose (prototype — no real upload)",
+    chooseFile: "Choose a file",
+    analyzingTitle: "Analyzing your data...",
+    analyzingHint: "Reading the files and extracting records. Just a moment.",
+    extractedCount: "{n} records recognized",
+    reviewTableTitle: "Review the extracted data",
+    cellConfirmed: "Confirmed",
+    cellNeedsReview: "Needs review",
+    cellMissing: "Missing",
+    summaryConfirmed: "{n} confirmed",
+    summaryNeedsReview: "{n} need review",
+    summaryMissing: "{n} missing",
+    reconciliationTitle: "Are these the same person?",
+    reconciliationHint: "We found a possible match between imported data and existing records.",
+    samePerson: "Yes, same person",
+    differentPerson: "No, different people",
+    reconciliationDone: "Linked",
+    finalReviewTitle: "Everything's ready",
+    finalReviewHint: "Check the counts before final approval. Tap any step to revisit it.",
+    finalApprove: "Approve migration",
+    finalApproveConfirm: "What you approved will be added to your system permanently.",
+    completedTitle: "Welcome to Muqsit ✨",
+    completedSubtitle: "Your data is in. Your office is ready to go.",
+    completedCount: "{n} records migrated",
+    completedCta: "Start using Muqsit",
+    columnLabels: {
+      name: "Name",
+      identityType: "ID type",
+      identityNumber: "ID number",
+      phone: "Phone",
+      email: "Email",
+      bank: "Bank",
+      iban: "IBAN",
+      investor: "Investor",
+      capital: "Capital",
+      officeProfit: "Office profit",
+      investorProfit: "Investor profit",
+      startDate: "Start date",
+      durationMonths: "Duration (months)",
+      city: "City",
+      employer: "Employer",
+      monthlySalary: "Monthly salary",
+      customer: "Customer",
+      product: "Product",
+      cashPrice: "Cash price",
+      installmentPrice: "Installment price",
+      installmentsCount: "Installments",
+      fundedBy: "Funded by",
+      date: "Date",
+      party: "Party",
+      partyType: "Party type",
+      amount: "Amount",
+      method: "Method",
+      description: "Description",
+    },
   },
   purchaseStatus: {
     purchased: "Purchased",

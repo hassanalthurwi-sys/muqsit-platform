@@ -1027,7 +1027,7 @@ export interface Dictionary {
     steps: Record<"investors" | "investmentContracts" | "customers" | "installmentContracts" | "receipts" | "payments" | "review", { title: string; subtitle: string }>;
     stepStatus: Record<"notStarted" | "inProgress" | "completed" | "skipped", string>;
     methodQuestion: string;
-    methods: Record<"excel" | "pdf" | "scan" | "manual", { label: string; hint: string }>;
+    methods: Record<"excel" | "pdf" | "screenshots" | "scan" | "manual", { label: string; hint: string }>;
     uploadHint: string;
     chooseFile: string;
     analyzingTitle: string;
@@ -2418,7 +2418,11 @@ const ar: Dictionary = {
     methods: {
       excel: { label: "ملف Excel", hint: "تحليل دقيق — يستخرج كل الحقول تقريباً." },
       pdf: { label: "ملفات PDF", hint: "تحليل جيد — قد تحتاج بعض الحقول مراجعة." },
-      scan: { label: "صور أو مسح ضوئي", hint: "تحليل أوّلي — راجع الحقول المهمة." },
+      screenshots: {
+        label: "لقطات من نظامك الحالي",
+        hint: "لو ما تقدر تصدّر بياناتك، ارفع لقطات من شاشات نظامك الحالي ونحاول استخراج المستثمرين والعقود والعملاء والسندات للمراجعة.",
+      },
+      scan: { label: "صور أو مسح ضوئي للأوراق", hint: "تحليل أوّلي — راجع الحقول المهمة." },
       manual: { label: "إدخال يدوي", hint: "ابدأ بسجل فارغ وأضف كل سجل بنفسك." },
     },
     uploadHint: "اسحب الملفات هنا أو اضغط للاختيار (نموذج تجريبي — لا يرفع ملفات حقيقية)",
@@ -3838,7 +3842,11 @@ const en: Dictionary = {
     methods: {
       excel: { label: "Excel file", hint: "Cleanest extraction — almost every field captured." },
       pdf: { label: "PDF files", hint: "Good extraction — a few fields may need review." },
-      scan: { label: "Photos or scans", hint: "Initial extraction — review the important fields." },
+      screenshots: {
+        label: "Screenshots from your current system",
+        hint: "If you can't export your data, upload screenshots from your current system and we'll attempt to extract investors, contracts, customers, and vouchers for your review.",
+      },
+      scan: { label: "Photos or paper scans", hint: "Initial extraction — review the important fields." },
       manual: { label: "Manual entry", hint: "Start blank and add each record yourself." },
     },
     uploadHint: "Drop files here or click to choose (prototype — no real upload)",

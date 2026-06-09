@@ -1,6 +1,6 @@
 "use client";
 
-import { FileSpreadsheet, FileText, ScanLine, Keyboard } from "lucide-react";
+import { FileSpreadsheet, FileText, Camera, ScanLine, Keyboard } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { MigrationInputMethod } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const METHODS: { key: MigrationInputMethod; Icon: typeof FileSpreadsheet }[] = [
   { key: "excel", Icon: FileSpreadsheet },
   { key: "pdf", Icon: FileText },
+  { key: "screenshots", Icon: Camera },
   { key: "scan", Icon: ScanLine },
   { key: "manual", Icon: Keyboard },
 ];

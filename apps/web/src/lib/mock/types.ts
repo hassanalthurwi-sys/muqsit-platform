@@ -582,7 +582,7 @@ export type MigrationStepKey =
   | "payments"
   | "review";
 
-export type MigrationInputMethod = "excel" | "pdf" | "scan" | "manual";
+export type MigrationInputMethod = "excel" | "pdf" | "screenshots" | "scan" | "manual";
 
 export type MigrationStepStatus =
   | "notStarted"

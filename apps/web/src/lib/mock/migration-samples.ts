@@ -300,7 +300,8 @@ const ROWS_BY_STEP: Record<Exclude<MigrationStepKey, "review">, MigrationRow[]> 
 };
 
 // Input method modifies how many cells need review — Excel cleanest,
-// scans messiest. Pure function over the base rows.
+// scans messiest, screenshots somewhere in between (system text is
+// crisp but layouts vary). Pure function over the base rows.
 export function sampleRowsFor(
   step: Exclude<MigrationStepKey, "review">,
   method: MigrationInputMethod,
@@ -308,11 +309,17 @@ export function sampleRowsFor(
   const base = ROWS_BY_STEP[step];
   if (method === "manual") return [];
   if (method === "excel") return base; // baseline
-  // PDF and scan progressively degrade — flip some confirmed cells to needsReview
+  // PDF, screenshots and scan progressively degrade — flip some confirmed
+  // cells to needsReview. Screenshots sit between PDF and scan.
   return base.map((row, idx) => {
     const cells: typeof row.cells = {};
     for (const [key, value] of Object.entries(row.cells)) {
-      const downgrade = method === "scan" ? idx % 2 === 0 : idx === 0;
+      const downgrade =
+        method === "scan"
+          ? idx % 2 === 0
+          : method === "screenshots"
+            ? idx === 0 || idx === 2
+            : idx === 0;
       cells[key] = {
         value: value.value,
         status:

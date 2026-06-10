@@ -1011,6 +1011,83 @@ export interface Dictionary {
     investorPolicyLabel: string;
     investorPolicyHint: string;
   };
+  authFlow: {
+    appName: string;
+    tagline: string;
+    login: {
+      title: string;
+      hint: string;
+      identifierLabel: string;
+      identifierPlaceholder: string;
+      passwordLabel: string;
+      continueWithOtp: string;
+      continueWithPassword: string;
+      remember30: string;
+      forgotPassword: string;
+      newToMuqsit: string;
+      registerCta: string;
+    };
+    otp: {
+      title: string;
+      hint: string;
+      codeLabel: string;
+      verifyCta: string;
+      resend: string;
+      resendIn: string;
+      back: string;
+    };
+    register: {
+      title: string;
+      hint: string;
+      step1Title: string;
+      step2Title: string;
+      officeNameLabel: string;
+      crLabel: string;
+      managerPhoneLabel: string;
+      managerEmailLabel: string;
+      managerEmailOptional: string;
+      continueCta: string;
+      passwordOptional: string;
+      finishCta: string;
+      backToLogin: string;
+    };
+    welcome: {
+      title: string;
+      subtitle: string;
+      trialActive: string;
+      hasOldData: string;
+      hasOldDataHint: string;
+      startMigration: string;
+      startFresh: string;
+    };
+    forgot: {
+      title: string;
+      hint: string;
+      newPasswordLabel: string;
+      confirmCta: string;
+    };
+    trialBanner: {
+      title: string;
+      hint: string;
+      warningTitle: string;
+      warningHint: string;
+      expiredTitle: string;
+      expiredHint: string;
+      upgradeCta: string;
+    };
+    account: {
+      title: string;
+      subtitle: string;
+      profile: string;
+      changePassword: string;
+      language: string;
+      sessions: string;
+      currentDevice: string;
+      revoke: string;
+      logout: string;
+      logoutAll: string;
+    };
+  };
   migration: {
     title: string;
     subtitle: string;
@@ -2385,6 +2462,83 @@ const ar: Dictionary = {
     investorExpected: "ربح المستثمر المتوقع",
     investorPolicyLabel: "سياسة توزيع الأرباح",
     investorPolicyHint: "تُلغي افتراضي المكتب لهذا المستثمر فقط.",
+  },
+  authFlow: {
+    appName: "مُقسِّط",
+    tagline: "منصة تشغيلية لمكاتب التقسيط",
+    login: {
+      title: "تسجيل الدخول",
+      hint: "أدخل رقم جوالك أو بريدك الإلكتروني للمتابعة",
+      identifierLabel: "رقم الجوال أو البريد الإلكتروني",
+      identifierPlaceholder: "5XXXXXXXX أو email@example.com",
+      passwordLabel: "كلمة المرور",
+      continueWithOtp: "إرسال رمز التحقق",
+      continueWithPassword: "متابعة بكلمة المرور",
+      remember30: "تذكَّر هذا الجهاز لمدة ٣٠ يوم",
+      forgotPassword: "نسيت كلمة المرور؟",
+      newToMuqsit: "جديد في مُقسِّط؟",
+      registerCta: "سجّل مكتبك مجاناً",
+    },
+    otp: {
+      title: "أدخل رمز التحقق",
+      hint: "أرسلنا رمزاً مكوناً من ٤ أرقام إلى جوالك",
+      codeLabel: "رمز التحقق",
+      verifyCta: "تحقّق ودخول",
+      resend: "إعادة إرسال الرمز",
+      resendIn: "إعادة الإرسال بعد {n} ثانية",
+      back: "العودة",
+    },
+    register: {
+      title: "أهلاً بك في مُقسِّط",
+      hint: "أنشئ حساب مكتبك في دقيقة واحدة — تجربة مجانية ٣٠ يوم",
+      step1Title: "بيانات المكتب",
+      step2Title: "تحقَّق من جوالك",
+      officeNameLabel: "اسم المكتب",
+      crLabel: "رقم السجل التجاري",
+      managerPhoneLabel: "رقم جوال مدير المكتب",
+      managerEmailLabel: "البريد الإلكتروني",
+      managerEmailOptional: "اختياري",
+      continueCta: "متابعة",
+      passwordOptional: "كلمة مرور (اختياري — يمكنك الاكتفاء برمز التحقق)",
+      finishCta: "إنشاء الحساب",
+      backToLogin: "لديك حساب؟ ادخل من هنا",
+    },
+    welcome: {
+      title: "أهلاً بك في مُقسِّط ✨",
+      subtitle: "تم إنشاء حساب مكتبك بنجاح. اختر كيف تريد البدء.",
+      trialActive: "تجربتك المجانية فعّالة — متبقي {n} يوم",
+      hasOldData: "عندي بيانات قديمة أنقلها",
+      hasOldDataHint: "إكسل، PDF، صور أو حتى لقطات من نظامك السابق — نساعدك خطوة بخطوة",
+      startMigration: "ابدأ رحلة الانتقال",
+      startFresh: "ابدأ من الصفر",
+    },
+    forgot: {
+      title: "استعادة كلمة المرور",
+      hint: "أدخل رقم جوالك وسنرسل لك رمز تحقق لإعادة تعيين كلمة المرور",
+      newPasswordLabel: "كلمة المرور الجديدة",
+      confirmCta: "حفظ كلمة المرور",
+    },
+    trialBanner: {
+      title: "🎁 تجربة مجانية",
+      hint: "متبقي {n} يوم من تجربتك",
+      warningTitle: "⏰ تجربتك تنتهي قريباً",
+      warningHint: "متبقي {n} يوم فقط — تواصل معنا للترقية",
+      expiredTitle: "انتهت تجربتك المجانية",
+      expiredHint: "لتفعيل حسابك ومواصلة العمل، تواصل مع فريق مُقسِّط",
+      upgradeCta: "ترقية الاشتراك",
+    },
+    account: {
+      title: "حسابي",
+      subtitle: "إدارة بياناتك الشخصية والأمان",
+      profile: "البيانات الشخصية",
+      changePassword: "تغيير كلمة المرور",
+      language: "اللغة",
+      sessions: "الأجهزة النشطة",
+      currentDevice: "الجهاز الحالي",
+      revoke: "إنهاء الجلسة",
+      logout: "تسجيل الخروج",
+      logoutAll: "تسجيل الخروج من كل الأجهزة",
+    },
   },
   migration: {
     title: "الانتقال إلى مُقسِّط",
@@ -3809,6 +3963,83 @@ const en: Dictionary = {
     investorExpected: "Investor expected profit",
     investorPolicyLabel: "Profit distribution policy",
     investorPolicyHint: "Overrides the office default for this investor only.",
+  },
+  authFlow: {
+    appName: "Muqsit",
+    tagline: "Operational platform for installment offices",
+    login: {
+      title: "Sign in",
+      hint: "Enter your phone number or email to continue",
+      identifierLabel: "Phone or email",
+      identifierPlaceholder: "5XXXXXXXX or email@example.com",
+      passwordLabel: "Password",
+      continueWithOtp: "Send verification code",
+      continueWithPassword: "Continue with password",
+      remember30: "Remember this device for 30 days",
+      forgotPassword: "Forgot password?",
+      newToMuqsit: "New to Muqsit?",
+      registerCta: "Register your office for free",
+    },
+    otp: {
+      title: "Enter verification code",
+      hint: "We sent a 4-digit code to your phone",
+      codeLabel: "Verification code",
+      verifyCta: "Verify & enter",
+      resend: "Resend code",
+      resendIn: "Resend in {n} seconds",
+      back: "Back",
+    },
+    register: {
+      title: "Welcome to Muqsit",
+      hint: "Create your office account in under a minute — 30-day free trial",
+      step1Title: "Office details",
+      step2Title: "Verify your phone",
+      officeNameLabel: "Office name",
+      crLabel: "Commercial registration",
+      managerPhoneLabel: "Office manager phone",
+      managerEmailLabel: "Email",
+      managerEmailOptional: "optional",
+      continueCta: "Continue",
+      passwordOptional: "Password (optional — you can use the verification code only)",
+      finishCta: "Create account",
+      backToLogin: "Already have an account? Sign in",
+    },
+    welcome: {
+      title: "Welcome to Muqsit ✨",
+      subtitle: "Your office account is ready. Choose how you'd like to start.",
+      trialActive: "Free trial active — {n} days remaining",
+      hasOldData: "I have old data to bring over",
+      hasOldDataHint: "Excel, PDF, photos, or even screenshots from your previous system — we'll help you step by step",
+      startMigration: "Start the migration journey",
+      startFresh: "Start from scratch",
+    },
+    forgot: {
+      title: "Recover password",
+      hint: "Enter your phone number and we'll send you a verification code to reset your password",
+      newPasswordLabel: "New password",
+      confirmCta: "Save password",
+    },
+    trialBanner: {
+      title: "🎁 Free trial",
+      hint: "{n} days remaining in your trial",
+      warningTitle: "⏰ Trial ending soon",
+      warningHint: "Only {n} days left — contact us to upgrade",
+      expiredTitle: "Your free trial has ended",
+      expiredHint: "Contact the Muqsit team to activate your account and continue.",
+      upgradeCta: "Upgrade subscription",
+    },
+    account: {
+      title: "My account",
+      subtitle: "Manage your personal information and security",
+      profile: "Personal info",
+      changePassword: "Change password",
+      language: "Language",
+      sessions: "Active devices",
+      currentDevice: "Current device",
+      revoke: "End session",
+      logout: "Sign out",
+      logoutAll: "Sign out everywhere",
+    },
   },
   migration: {
     title: "Move to Muqsit",

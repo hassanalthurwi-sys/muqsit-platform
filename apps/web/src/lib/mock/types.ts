@@ -615,3 +615,70 @@ export interface MigrationStepState {
   rows: MigrationRow[];
   matches: MigrationMatchPrompt[];
 }
+
+// ─── Sprint 13 — Authentication & entry ─────────────────────────────
+
+// User roles — designed for forward compatibility with the multi-office
+// "Phase 2" group model. systemAdmin and systemEmployee will be wired
+// in Sprint 14. groupManager is reserved for Phase 2 and never assigned
+// in Sprint 13.
+export type UserRole =
+  | "systemAdmin"
+  | "systemEmployee"
+  | "groupManager"
+  | "officeManager"
+  | "officeEmployee"
+  | "investor"
+  | "customer";
+
+export type SubscriptionStatus = "trial" | "active" | "expired" | "suspended";
+
+export interface OfficeAccount {
+  id: string;
+  name: string;
+  cr: string;
+  managerPhone: string;
+  managerEmail?: string;
+  createdAt: string;
+  // Trial / subscription. Sprint 13 wires the trial; Sprint 14 will let
+  // the system admin configure defaultTrialDays + extend/suspend.
+  trialStartedAt?: string;
+  trialEndsAt?: string;
+  subscriptionStatus: SubscriptionStatus;
+  // Phase 2 — group membership. Always undefined in Sprint 13 / Phase 1.
+  groupId?: string;
+}
+
+// Group of offices owned by a single group manager. Reserved for Phase 2.
+// Defined now so the data model is forward-compatible without later
+// migration.
+export interface OfficeGroup {
+  id: string;
+  name: string;
+  ownerUserId: string;
+  officeIds: string[];
+  createdAt: string;
+}
+
+export interface AppUser {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  role: UserRole;
+  // Many-to-many shape from day one. In Phase 1 length is always 1.
+  officeIds: string[];
+  defaultOfficeId?: string;     // present for office users only
+  investorId?: string;          // present for investor users only
+  customerId?: string;          // present for customer users only
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface DeviceSession {
+  id: string;
+  userId: string;
+  deviceLabel: string;
+  lastActiveAt: string;
+  current: boolean;
+}

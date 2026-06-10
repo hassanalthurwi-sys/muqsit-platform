@@ -27,6 +27,7 @@ import { SplitBar } from "@/components/ui/split-bar";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Currency } from "@/components/ui/currency";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 import type {
   FollowupStatus,
   FollowupTab,
@@ -130,6 +131,55 @@ function ProgressBar({ value, className }: { value: number; className?: string }
 }
 
 // ─── Sections ───
+
+function TrialBanner() {
+  const { dict } = useI18n();
+  const { daysLeftInTrial, office } = useAuth();
+  const t = dict.authFlow.trialBanner;
+  const days = daysLeftInTrial();
+  if (days === null || !office) return null;
+  if (office.subscriptionStatus === "expired") {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 px-5 py-4">
+        <div>
+          <p className="text-sm font-semibold text-destructive">{t.expiredTitle}</p>
+          <p className="text-xs text-muted-foreground">{t.expiredHint}</p>
+        </div>
+        <button
+          type="button"
+          className="rounded-md bg-destructive px-3 py-1.5 text-xs font-medium text-destructive-foreground"
+        >
+          {t.upgradeCta}
+        </button>
+      </div>
+    );
+  }
+  const isWarning = days <= 3;
+  const titleText = isWarning ? t.warningTitle : t.title;
+  const hintText = (isWarning ? t.warningHint : t.hint).replace("{n}", String(days));
+  return (
+    <div
+      className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4 ${
+        isWarning
+          ? "border-warning-soft bg-warning-soft/30"
+          : "border-gold-soft bg-gold-soft/30"
+      }`}
+    >
+      <div>
+        <p className={`text-sm font-semibold ${isWarning ? "text-warning-foreground" : "text-gold-foreground"}`}>
+          {titleText}
+        </p>
+        <p className="text-xs text-muted-foreground">{hintText}</p>
+      </div>
+      <button
+        type="button"
+        className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+      >
+        {t.upgradeCta}
+      </button>
+    </div>
+  );
+}
 
 function MigrationBanner() {
   const { dict, dir } = useI18n();
@@ -626,6 +676,7 @@ export default function DashboardPage() {
         <p className="text-sm text-muted-foreground">{dict.dashboard.subtitle}</p>
       </header>
 
+      <TrialBanner />
       <MigrationBanner />
       <Tier1Kpis />
       <SmartAlerts />

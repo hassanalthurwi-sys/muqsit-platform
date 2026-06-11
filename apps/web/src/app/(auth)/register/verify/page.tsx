@@ -25,6 +25,8 @@ function Inner() {
 
   const name = search.get("name") ?? "";
   const cr = search.get("cr") ?? "";
+  const managerName = search.get("managerName") ?? "";
+  const managerNationalId = search.get("managerNationalId") ?? "";
   const phone = search.get("phone") ?? "";
   const email = search.get("email") ?? "";
 
@@ -49,7 +51,14 @@ function Inner() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (code.some((c) => !c)) return;
-    registerOffice({ name, cr, phone, email: email || undefined });
+    registerOffice({
+      name,
+      cr,
+      managerName,
+      managerNationalId,
+      phone,
+      email: email || undefined,
+    });
     router.push("/welcome");
   }
 

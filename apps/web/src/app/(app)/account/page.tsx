@@ -36,6 +36,16 @@ export default function AccountPage() {
         <CardContent>
           <DataRows>
             <DataRow label={dict.identityFieldLabel.entityName} value={user?.name ?? "—"} />
+            {user?.nationalId ? (
+              <DataRow
+                label={dict.identityFieldLabel.nationalId}
+                value={
+                  <span className="num text-xs" dir="ltr">
+                    {user.nationalId}
+                  </span>
+                }
+              />
+            ) : null}
             <DataRow
               label="الجوال"
               value={

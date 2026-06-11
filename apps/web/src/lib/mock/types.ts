@@ -637,6 +637,11 @@ export interface OfficeAccount {
   id: string;
   name: string;
   cr: string;
+  // Manager identification — captured at registration so the office
+  // owner is known to the system from day one. Useful later for KYC,
+  // legal documents, contracts, and contacting the right person.
+  managerName: string;
+  managerNationalId: string;
   managerPhone: string;
   managerEmail?: string;
   createdAt: string;
@@ -663,6 +668,7 @@ export interface OfficeGroup {
 export interface AppUser {
   id: string;
   name: string;
+  nationalId?: string;          // captured at registration / invitation
   phone: string;
   email?: string;
   role: UserRole;

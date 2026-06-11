@@ -17,6 +17,7 @@ export interface Tenant {
 export interface SessionUser {
   id: string;
   name: string;
+  nationalId?: string;
   phone: string;
   email?: string;
   role: UserRole;
@@ -29,6 +30,8 @@ export interface SessionOffice {
   id: string;
   name: string;
   cr?: string;
+  managerName?: string;
+  managerNationalId?: string;
   subscriptionStatus: SubscriptionStatus;
   trialStartedAt?: string;
   trialEndsAt?: string;
@@ -47,6 +50,8 @@ interface AuthContextValue {
   registerOffice: (input: {
     name: string;
     cr: string;
+    managerName: string;
+    managerNationalId: string;
     phone: string;
     email?: string;
   }) => SessionOffice;
@@ -146,7 +151,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const registerOffice = useCallback(
-    (input: { name: string; cr: string; phone: string; email?: string }) => {
+    (input: {
+      name: string;
+      cr: string;
+      managerName: string;
+      managerNationalId: string;
+      phone: string;
+      email?: string;
+    }) => {
       const now = new Date();
       const ends = new Date(now);
       ends.setDate(ends.getDate() + DEFAULT_TRIAL_DAYS);
@@ -154,13 +166,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: `office-${Date.now().toString(36)}`,
         name: input.name,
         cr: input.cr,
+        managerName: input.managerName,
+        managerNationalId: input.managerNationalId,
         subscriptionStatus: "trial",
         trialStartedAt: now.toISOString(),
         trialEndsAt: ends.toISOString(),
       };
       const newUser: SessionUser = {
         id: `user-${Date.now().toString(36)}`,
-        name: "مدير المكتب",
+        name: input.managerName,
+        nationalId: input.managerNationalId,
         phone: input.phone,
         email: input.email,
         role: "officeManager",

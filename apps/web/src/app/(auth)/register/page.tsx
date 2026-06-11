@@ -17,13 +17,22 @@ export default function RegisterPage() {
 
   const [name, setName] = useState("");
   const [cr, setCr] = useState("");
+  const [managerName, setManagerName] = useState("");
+  const [managerNationalId, setManagerNationalId] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !cr || !phone) return;
-    const sp = new URLSearchParams({ name, cr, phone, email });
+    if (!name || !cr || !managerName || !managerNationalId || !phone) return;
+    const sp = new URLSearchParams({
+      name,
+      cr,
+      managerName,
+      managerNationalId,
+      phone,
+      email,
+    });
     router.push(`/register/verify?${sp.toString()}`);
   }
 
@@ -65,6 +74,29 @@ export default function RegisterPage() {
             onChange={(e) => setCr(e.target.value)}
             dir="ltr"
             className="num"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="manager-name">{a.register.managerNameLabel}</Label>
+          <Input
+            id="manager-name"
+            value={managerName}
+            onChange={(e) => setManagerName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="manager-national-id">{a.register.managerNationalIdLabel}</Label>
+          <Input
+            id="manager-national-id"
+            value={managerNationalId}
+            onChange={(e) => setManagerNationalId(e.target.value)}
+            dir="ltr"
+            className="num"
+            placeholder="10XXXXXXXX"
             required
           />
         </div>

@@ -1043,6 +1043,8 @@ export interface Dictionary {
       step2Title: string;
       officeNameLabel: string;
       crLabel: string;
+      managerNameLabel: string;
+      managerNationalIdLabel: string;
       managerPhoneLabel: string;
       managerEmailLabel: string;
       managerEmailOptional: string;
@@ -2495,7 +2497,9 @@ const ar: Dictionary = {
       step2Title: "تحقَّق من جوالك",
       officeNameLabel: "اسم المكتب",
       crLabel: "رقم السجل التجاري",
-      managerPhoneLabel: "رقم جوال مدير المكتب",
+      managerNameLabel: "اسم مدير المكتب",
+      managerNationalIdLabel: "رقم هوية المدير",
+      managerPhoneLabel: "رقم جوال المدير",
       managerEmailLabel: "البريد الإلكتروني",
       managerEmailOptional: "اختياري",
       continueCta: "متابعة",
@@ -3996,7 +4000,9 @@ const en: Dictionary = {
       step2Title: "Verify your phone",
       officeNameLabel: "Office name",
       crLabel: "Commercial registration",
-      managerPhoneLabel: "Office manager phone",
+      managerNameLabel: "Office manager name",
+      managerNationalIdLabel: "Manager national ID",
+      managerPhoneLabel: "Manager phone",
       managerEmailLabel: "Email",
       managerEmailOptional: "optional",
       continueCta: "Continue",

@@ -108,7 +108,7 @@ export default function EmployeesListPage() {
                       {emp.email}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{emp.roleName}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{emp.title}</td>
                   <td className="num px-4 py-3 text-muted-foreground" dir="ltr">
                     {emp.phone ?? "—"}
                   </td>

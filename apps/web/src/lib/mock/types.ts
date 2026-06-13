@@ -287,6 +287,20 @@ export interface Employee {
   // and surface KYC-ready info on the employee detail page.
   phone?: string;
   nationalId?: string;
+  // Sprint 15 revision — title (free-text) is decoupled from
+  // permissions. The office manager gives the member a custom job
+  // title, then assigns permissions independently.
+  title: string;
+  // Sprint 15 revision — per-employee permission matrix. Roles still
+  // exist as optional templates (templateRoleId references the role
+  // used as the starting point when the employee was created, purely
+  // informational). The effective permissions are these — no
+  // implicit fallback to the role.
+  permissions: Record<PermissionAction, PermissionState>;
+  templateRoleId?: string;
+  // ── Legacy fields kept for backward compatibility with earlier
+  // sprints that read roleId / roleName. New code should prefer
+  // title and permissions above.
   roleId: string;
   roleName: string;
   bypassApprovals: boolean;

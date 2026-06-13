@@ -1117,8 +1117,11 @@ export interface Dictionary {
       phoneLabel: string;
       emailLabel: string;
       emailOptional: string;
-      roleLabel: string;
-      roleHint: string;
+      titleLabel: string;
+      titleHint: string;
+      permissionsLabel: string;
+      permissionsHint: string;
+      loadFromTemplate: string;
       sendInviteCta: string;
       smsHint: string;
       cancel: string;
@@ -1126,10 +1129,11 @@ export interface Dictionary {
     detail: {
       back: string;
       personalInfo: string;
-      roleSection: string;
+      titleSection: string;
+      titleLabel: string;
+      permissionsSection: string;
+      permissionsHint: string;
       activitySection: string;
-      changeRole: string;
-      changeRoleSave: string;
       bypassApprovals: string;
       bypassApprovalsHint: string;
       lastLogin: string;
@@ -1141,7 +1145,29 @@ export interface Dictionary {
       resendInvite: string;
       deleteBtn: string;
       deleteConfirm: string;
+      customized: string;
+      basedOnTemplate: string;
+      saveChanges: string;
     };
+    permissionStates: { allow: string; requireApproval: string; deny: string };
+    permissionGroups: { contracts: string; payments: string; customers: string; investors: string; system: string };
+    permissionActions: Record<
+      | "createInstallmentContract"
+      | "editInstallments"
+      | "rescheduleContract"
+      | "deleteAttachment"
+      | "closeContract"
+      | "approvePaymentProof"
+      | "rejectPaymentProof"
+      | "recordPartialPayment"
+      | "createCustomer"
+      | "approveHighRiskCustomer"
+      | "createInvestmentContract"
+      | "distributeProfits"
+      | "exportReport"
+      | "managePermissions",
+      string
+    >;
     accept: {
       title: string;
       subtitle: string;
@@ -2714,13 +2740,13 @@ const ar: Dictionary = {
   },
   officeEmployees: {
     title: "موظفو المكتب",
-    subtitle: "ادعُ موظفيك وحدد دور كل واحد",
+    subtitle: "ادعُ موظفيك وحدد لكل واحد مسماه وصلاحياته",
     inviteCta: "+ دعوة موظف",
     filters: { all: "الكل", active: "نشطون", pending: "في انتظار القبول", suspended: "موقوفون" },
     searchPlaceholder: "ابحث بالاسم أو الجوال…",
     columns: {
       employee: "الموظف",
-      role: "الدور",
+      role: "المسمى",
       phone: "الجوال",
       lastLogin: "آخر دخول",
       status: "الحالة",
@@ -2737,14 +2763,17 @@ const ar: Dictionary = {
     view: "عرض",
     invite: {
       title: "دعوة موظف جديد",
-      subtitle: "املأ بيانات الموظف وحدد دوره — يستلم رابط دعوة عبر SMS",
+      subtitle: "املأ البيانات، حدد المسمى والصلاحيات — يستلم رابط دعوة عبر SMS",
       nameLabel: "اسم الموظف",
       nationalIdLabel: "رقم الهوية",
       phoneLabel: "رقم الجوال",
       emailLabel: "البريد الإلكتروني",
       emailOptional: "اختياري",
-      roleLabel: "الدور",
-      roleHint: "تعدّل الصلاحيات لاحقاً من صفحة الأدوار",
+      titleLabel: "المسمى الوظيفي",
+      titleHint: "اكتب أي مسمى يناسب — لا يؤثر على الصلاحيات",
+      permissionsLabel: "الصلاحيات",
+      permissionsHint: "حدد ما يستطيع الموظف فعله — كل صلاحية مستقلة",
+      loadFromTemplate: "تحميل من قالب جاهز",
       sendInviteCta: "إرسال الدعوة",
       smsHint: "سيستلم الموظف رسالة SMS برابط الدعوة ورمز التحقق",
       cancel: "إلغاء",
@@ -2752,10 +2781,11 @@ const ar: Dictionary = {
     detail: {
       back: "العودة للموظفين",
       personalInfo: "البيانات الشخصية",
-      roleSection: "الدور والصلاحيات",
+      titleSection: "المسمى الوظيفي",
+      titleLabel: "المسمى",
+      permissionsSection: "الصلاحيات",
+      permissionsHint: "صلاحيات هذا الموظف بشكل مستقل — يمكنك تعديل أي بند",
       activitySection: "النشاط",
-      changeRole: "تغيير الدور",
-      changeRoleSave: "حفظ التغيير",
       bypassApprovals: "تجاوز الموافقات",
       bypassApprovalsHint: "يُسمح للموظف بتنفيذ المبالغ الكبيرة بدون موافقة",
       lastLogin: "آخر دخول",
@@ -2767,6 +2797,33 @@ const ar: Dictionary = {
       resendInvite: "إعادة إرسال الدعوة",
       deleteBtn: "حذف الحساب",
       deleteConfirm: "تأكيد الحذف",
+      customized: "صلاحيات مخصصة",
+      basedOnTemplate: "بدأت من قالب: {name}",
+      saveChanges: "حفظ التعديلات",
+    },
+    permissionStates: { allow: "مسموح", requireApproval: "يحتاج موافقة", deny: "ممنوع" },
+    permissionGroups: {
+      contracts: "العقود",
+      payments: "المدفوعات",
+      customers: "العملاء",
+      investors: "المستثمرون",
+      system: "النظام",
+    },
+    permissionActions: {
+      createInstallmentContract: "إنشاء عقد تقسيط",
+      editInstallments: "تعديل الأقساط",
+      rescheduleContract: "إعادة جدولة عقد",
+      deleteAttachment: "حذف مرفق",
+      closeContract: "إنهاء عقد",
+      approvePaymentProof: "اعتماد إثبات دفع",
+      rejectPaymentProof: "رفض إثبات دفع",
+      recordPartialPayment: "تسجيل دفعة جزئية",
+      createCustomer: "إضافة عميل",
+      approveHighRiskCustomer: "اعتماد عميل عالي المخاطر",
+      createInvestmentContract: "إنشاء عقد استثمار",
+      distributeProfits: "توزيع الأرباح",
+      exportReport: "تصدير التقارير",
+      managePermissions: "إدارة الصلاحيات",
     },
     accept: {
       title: "أهلاً بك في مُقسِّط",
@@ -4398,13 +4455,13 @@ const en: Dictionary = {
   },
   officeEmployees: {
     title: "Team",
-    subtitle: "Invite your team and set each person's role",
+    subtitle: "Invite your team — pick each person's title and permissions",
     inviteCta: "+ Invite member",
     filters: { all: "All", active: "Active", pending: "Pending", suspended: "Suspended" },
     searchPlaceholder: "Search by name or phone…",
     columns: {
       employee: "Member",
-      role: "Role",
+      role: "Title",
       phone: "Phone",
       lastLogin: "Last login",
       status: "Status",
@@ -4421,14 +4478,17 @@ const en: Dictionary = {
     view: "View",
     invite: {
       title: "Invite a team member",
-      subtitle: "Fill in their details and pick a role — they'll get an SMS invite",
+      subtitle: "Fill in their details, pick a title and permissions — they'll get an SMS invite",
       nameLabel: "Member name",
       nationalIdLabel: "National ID",
       phoneLabel: "Phone",
       emailLabel: "Email",
       emailOptional: "optional",
-      roleLabel: "Role",
-      roleHint: "Adjust permissions later on the Roles page",
+      titleLabel: "Job title",
+      titleHint: "Free text — doesn't affect permissions",
+      permissionsLabel: "Permissions",
+      permissionsHint: "Pick what this member can do — each permission is independent",
+      loadFromTemplate: "Load from a template",
       sendInviteCta: "Send invitation",
       smsHint: "They'll receive an SMS with the invite link and a verification code",
       cancel: "Cancel",
@@ -4436,10 +4496,11 @@ const en: Dictionary = {
     detail: {
       back: "Back to team",
       personalInfo: "Personal info",
-      roleSection: "Role & permissions",
+      titleSection: "Job title",
+      titleLabel: "Title",
+      permissionsSection: "Permissions",
+      permissionsHint: "This member's permissions are independent — toggle anything",
       activitySection: "Activity",
-      changeRole: "Change role",
-      changeRoleSave: "Save change",
       bypassApprovals: "Bypass approvals",
       bypassApprovalsHint: "This member can execute large amounts without approval",
       lastLogin: "Last login",
@@ -4451,6 +4512,33 @@ const en: Dictionary = {
       resendInvite: "Resend invitation",
       deleteBtn: "Delete account",
       deleteConfirm: "Confirm deletion",
+      customized: "Customized permissions",
+      basedOnTemplate: "Started from template: {name}",
+      saveChanges: "Save changes",
+    },
+    permissionStates: { allow: "Allow", requireApproval: "Needs approval", deny: "Deny" },
+    permissionGroups: {
+      contracts: "Contracts",
+      payments: "Payments",
+      customers: "Customers",
+      investors: "Investors",
+      system: "System",
+    },
+    permissionActions: {
+      createInstallmentContract: "Create installment contract",
+      editInstallments: "Edit installments",
+      rescheduleContract: "Reschedule contract",
+      deleteAttachment: "Delete attachment",
+      closeContract: "Close contract",
+      approvePaymentProof: "Approve payment proof",
+      rejectPaymentProof: "Reject payment proof",
+      recordPartialPayment: "Record partial payment",
+      createCustomer: "Create customer",
+      approveHighRiskCustomer: "Approve high-risk customer",
+      createInvestmentContract: "Create investment contract",
+      distributeProfits: "Distribute profits",
+      exportReport: "Export reports",
+      managePermissions: "Manage permissions",
     },
     accept: {
       title: "Welcome to Muqsit",

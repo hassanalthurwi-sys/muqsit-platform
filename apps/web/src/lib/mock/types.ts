@@ -277,15 +277,26 @@ export interface Role {
   employeeCount: number;
 }
 
+export type EmployeeInviteStatus = "pending" | "accepted" | "expired";
+
 export interface Employee {
   id: string;
   name: string;
   email: string;
+  // Sprint 15 — added phone + national ID so we can invite via SMS
+  // and surface KYC-ready info on the employee detail page.
+  phone?: string;
+  nationalId?: string;
   roleId: string;
   roleName: string;
   bypassApprovals: boolean;
   active: boolean;
   joinedAt: string;
+  // Sprint 15 — invite lifecycle. When inviteStatus is "pending" the
+  // employee hasn't accepted the invitation yet (no login yet).
+  inviteStatus?: EmployeeInviteStatus;
+  invitedAt?: string;
+  lastLoginAt?: string;
 }
 
 export type ApprovalStatus =

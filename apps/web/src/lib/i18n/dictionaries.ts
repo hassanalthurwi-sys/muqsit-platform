@@ -1090,6 +1090,68 @@ export interface Dictionary {
       logoutAll: string;
     };
   };
+  officeEmployees: {
+    title: string;
+    subtitle: string;
+    inviteCta: string;
+    filters: { all: string; active: string; pending: string; suspended: string };
+    searchPlaceholder: string;
+    columns: {
+      employee: string;
+      role: string;
+      phone: string;
+      lastLogin: string;
+      status: string;
+      actions: string;
+    };
+    inviteStatus: { pending: string; accepted: string; expired: string };
+    activeBadge: string;
+    suspendedBadge: string;
+    pendingHint: string;
+    view: string;
+    invite: {
+      title: string;
+      subtitle: string;
+      nameLabel: string;
+      nationalIdLabel: string;
+      phoneLabel: string;
+      emailLabel: string;
+      emailOptional: string;
+      roleLabel: string;
+      roleHint: string;
+      sendInviteCta: string;
+      smsHint: string;
+      cancel: string;
+    };
+    detail: {
+      back: string;
+      personalInfo: string;
+      roleSection: string;
+      activitySection: string;
+      changeRole: string;
+      changeRoleSave: string;
+      bypassApprovals: string;
+      bypassApprovalsHint: string;
+      lastLogin: string;
+      neverLoggedIn: string;
+      joinedAt: string;
+      actions: string;
+      suspendBtn: string;
+      reactivateBtn: string;
+      resendInvite: string;
+      deleteBtn: string;
+      deleteConfirm: string;
+    };
+    accept: {
+      title: string;
+      subtitle: string;
+      enterOtp: string;
+      setPassword: string;
+      passwordOptional: string;
+      finishCta: string;
+      invalidLink: string;
+    };
+  };
   admin: {
     shellTitle: string;
     nav: {
@@ -2648,6 +2710,72 @@ const ar: Dictionary = {
       revoke: "إنهاء الجلسة",
       logout: "تسجيل الخروج",
       logoutAll: "تسجيل الخروج من كل الأجهزة",
+    },
+  },
+  officeEmployees: {
+    title: "موظفو المكتب",
+    subtitle: "ادعُ موظفيك وحدد دور كل واحد",
+    inviteCta: "+ دعوة موظف",
+    filters: { all: "الكل", active: "نشطون", pending: "في انتظار القبول", suspended: "موقوفون" },
+    searchPlaceholder: "ابحث بالاسم أو الجوال…",
+    columns: {
+      employee: "الموظف",
+      role: "الدور",
+      phone: "الجوال",
+      lastLogin: "آخر دخول",
+      status: "الحالة",
+      actions: "إجراءات",
+    },
+    inviteStatus: {
+      pending: "في انتظار القبول",
+      accepted: "قَبِل الدعوة",
+      expired: "انتهت الدعوة",
+    },
+    activeBadge: "نشط",
+    suspendedBadge: "موقوف",
+    pendingHint: "أُرسلت دعوة عبر SMS — لم يدخل الموظف بعد",
+    view: "عرض",
+    invite: {
+      title: "دعوة موظف جديد",
+      subtitle: "املأ بيانات الموظف وحدد دوره — يستلم رابط دعوة عبر SMS",
+      nameLabel: "اسم الموظف",
+      nationalIdLabel: "رقم الهوية",
+      phoneLabel: "رقم الجوال",
+      emailLabel: "البريد الإلكتروني",
+      emailOptional: "اختياري",
+      roleLabel: "الدور",
+      roleHint: "تعدّل الصلاحيات لاحقاً من صفحة الأدوار",
+      sendInviteCta: "إرسال الدعوة",
+      smsHint: "سيستلم الموظف رسالة SMS برابط الدعوة ورمز التحقق",
+      cancel: "إلغاء",
+    },
+    detail: {
+      back: "العودة للموظفين",
+      personalInfo: "البيانات الشخصية",
+      roleSection: "الدور والصلاحيات",
+      activitySection: "النشاط",
+      changeRole: "تغيير الدور",
+      changeRoleSave: "حفظ التغيير",
+      bypassApprovals: "تجاوز الموافقات",
+      bypassApprovalsHint: "يُسمح للموظف بتنفيذ المبالغ الكبيرة بدون موافقة",
+      lastLogin: "آخر دخول",
+      neverLoggedIn: "لم يدخل بعد",
+      joinedAt: "تاريخ الانضمام",
+      actions: "إجراءات",
+      suspendBtn: "تعليق الموظف",
+      reactivateBtn: "إعادة التفعيل",
+      resendInvite: "إعادة إرسال الدعوة",
+      deleteBtn: "حذف الحساب",
+      deleteConfirm: "تأكيد الحذف",
+    },
+    accept: {
+      title: "أهلاً بك في مُقسِّط",
+      subtitle: "ادخل رمز التحقق المُرسل لجوالك لإتمام التفعيل",
+      enterOtp: "رمز التحقق",
+      setPassword: "كلمة المرور",
+      passwordOptional: "اختياري — يمكنك الاكتفاء بـ OTP في كل دخول",
+      finishCta: "تفعيل الحساب والدخول",
+      invalidLink: "رابط الدعوة غير صحيح أو منتهي.",
     },
   },
   admin: {
@@ -4266,6 +4394,72 @@ const en: Dictionary = {
       revoke: "End session",
       logout: "Sign out",
       logoutAll: "Sign out everywhere",
+    },
+  },
+  officeEmployees: {
+    title: "Team",
+    subtitle: "Invite your team and set each person's role",
+    inviteCta: "+ Invite member",
+    filters: { all: "All", active: "Active", pending: "Pending", suspended: "Suspended" },
+    searchPlaceholder: "Search by name or phone…",
+    columns: {
+      employee: "Member",
+      role: "Role",
+      phone: "Phone",
+      lastLogin: "Last login",
+      status: "Status",
+      actions: "Actions",
+    },
+    inviteStatus: {
+      pending: "Awaiting acceptance",
+      accepted: "Accepted",
+      expired: "Invitation expired",
+    },
+    activeBadge: "Active",
+    suspendedBadge: "Suspended",
+    pendingHint: "Invitation sent via SMS — member hasn't joined yet",
+    view: "View",
+    invite: {
+      title: "Invite a team member",
+      subtitle: "Fill in their details and pick a role — they'll get an SMS invite",
+      nameLabel: "Member name",
+      nationalIdLabel: "National ID",
+      phoneLabel: "Phone",
+      emailLabel: "Email",
+      emailOptional: "optional",
+      roleLabel: "Role",
+      roleHint: "Adjust permissions later on the Roles page",
+      sendInviteCta: "Send invitation",
+      smsHint: "They'll receive an SMS with the invite link and a verification code",
+      cancel: "Cancel",
+    },
+    detail: {
+      back: "Back to team",
+      personalInfo: "Personal info",
+      roleSection: "Role & permissions",
+      activitySection: "Activity",
+      changeRole: "Change role",
+      changeRoleSave: "Save change",
+      bypassApprovals: "Bypass approvals",
+      bypassApprovalsHint: "This member can execute large amounts without approval",
+      lastLogin: "Last login",
+      neverLoggedIn: "Never logged in",
+      joinedAt: "Joined",
+      actions: "Actions",
+      suspendBtn: "Suspend member",
+      reactivateBtn: "Reactivate",
+      resendInvite: "Resend invitation",
+      deleteBtn: "Delete account",
+      deleteConfirm: "Confirm deletion",
+    },
+    accept: {
+      title: "Welcome to Muqsit",
+      subtitle: "Enter the code sent to your phone to activate your account",
+      enterOtp: "Verification code",
+      setPassword: "Password",
+      passwordOptional: "optional — you can use OTP every time instead",
+      finishCta: "Activate & sign in",
+      invalidLink: "Invitation link is invalid or expired.",
     },
   },
   admin: {

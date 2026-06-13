@@ -1090,6 +1090,112 @@ export interface Dictionary {
       logoutAll: string;
     };
   };
+  admin: {
+    shellTitle: string;
+    nav: {
+      dashboard: string;
+      offices: string;
+      employees: string;
+      settings: string;
+      audit: string;
+    };
+    dashboard: {
+      title: string;
+      subtitle: string;
+      kpis: {
+        totalOffices: string;
+        trial: string;
+        active: string;
+        expired: string;
+        suspended: string;
+        newThisMonth: string;
+      };
+      recentActivity: string;
+      noActivity: string;
+    };
+    offices: {
+      title: string;
+      subtitle: string;
+      filters: {
+        all: string;
+        trial: string;
+        active: string;
+        expired: string;
+        suspended: string;
+      };
+      columns: {
+        office: string;
+        manager: string;
+        cr: string;
+        subscription: string;
+        registeredAt: string;
+        actions: string;
+      };
+      daysLeft: string;
+      view: string;
+      empty: string;
+    };
+    officeDetail: {
+      back: string;
+      managerInfo: string;
+      subscription: string;
+      actions: string;
+      extendTrial: string;
+      activate: string;
+      suspend: string;
+      reactivate: string;
+      extendDays: string;
+      extendConfirm: string;
+    };
+    settings: {
+      title: string;
+      subtitle: string;
+      defaultTrialDays: string;
+      defaultTrialDaysHint: string;
+      autoSuspendDays: string;
+      autoSuspendDaysHint: string;
+      allowSelfRegistration: string;
+      allowSelfRegistrationHint: string;
+      globalAnnouncement: string;
+      globalAnnouncementHint: string;
+      save: string;
+      saved: string;
+    };
+    employees: {
+      title: string;
+      subtitle: string;
+      addEmployee: string;
+      columns: {
+        name: string;
+        role: string;
+        phone: string;
+        permissions: string;
+        status: string;
+      };
+      role: { systemAdmin: string; systemEmployee: string };
+      active: string;
+      inactive: string;
+    };
+    audit: {
+      title: string;
+      subtitle: string;
+      columns: { ts: string; actor: string; action: string; target: string; notes: string };
+      actions: {
+        officeRegistered: string;
+        trialExtended: string;
+        officeSuspended: string;
+        officeActivated: string;
+        employeeAdded: string;
+        settingChanged: string;
+      };
+    };
+    subscriptionStatus: {
+      trial: string;
+      active: string;
+      expired: string;
+      suspended: string;
+    };
+  };
   migration: {
     title: string;
     subtitle: string;
@@ -2542,6 +2648,121 @@ const ar: Dictionary = {
       revoke: "إنهاء الجلسة",
       logout: "تسجيل الخروج",
       logoutAll: "تسجيل الخروج من كل الأجهزة",
+    },
+  },
+  admin: {
+    shellTitle: "النظام · مُقسِّط",
+    nav: {
+      dashboard: "لوحة المنصة",
+      offices: "المكاتب",
+      employees: "موظفو النظام",
+      settings: "إعدادات المنصة",
+      audit: "سجل العمليات",
+    },
+    dashboard: {
+      title: "لوحة المنصة",
+      subtitle: "نظرة عامة على المكاتب المسجَّلة والنشاط الأخير",
+      kpis: {
+        totalOffices: "إجمالي المكاتب",
+        trial: "في فترة التجربة",
+        active: "اشتراكات فعّالة",
+        expired: "انتهت تجربتها",
+        suspended: "معلَّقة",
+        newThisMonth: "تسجيلات جديدة هذا الشهر",
+      },
+      recentActivity: "آخر العمليات",
+      noActivity: "لا توجد عمليات بعد",
+    },
+    offices: {
+      title: "المكاتب",
+      subtitle: "إدارة جميع المكاتب المسجَّلة في المنصة",
+      filters: {
+        all: "الكل",
+        trial: "تجربة",
+        active: "نشط",
+        expired: "منتهي",
+        suspended: "معلَّق",
+      },
+      columns: {
+        office: "المكتب",
+        manager: "المدير",
+        cr: "السجل التجاري",
+        subscription: "الاشتراك",
+        registeredAt: "تاريخ التسجيل",
+        actions: "إجراءات",
+      },
+      daysLeft: "{n} يوم متبقي",
+      view: "عرض",
+      empty: "لا توجد مكاتب",
+    },
+    officeDetail: {
+      back: "العودة للمكاتب",
+      managerInfo: "بيانات المدير",
+      subscription: "الاشتراك",
+      actions: "إجراءات",
+      extendTrial: "تمديد التجربة",
+      activate: "تفعيل الاشتراك",
+      suspend: "تعليق المكتب",
+      reactivate: "إعادة التفعيل",
+      extendDays: "عدد أيام التمديد",
+      extendConfirm: "تمديد",
+    },
+    settings: {
+      title: "إعدادات المنصة",
+      subtitle: "إعدادات تطبَّق على كل المكاتب",
+      defaultTrialDays: "مدة التجربة الافتراضية (يوم)",
+      defaultTrialDaysHint: "تُطبَّق على المكاتب الجديدة عند التسجيل",
+      autoSuspendDays: "تعليق تلقائي بعد انتهاء التجربة (يوم)",
+      autoSuspendDaysHint: "صفر = لا تعليق تلقائي",
+      allowSelfRegistration: "السماح بالتسجيل الذاتي للمكاتب",
+      allowSelfRegistrationHint: "عند الإيقاف، التسجيل يصبح بدعوة فقط",
+      globalAnnouncement: "إعلان عام (يظهر لكل المكاتب)",
+      globalAnnouncementHint: "اتركه فارغاً لعدم عرض إعلان",
+      save: "حفظ الإعدادات",
+      saved: "تم الحفظ",
+    },
+    employees: {
+      title: "موظفو النظام",
+      subtitle: "مدير النظام يحدد صلاحيات كل موظف",
+      addEmployee: "+ إضافة موظف",
+      columns: {
+        name: "الاسم",
+        role: "الدور",
+        phone: "الجوال",
+        permissions: "الصلاحيات",
+        status: "الحالة",
+      },
+      role: {
+        systemAdmin: "مدير النظام",
+        systemEmployee: "موظف نظام",
+      },
+      active: "نشط",
+      inactive: "موقوف",
+    },
+    audit: {
+      title: "سجل عمليات النظام",
+      subtitle: "كل ما حدث على مستوى المنصة",
+      columns: {
+        ts: "الوقت",
+        actor: "بواسطة",
+        action: "العملية",
+        target: "المكتب",
+        notes: "ملاحظات",
+      },
+      actions: {
+        officeRegistered: "تسجيل مكتب جديد",
+        trialExtended: "تمديد التجربة",
+        officeSuspended: "تعليق مكتب",
+        officeActivated: "تفعيل مكتب",
+        employeeAdded: "إضافة موظف",
+        settingChanged: "تغيير إعدادات",
+      },
+    },
+    subscriptionStatus: {
+      trial: "تجربة",
+      active: "نشط",
+      expired: "منتهي",
+      suspended: "معلَّق",
     },
   },
   migration: {
@@ -4045,6 +4266,121 @@ const en: Dictionary = {
       revoke: "End session",
       logout: "Sign out",
       logoutAll: "Sign out everywhere",
+    },
+  },
+  admin: {
+    shellTitle: "Platform · Muqsit",
+    nav: {
+      dashboard: "Platform dashboard",
+      offices: "Offices",
+      employees: "System staff",
+      settings: "Platform settings",
+      audit: "Audit log",
+    },
+    dashboard: {
+      title: "Platform dashboard",
+      subtitle: "Overview of registered offices and recent activity",
+      kpis: {
+        totalOffices: "Total offices",
+        trial: "On trial",
+        active: "Active subscriptions",
+        expired: "Trial expired",
+        suspended: "Suspended",
+        newThisMonth: "New this month",
+      },
+      recentActivity: "Recent activity",
+      noActivity: "No activity yet",
+    },
+    offices: {
+      title: "Offices",
+      subtitle: "Manage all offices registered on the platform",
+      filters: {
+        all: "All",
+        trial: "Trial",
+        active: "Active",
+        expired: "Expired",
+        suspended: "Suspended",
+      },
+      columns: {
+        office: "Office",
+        manager: "Manager",
+        cr: "CR",
+        subscription: "Subscription",
+        registeredAt: "Registered",
+        actions: "Actions",
+      },
+      daysLeft: "{n} days left",
+      view: "View",
+      empty: "No offices",
+    },
+    officeDetail: {
+      back: "Back to offices",
+      managerInfo: "Manager info",
+      subscription: "Subscription",
+      actions: "Actions",
+      extendTrial: "Extend trial",
+      activate: "Activate subscription",
+      suspend: "Suspend office",
+      reactivate: "Reactivate",
+      extendDays: "Days to extend",
+      extendConfirm: "Extend",
+    },
+    settings: {
+      title: "Platform settings",
+      subtitle: "Settings that apply to every office",
+      defaultTrialDays: "Default trial period (days)",
+      defaultTrialDaysHint: "Applied to new offices on registration",
+      autoSuspendDays: "Auto-suspend after trial ends (days)",
+      autoSuspendDaysHint: "Zero = never auto-suspend",
+      allowSelfRegistration: "Allow office self-registration",
+      allowSelfRegistrationHint: "When off, registration becomes invite-only",
+      globalAnnouncement: "Global announcement (shown to all offices)",
+      globalAnnouncementHint: "Leave empty to hide",
+      save: "Save settings",
+      saved: "Saved",
+    },
+    employees: {
+      title: "System staff",
+      subtitle: "System admin sets each staff member's permissions",
+      addEmployee: "+ Add staff",
+      columns: {
+        name: "Name",
+        role: "Role",
+        phone: "Phone",
+        permissions: "Permissions",
+        status: "Status",
+      },
+      role: {
+        systemAdmin: "System admin",
+        systemEmployee: "System staff",
+      },
+      active: "Active",
+      inactive: "Inactive",
+    },
+    audit: {
+      title: "Platform audit log",
+      subtitle: "Everything that happened at the platform level",
+      columns: {
+        ts: "When",
+        actor: "By",
+        action: "Action",
+        target: "Office",
+        notes: "Notes",
+      },
+      actions: {
+        officeRegistered: "Office registered",
+        trialExtended: "Trial extended",
+        officeSuspended: "Office suspended",
+        officeActivated: "Office activated",
+        employeeAdded: "Staff added",
+        settingChanged: "Setting changed",
+      },
+    },
+    subscriptionStatus: {
+      trial: "Trial",
+      active: "Active",
+      expired: "Expired",
+      suspended: "Suspended",
     },
   },
   migration: {

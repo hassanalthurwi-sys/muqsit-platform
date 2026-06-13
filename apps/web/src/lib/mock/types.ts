@@ -688,3 +688,54 @@ export interface DeviceSession {
   lastActiveAt: string;
   current: boolean;
 }
+
+// ─── Sprint 14 — System admin level ─────────────────────────────────
+
+export interface SystemSettings {
+  // Default trial period (days) granted when a new office self-registers.
+  // The system admin can change this at /admin/settings.
+  defaultTrialDays: number;
+  // Auto-suspend offices that fail to upgrade N days after trial expires.
+  // 0 = never auto-suspend.
+  autoSuspendDays: number;
+  // Free message: shown on every office's dashboard banner.
+  globalAnnouncement?: string;
+  // Allow self-registration vs invite-only.
+  allowSelfRegistration: boolean;
+}
+
+export interface AdminAuditEntry {
+  id: string;
+  ts: string;
+  actorName: string;
+  actorRole: "systemAdmin" | "systemEmployee";
+  action:
+    | "officeRegistered"
+    | "trialExtended"
+    | "officeSuspended"
+    | "officeActivated"
+    | "employeeAdded"
+    | "settingChanged";
+  targetOfficeId?: string;
+  targetOfficeName?: string;
+  notes?: string;
+}
+
+export interface SystemEmployee {
+  id: string;
+  name: string;
+  nationalId?: string;
+  phone: string;
+  email?: string;
+  role: "systemAdmin" | "systemEmployee";
+  permissions: Array<
+    | "viewOffices"
+    | "extendTrial"
+    | "suspendOffice"
+    | "manageEmployees"
+    | "manageSettings"
+    | "viewAudit"
+  >;
+  active: boolean;
+  createdAt: string;
+}

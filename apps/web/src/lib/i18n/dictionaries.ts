@@ -1188,6 +1188,7 @@ export interface Dictionary {
     nav: {
       dashboard: string;
       offices: string;
+      plans: string;
       employees: string;
       settings: string;
       audit: string;
@@ -1355,6 +1356,55 @@ export interface Dictionary {
       active: string;
       expired: string;
       suspended: string;
+    };
+    plans: {
+      title: string;
+      subtitle: string;
+      addPlan: string;
+      activeBadge: string;
+      inactiveBadge: string;
+      featuresIncluded: string;
+      noFeatures: string;
+      pricingTitle: string;
+      durationLabels: { 6: string; 12: string; 24: string };
+      perDuration: string;
+      currency: string;
+      edit: string;
+      backToPlans: string;
+      editorTitle: string;
+      newPlanTitle: string;
+      nameLabel: string;
+      descriptionLabel: string;
+      featuresSection: string;
+      featuresHint: string;
+      pricingSection: string;
+      pricingHint: string;
+      activeToggle: string;
+      activeToggleHint: string;
+      save: string;
+      saved: string;
+      cancel: string;
+      featureNames: Record<
+        "aiAssistant" | "ocr" | "whatsappMessages" | "smsMessages",
+        string
+      >;
+      featureHints: Record<
+        "aiAssistant" | "ocr" | "whatsappMessages" | "smsMessages",
+        string
+      >;
+      officeSubscription: {
+        section: string;
+        currentPlan: string;
+        duration: string;
+        price: string;
+        startedAt: string;
+        endsAt: string;
+        noPlan: string;
+        changePlan: string;
+        pickPlan: string;
+        pickDuration: string;
+        confirm: string;
+      };
     };
   };
   migration: {
@@ -2912,6 +2962,7 @@ const ar: Dictionary = {
     nav: {
       dashboard: "لوحة المنصة",
       offices: "المكاتب",
+      plans: "الباقات",
       employees: "موظفو النظام",
       settings: "إعدادات المنصة",
       audit: "سجل العمليات",
@@ -3087,6 +3138,59 @@ const ar: Dictionary = {
       active: "نشط",
       expired: "منتهي",
       suspended: "معلَّق",
+    },
+    plans: {
+      title: "باقات الاشتراك",
+      subtitle: "تحكَّم في المزايا والأسعار والمدد لكل باقة",
+      addPlan: "+ إضافة باقة",
+      activeBadge: "مفعَّلة",
+      inactiveBadge: "متوقفة",
+      featuresIncluded: "المزايا المضمَّنة",
+      noFeatures: "لا توجد مزايا إضافية — يقتصر على الأساسيات",
+      pricingTitle: "الأسعار",
+      durationLabels: { 6: "٦ أشهر", 12: "سنة", 24: "سنتان" },
+      perDuration: "لكل {duration}",
+      currency: "ر.س",
+      edit: "تعديل",
+      backToPlans: "العودة للباقات",
+      editorTitle: "تعديل الباقة",
+      newPlanTitle: "إضافة باقة جديدة",
+      nameLabel: "اسم الباقة",
+      descriptionLabel: "الوصف",
+      featuresSection: "المزايا",
+      featuresHint: "فعِّل كل ميزة تريد إدراجها في هذه الباقة",
+      pricingSection: "الأسعار",
+      pricingHint: "حدد سعر الباقة لكل مدة (بالريال السعودي)",
+      activeToggle: "الباقة متاحة للاشتراك",
+      activeToggleHint: "عند الإيقاف، لن يتمكن مدير المكتب من اختيار هذه الباقة عند تجديد اشتراكه",
+      save: "حفظ التغييرات",
+      saved: "حُفظت التغييرات",
+      cancel: "إلغاء",
+      featureNames: {
+        aiAssistant: "المساعد الذكي على الواتساب",
+        ocr: "التعرف الضوئي على الإيصالات (OCR)",
+        whatsappMessages: "رسائل الواتساب للعملاء",
+        smsMessages: "رسائل SMS للعملاء",
+      },
+      featureHints: {
+        aiAssistant: "يردّ على رسائل العملاء على الواتساب ويجيب عن الأقساط والمدفوعات تلقائيًا",
+        ocr: "يقرأ صور إيصالات التحويلات البنكية ويعبّئ البيانات تلقائيًا",
+        whatsappMessages: "إرسال إشعارات تلقائية للعملاء عبر الواتساب (تذكير قسط، اعتماد دفع، …)",
+        smsMessages: "إرسال إشعارات قصيرة عبر رسائل SMS للعملاء غير المفعّلين على الواتساب",
+      },
+      officeSubscription: {
+        section: "الاشتراك الحالي",
+        currentPlan: "الباقة",
+        duration: "المدة",
+        price: "السعر",
+        startedAt: "تاريخ البدء",
+        endsAt: "تاريخ الانتهاء",
+        noPlan: "في فترة التجربة — لم تُختر باقة بعد",
+        changePlan: "تغيير الباقة",
+        pickPlan: "اختيار الباقة",
+        pickDuration: "اختيار المدة",
+        confirm: "تأكيد الاشتراك",
+      },
     },
   },
   migration: {
@@ -4693,6 +4797,7 @@ const en: Dictionary = {
     nav: {
       dashboard: "Platform dashboard",
       offices: "Offices",
+      plans: "Plans",
       employees: "System staff",
       settings: "Platform settings",
       audit: "Audit log",
@@ -4872,6 +4977,59 @@ const en: Dictionary = {
       active: "Active",
       expired: "Expired",
       suspended: "Suspended",
+    },
+    plans: {
+      title: "Subscription plans",
+      subtitle: "Control features, pricing, and durations for each plan",
+      addPlan: "+ Add plan",
+      activeBadge: "Available",
+      inactiveBadge: "Paused",
+      featuresIncluded: "Included features",
+      noFeatures: "No premium features — core CRM only",
+      pricingTitle: "Pricing",
+      durationLabels: { 6: "6 months", 12: "1 year", 24: "2 years" },
+      perDuration: "per {duration}",
+      currency: "SAR",
+      edit: "Edit",
+      backToPlans: "Back to plans",
+      editorTitle: "Edit plan",
+      newPlanTitle: "Add a new plan",
+      nameLabel: "Plan name",
+      descriptionLabel: "Description",
+      featuresSection: "Features",
+      featuresHint: "Toggle each feature you want to include in this plan",
+      pricingSection: "Pricing",
+      pricingHint: "Set the plan's price for each duration (in SAR)",
+      activeToggle: "Plan is available for subscription",
+      activeToggleHint: "When off, office managers can't pick this plan at renewal time",
+      save: "Save changes",
+      saved: "Changes saved",
+      cancel: "Cancel",
+      featureNames: {
+        aiAssistant: "WhatsApp AI assistant",
+        ocr: "Bank receipt OCR",
+        whatsappMessages: "WhatsApp messages to customers",
+        smsMessages: "SMS messages to customers",
+      },
+      featureHints: {
+        aiAssistant: "Replies to customer WhatsApp messages and answers installment / payment questions automatically",
+        ocr: "Reads bank transfer receipt images and fills the proof fields automatically",
+        whatsappMessages: "Auto-sends customer notifications via WhatsApp (installment reminders, payment confirmations, …)",
+        smsMessages: "Sends short SMS notifications to customers who aren't on WhatsApp",
+      },
+      officeSubscription: {
+        section: "Current subscription",
+        currentPlan: "Plan",
+        duration: "Duration",
+        price: "Price",
+        startedAt: "Started",
+        endsAt: "Renews",
+        noPlan: "On trial — no plan picked yet",
+        changePlan: "Change plan",
+        pickPlan: "Pick a plan",
+        pickDuration: "Pick a duration",
+        confirm: "Confirm subscription",
+      },
     },
   },
   migration: {

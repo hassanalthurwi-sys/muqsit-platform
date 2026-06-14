@@ -674,8 +674,45 @@ export interface OfficeAccount {
   trialStartedAt?: string;
   trialEndsAt?: string;
   subscriptionStatus: SubscriptionStatus;
+  // Sprint 16 — active paid plan + selected duration. Populated when the
+  // office picks a paid plan after the trial. Renewal date is computed
+  // from `planStartedAt` + `planDuration` so we don't store it twice.
+  planId?: string;
+  planDuration?: SubscriptionDuration;
+  planStartedAt?: string;
+  planEndsAt?: string;
   // Phase 2 — group membership. Always undefined in Sprint 13 / Phase 1.
   groupId?: string;
+}
+
+// ─── Sprint 16 — Subscription plans ─────────────────────────────────
+
+// The four premium features that distinguish Pro from Basic. Each plan
+// turns these on or off. Two tiers ship in the seed — Basic (all off)
+// and Pro (all on) — but the platform admin can edit either freely.
+export type SubscriptionFeature =
+  | "aiAssistant"
+  | "ocr"
+  | "whatsappMessages"
+  | "smsMessages";
+
+// Three durations are offered per plan: 6 months, 1 year, 2 years. Each
+// has its own price configured by the platform admin (longer typically
+// = better unit price).
+export type SubscriptionDuration = 6 | 12 | 24;
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  features: Record<SubscriptionFeature, boolean>;
+  // Price in SAR per duration. All three durations are always priced;
+  // there's no "this duration isn't offered" toggle — keeps the offer
+  // shape consistent across plans.
+  prices: Record<SubscriptionDuration, number>;
+  active: boolean;
+  displayOrder: number;
+  createdAt: string;
 }
 
 // Group of offices owned by a single group manager. Reserved for Phase 2.

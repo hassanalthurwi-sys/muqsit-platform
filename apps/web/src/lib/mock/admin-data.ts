@@ -134,6 +134,10 @@ export const MOCK_OFFICES: OfficeAccount[] = [
     managerEmail: "manager@muqsit.sa",
     createdAt: "2024-08-15T10:00:00Z",
     subscriptionStatus: "active",
+    planId: "plan-pro",
+    planDuration: 12,
+    planStartedAt: "2025-08-15T10:00:00Z",
+    planEndsAt: "2026-08-15T10:00:00Z",
   },
   {
     id: "office-002",
@@ -170,6 +174,10 @@ export const MOCK_OFFICES: OfficeAccount[] = [
     managerPhone: "+966 11 489 9020",
     createdAt: "2024-06-01T10:00:00Z",
     subscriptionStatus: "active",
+    planId: "plan-basic",
+    planDuration: 24,
+    planStartedAt: "2025-06-01T10:00:00Z",
+    planEndsAt: "2027-06-01T10:00:00Z",
   },
   {
     id: "office-005",
@@ -204,6 +212,10 @@ export const MOCK_OFFICES: OfficeAccount[] = [
     managerPhone: "+966 53 224 9930",
     createdAt: "2024-02-20T10:00:00Z",
     subscriptionStatus: "active",
+    planId: "plan-pro",
+    planDuration: 24,
+    planStartedAt: "2025-02-20T10:00:00Z",
+    planEndsAt: "2027-02-20T10:00:00Z",
   },
   {
     id: "office-008",

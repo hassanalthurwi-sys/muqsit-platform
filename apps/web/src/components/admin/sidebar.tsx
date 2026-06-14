@@ -8,6 +8,7 @@ import {
   Users,
   Settings,
   ScrollText,
+  Package,
 } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ export function AdminSidebar() {
   const items = [
     { href: "/admin/dashboard", label: n.dashboard, Icon: LayoutDashboard },
     { href: "/admin/offices", label: n.offices, Icon: Building2 },
+    { href: "/admin/plans", label: n.plans, Icon: Package },
     { href: "/admin/employees", label: n.employees, Icon: Users },
     { href: "/admin/settings", label: n.settings, Icon: Settings },
     { href: "/admin/audit", label: n.audit, Icon: ScrollText },

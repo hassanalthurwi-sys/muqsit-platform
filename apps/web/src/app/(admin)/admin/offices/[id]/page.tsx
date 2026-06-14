@@ -2,10 +2,23 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Calendar, User, Phone, Mail, Building2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  User,
+  Phone,
+  Mail,
+  Building2,
+  Package,
+} from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { MOCK_OFFICES, daysLeftInTrial } from "@/lib/mock/admin-data";
-import type { SubscriptionStatus } from "@/lib/mock/types";
+import { MOCK_PLANS, findPlan } from "@/lib/mock/plans";
+import type {
+  SubscriptionDuration,
+  SubscriptionStatus,
+} from "@/lib/mock/types";
 
 export default function OfficeDetailPage({
   params,
@@ -18,6 +31,13 @@ export default function OfficeDetailPage({
   const BackArrow = dir === "rtl" ? ArrowRight : ArrowLeft;
   const office = MOCK_OFFICES.find((o) => o.id === id);
   const [extendDays, setExtendDays] = useState(14);
+  const [editingPlan, setEditingPlan] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(
+    office?.planId ?? MOCK_PLANS[0]?.id ?? "",
+  );
+  const [selectedDuration, setSelectedDuration] = useState<SubscriptionDuration>(
+    office?.planDuration ?? 12,
+  );
 
   if (!office) {
     return (
@@ -124,6 +144,16 @@ export default function OfficeDetailPage({
         </section>
       </div>
 
+      <PlanSection
+        office={office}
+        editing={editingPlan}
+        onToggleEdit={() => setEditingPlan((v) => !v)}
+        selectedPlanId={selectedPlanId}
+        setSelectedPlanId={setSelectedPlanId}
+        selectedDuration={selectedDuration}
+        setSelectedDuration={setSelectedDuration}
+      />
+
       <section className="rounded-2xl border bg-card p-5">
         <h2 className="mb-4 text-sm font-semibold">{a.actions}</h2>
         <div className="space-y-4">
@@ -191,6 +221,182 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="text-sm">{value}</dd>
     </div>
+  );
+}
+
+function PlanSection({
+  office,
+  editing,
+  onToggleEdit,
+  selectedPlanId,
+  setSelectedPlanId,
+  selectedDuration,
+  setSelectedDuration,
+}: {
+  office: (typeof MOCK_OFFICES)[number];
+  editing: boolean;
+  onToggleEdit: () => void;
+  selectedPlanId: string;
+  setSelectedPlanId: (id: string) => void;
+  selectedDuration: SubscriptionDuration;
+  setSelectedDuration: (d: SubscriptionDuration) => void;
+}) {
+  const { dict, locale } = useI18n();
+  const p = dict.admin.plans;
+  const numLocale = locale === "ar" ? "ar-SA-u-nu-latn" : "en-US";
+  const currentPlan = office.planId ? findPlan(office.planId) : undefined;
+  const selectedPlan = findPlan(selectedPlanId);
+
+  return (
+    <section className="rounded-2xl border bg-card p-5">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-sm font-semibold">
+          <Package className="size-4" />
+          {p.officeSubscription.section}
+        </h2>
+        <button
+          type="button"
+          onClick={onToggleEdit}
+          className="rounded-md border border-input bg-card px-3 py-1.5 text-[11px] font-medium hover:bg-muted"
+        >
+          {editing ? p.cancel : currentPlan ? p.officeSubscription.changePlan : p.officeSubscription.pickPlan}
+        </button>
+      </div>
+
+      {!editing ? (
+        currentPlan ? (
+          <dl className="space-y-2 text-sm">
+            <Row
+              label={p.officeSubscription.currentPlan}
+              value={
+                <span className="inline-flex items-center gap-2">
+                  <span className="font-medium">{currentPlan.name}</span>
+                  {Object.values(currentPlan.features).some(Boolean) ? (
+                    <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-medium text-primary-soft-foreground">
+                      Pro
+                    </span>
+                  ) : null}
+                </span>
+              }
+            />
+            {office.planDuration ? (
+              <Row
+                label={p.officeSubscription.duration}
+                value={
+                  <span className="text-xs">{p.durationLabels[office.planDuration]}</span>
+                }
+              />
+            ) : null}
+            {office.planDuration ? (
+              <Row
+                label={p.officeSubscription.price}
+                value={
+                  <span className="num text-xs tabular-nums">
+                    {currentPlan.prices[office.planDuration].toLocaleString(numLocale)} {p.currency}
+                  </span>
+                }
+              />
+            ) : null}
+            {office.planStartedAt ? (
+              <Row
+                label={p.officeSubscription.startedAt}
+                value={
+                  <span className="num text-xs">
+                    {new Date(office.planStartedAt).toLocaleDateString(
+                      locale === "ar" ? "ar-SA-u-nu-latn" : "en-US",
+                    )}
+                  </span>
+                }
+              />
+            ) : null}
+            {office.planEndsAt ? (
+              <Row
+                label={p.officeSubscription.endsAt}
+                value={
+                  <span className="num text-xs">
+                    {new Date(office.planEndsAt).toLocaleDateString(
+                      locale === "ar" ? "ar-SA-u-nu-latn" : "en-US",
+                    )}
+                  </span>
+                }
+              />
+            ) : null}
+          </dl>
+        ) : (
+          <p className="text-xs text-muted-foreground">{p.officeSubscription.noPlan}</p>
+        )
+      ) : (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              {p.officeSubscription.pickPlan}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {MOCK_PLANS.filter((pl) => pl.active).map((pl) => {
+                const active = selectedPlanId === pl.id;
+                return (
+                  <button
+                    key={pl.id}
+                    type="button"
+                    onClick={() => setSelectedPlanId(pl.id)}
+                    className={`rounded-lg border p-3 text-start text-sm transition-colors ${
+                      active
+                        ? "border-primary bg-primary-soft text-primary-soft-foreground"
+                        : "border-input hover:bg-muted"
+                    }`}
+                  >
+                    <p className="font-medium">{pl.name}</p>
+                    <p className="num mt-1 text-[10px] text-muted-foreground" dir="ltr">
+                      {pl.prices[selectedDuration].toLocaleString(numLocale)} {p.currency} / {p.durationLabels[selectedDuration]}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              {p.officeSubscription.pickDuration}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {([6, 12, 24] as SubscriptionDuration[]).map((d) => {
+                const active = selectedDuration === d;
+                const price = selectedPlan?.prices[d] ?? 0;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setSelectedDuration(d)}
+                    className={`rounded-lg border p-3 text-center transition-colors ${
+                      active
+                        ? "border-primary bg-primary-soft text-primary-soft-foreground"
+                        : "border-input hover:bg-muted"
+                    }`}
+                  >
+                    <p className="text-xs font-medium">{p.durationLabels[d]}</p>
+                    <p className="num mt-1 text-sm font-semibold tabular-nums">
+                      {price.toLocaleString(numLocale)}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">{p.currency}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex justify-end border-t pt-3">
+            <button
+              type="button"
+              onClick={onToggleEdit}
+              className="rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              {p.officeSubscription.confirm}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 

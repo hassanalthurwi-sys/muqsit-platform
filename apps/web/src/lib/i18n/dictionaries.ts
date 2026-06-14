@@ -1117,11 +1117,8 @@ export interface Dictionary {
       phoneLabel: string;
       emailLabel: string;
       emailOptional: string;
-      titleLabel: string;
-      titleHint: string;
-      permissionsLabel: string;
-      permissionsHint: string;
-      loadFromTemplate: string;
+      roleLabel: string;
+      roleHint: string;
       sendInviteCta: string;
       smsHint: string;
       cancel: string;
@@ -1129,11 +1126,10 @@ export interface Dictionary {
     detail: {
       back: string;
       personalInfo: string;
-      titleSection: string;
-      titleLabel: string;
-      permissionsSection: string;
-      permissionsHint: string;
+      roleSection: string;
       activitySection: string;
+      changeRole: string;
+      changeRoleSave: string;
       bypassApprovals: string;
       bypassApprovalsHint: string;
       lastLogin: string;
@@ -1145,29 +1141,7 @@ export interface Dictionary {
       resendInvite: string;
       deleteBtn: string;
       deleteConfirm: string;
-      customized: string;
-      basedOnTemplate: string;
-      saveChanges: string;
     };
-    permissionStates: { allow: string; requireApproval: string; deny: string };
-    permissionGroups: { contracts: string; payments: string; customers: string; investors: string; system: string };
-    permissionActions: Record<
-      | "createInstallmentContract"
-      | "editInstallments"
-      | "rescheduleContract"
-      | "deleteAttachment"
-      | "closeContract"
-      | "approvePaymentProof"
-      | "rejectPaymentProof"
-      | "recordPartialPayment"
-      | "createCustomer"
-      | "approveHighRiskCustomer"
-      | "createInvestmentContract"
-      | "distributeProfits"
-      | "exportReport"
-      | "managePermissions",
-      string
-    >;
     accept: {
       title: string;
       subtitle: string;
@@ -1255,14 +1229,82 @@ export interface Dictionary {
       addEmployee: string;
       columns: {
         name: string;
-        role: string;
+        title: string;
         phone: string;
         permissions: string;
+        lastLogin: string;
         status: string;
+        actions: string;
       };
-      role: { systemAdmin: string; systemEmployee: string };
+      authRole: { systemAdmin: string; systemEmployee: string };
       active: string;
       inactive: string;
+      view: string;
+      neverLoggedIn: string;
+      allowedCount: string;
+      invite: {
+        title: string;
+        subtitle: string;
+        nameLabel: string;
+        nationalIdLabel: string;
+        phoneLabel: string;
+        emailLabel: string;
+        emailOptional: string;
+        titleLabel: string;
+        titleHint: string;
+        authRoleLabel: string;
+        authRoleHint: string;
+        permissionsLabel: string;
+        permissionsHint: string;
+        loadFromTemplate: string;
+        addCta: string;
+        cancel: string;
+      };
+      detail: {
+        back: string;
+        personalInfo: string;
+        titleSection: string;
+        titleLabel: string;
+        authRoleSection: string;
+        permissionsSection: string;
+        permissionsHint: string;
+        activitySection: string;
+        joinedAt: string;
+        lastLogin: string;
+        actions: string;
+        suspendBtn: string;
+        reactivateBtn: string;
+        deleteBtn: string;
+        customized: string;
+        basedOnTemplate: string;
+        saveChanges: string;
+        adminBypassHint: string;
+      };
+      permissionGroups: {
+        offices: string;
+        subscriptions: string;
+        team: string;
+        settings: string;
+        auditReports: string;
+      };
+      permissionActions: Record<
+        | "viewOffices"
+        | "registerOffice"
+        | "extendTrial"
+        | "suspendOffice"
+        | "reactivateOffice"
+        | "deleteOffice"
+        | "changeSubscriptionPlan"
+        | "issueInvoice"
+        | "recordSubscriptionPayment"
+        | "viewPlatformEmployees"
+        | "managePlatformEmployees"
+        | "manageSystemSettings"
+        | "sendGlobalAnnouncement"
+        | "viewAudit"
+        | "exportPlatformReports",
+        string
+      >;
     };
     audit: {
       title: string;
@@ -2740,13 +2782,13 @@ const ar: Dictionary = {
   },
   officeEmployees: {
     title: "موظفو المكتب",
-    subtitle: "ادعُ موظفيك وحدد لكل واحد مسماه وصلاحياته",
+    subtitle: "ادعُ موظفيك وحدد دور كل واحد",
     inviteCta: "+ دعوة موظف",
     filters: { all: "الكل", active: "نشطون", pending: "في انتظار القبول", suspended: "موقوفون" },
     searchPlaceholder: "ابحث بالاسم أو الجوال…",
     columns: {
       employee: "الموظف",
-      role: "المسمى",
+      role: "الدور",
       phone: "الجوال",
       lastLogin: "آخر دخول",
       status: "الحالة",
@@ -2763,17 +2805,14 @@ const ar: Dictionary = {
     view: "عرض",
     invite: {
       title: "دعوة موظف جديد",
-      subtitle: "املأ البيانات، حدد المسمى والصلاحيات — يستلم رابط دعوة عبر SMS",
+      subtitle: "املأ بيانات الموظف وحدد دوره — يستلم رابط دعوة عبر SMS",
       nameLabel: "اسم الموظف",
       nationalIdLabel: "رقم الهوية",
       phoneLabel: "رقم الجوال",
       emailLabel: "البريد الإلكتروني",
       emailOptional: "اختياري",
-      titleLabel: "المسمى الوظيفي",
-      titleHint: "اكتب أي مسمى يناسب — لا يؤثر على الصلاحيات",
-      permissionsLabel: "الصلاحيات",
-      permissionsHint: "حدد ما يستطيع الموظف فعله — كل صلاحية مستقلة",
-      loadFromTemplate: "تحميل من قالب جاهز",
+      roleLabel: "الدور",
+      roleHint: "تعدّل الصلاحيات لاحقاً من صفحة الأدوار",
       sendInviteCta: "إرسال الدعوة",
       smsHint: "سيستلم الموظف رسالة SMS برابط الدعوة ورمز التحقق",
       cancel: "إلغاء",
@@ -2781,11 +2820,10 @@ const ar: Dictionary = {
     detail: {
       back: "العودة للموظفين",
       personalInfo: "البيانات الشخصية",
-      titleSection: "المسمى الوظيفي",
-      titleLabel: "المسمى",
-      permissionsSection: "الصلاحيات",
-      permissionsHint: "صلاحيات هذا الموظف بشكل مستقل — يمكنك تعديل أي بند",
+      roleSection: "الدور والصلاحيات",
       activitySection: "النشاط",
+      changeRole: "تغيير الدور",
+      changeRoleSave: "حفظ التغيير",
       bypassApprovals: "تجاوز الموافقات",
       bypassApprovalsHint: "يُسمح للموظف بتنفيذ المبالغ الكبيرة بدون موافقة",
       lastLogin: "آخر دخول",
@@ -2797,33 +2835,6 @@ const ar: Dictionary = {
       resendInvite: "إعادة إرسال الدعوة",
       deleteBtn: "حذف الحساب",
       deleteConfirm: "تأكيد الحذف",
-      customized: "صلاحيات مخصصة",
-      basedOnTemplate: "بدأت من قالب: {name}",
-      saveChanges: "حفظ التعديلات",
-    },
-    permissionStates: { allow: "مسموح", requireApproval: "يحتاج موافقة", deny: "ممنوع" },
-    permissionGroups: {
-      contracts: "العقود",
-      payments: "المدفوعات",
-      customers: "العملاء",
-      investors: "المستثمرون",
-      system: "النظام",
-    },
-    permissionActions: {
-      createInstallmentContract: "إنشاء عقد تقسيط",
-      editInstallments: "تعديل الأقساط",
-      rescheduleContract: "إعادة جدولة عقد",
-      deleteAttachment: "حذف مرفق",
-      closeContract: "إنهاء عقد",
-      approvePaymentProof: "اعتماد إثبات دفع",
-      rejectPaymentProof: "رفض إثبات دفع",
-      recordPartialPayment: "تسجيل دفعة جزئية",
-      createCustomer: "إضافة عميل",
-      approveHighRiskCustomer: "اعتماد عميل عالي المخاطر",
-      createInvestmentContract: "إنشاء عقد استثمار",
-      distributeProfits: "توزيع الأرباح",
-      exportReport: "تصدير التقارير",
-      managePermissions: "إدارة الصلاحيات",
     },
     accept: {
       title: "أهلاً بك في مُقسِّط",
@@ -2907,22 +2918,89 @@ const ar: Dictionary = {
       saved: "تم الحفظ",
     },
     employees: {
-      title: "موظفو النظام",
-      subtitle: "مدير النظام يحدد صلاحيات كل موظف",
+      title: "موظفو المنصة",
+      subtitle: "أضف موظفي المنصة، حدد لكل واحد مسماه الوظيفي وصلاحياته",
       addEmployee: "+ إضافة موظف",
       columns: {
         name: "الاسم",
-        role: "الدور",
+        title: "المسمى الوظيفي",
         phone: "الجوال",
         permissions: "الصلاحيات",
+        lastLogin: "آخر دخول",
         status: "الحالة",
+        actions: "إجراءات",
       },
-      role: {
-        systemAdmin: "مدير النظام",
-        systemEmployee: "موظف نظام",
+      authRole: {
+        systemAdmin: "مدير المنصة",
+        systemEmployee: "موظف منصة",
       },
       active: "نشط",
       inactive: "موقوف",
+      view: "عرض",
+      neverLoggedIn: "لم يدخل بعد",
+      allowedCount: "{n} من {total}",
+      invite: {
+        title: "إضافة موظف منصة",
+        subtitle: "املأ البيانات، حدد المسمى والصلاحيات لهذا الموظف",
+        nameLabel: "الاسم",
+        nationalIdLabel: "رقم الهوية",
+        phoneLabel: "رقم الجوال",
+        emailLabel: "البريد الإلكتروني",
+        emailOptional: "اختياري",
+        titleLabel: "المسمى الوظيفي",
+        titleHint: "اكتب أي مسمى يناسب — لا يؤثر على الصلاحيات",
+        authRoleLabel: "نوع الحساب",
+        authRoleHint: "مدير المنصة يتجاوز كل الصلاحيات تلقائيًا. لكل بقية الموظفين، تتحكم المصفوفة أدناه.",
+        permissionsLabel: "الصلاحيات",
+        permissionsHint: "حدد ما يستطيع الموظف فعله على مستوى المنصة — كل صلاحية مستقلة",
+        loadFromTemplate: "تحميل من قالب جاهز",
+        addCta: "إضافة الموظف",
+        cancel: "إلغاء",
+      },
+      detail: {
+        back: "العودة لموظفي المنصة",
+        personalInfo: "البيانات الشخصية",
+        titleSection: "المسمى الوظيفي",
+        titleLabel: "المسمى",
+        authRoleSection: "نوع الحساب",
+        permissionsSection: "الصلاحيات",
+        permissionsHint: "صلاحيات هذا الموظف بشكل مستقل — يمكنك تعديل أي بند",
+        activitySection: "النشاط",
+        joinedAt: "تاريخ الإضافة",
+        lastLogin: "آخر دخول",
+        actions: "إجراءات",
+        suspendBtn: "تعليق الموظف",
+        reactivateBtn: "إعادة التفعيل",
+        deleteBtn: "حذف الحساب",
+        customized: "صلاحيات مخصصة",
+        basedOnTemplate: "بدأت من قالب: {name}",
+        saveChanges: "حفظ التعديلات",
+        adminBypassHint: "مدير المنصة لديه كل الصلاحيات بشكل افتراضي — هذه المصفوفة للعرض فقط.",
+      },
+      permissionGroups: {
+        offices: "المكاتب",
+        subscriptions: "الاشتراكات والفواتير",
+        team: "موظفو المنصة",
+        settings: "الإعدادات",
+        auditReports: "السجل والتقارير",
+      },
+      permissionActions: {
+        viewOffices: "عرض المكاتب",
+        registerOffice: "تسجيل مكتب جديد",
+        extendTrial: "تمديد فترة التجربة",
+        suspendOffice: "تعليق مكتب",
+        reactivateOffice: "إعادة تفعيل مكتب",
+        deleteOffice: "حذف مكتب",
+        changeSubscriptionPlan: "تغيير خطة الاشتراك",
+        issueInvoice: "إصدار فاتورة",
+        recordSubscriptionPayment: "تسجيل دفعة اشتراك",
+        viewPlatformEmployees: "عرض موظفي المنصة",
+        managePlatformEmployees: "إدارة موظفي المنصة",
+        manageSystemSettings: "إعدادات المنصة",
+        sendGlobalAnnouncement: "إرسال إعلان عام",
+        viewAudit: "عرض سجل العمليات",
+        exportPlatformReports: "تصدير تقارير المنصة",
+      },
     },
     audit: {
       title: "سجل عمليات النظام",
@@ -4455,13 +4533,13 @@ const en: Dictionary = {
   },
   officeEmployees: {
     title: "Team",
-    subtitle: "Invite your team — pick each person's title and permissions",
+    subtitle: "Invite your team and set each person's role",
     inviteCta: "+ Invite member",
     filters: { all: "All", active: "Active", pending: "Pending", suspended: "Suspended" },
     searchPlaceholder: "Search by name or phone…",
     columns: {
       employee: "Member",
-      role: "Title",
+      role: "Role",
       phone: "Phone",
       lastLogin: "Last login",
       status: "Status",
@@ -4478,17 +4556,14 @@ const en: Dictionary = {
     view: "View",
     invite: {
       title: "Invite a team member",
-      subtitle: "Fill in their details, pick a title and permissions — they'll get an SMS invite",
+      subtitle: "Fill in their details and pick a role — they'll get an SMS invite",
       nameLabel: "Member name",
       nationalIdLabel: "National ID",
       phoneLabel: "Phone",
       emailLabel: "Email",
       emailOptional: "optional",
-      titleLabel: "Job title",
-      titleHint: "Free text — doesn't affect permissions",
-      permissionsLabel: "Permissions",
-      permissionsHint: "Pick what this member can do — each permission is independent",
-      loadFromTemplate: "Load from a template",
+      roleLabel: "Role",
+      roleHint: "Adjust permissions later on the Roles page",
       sendInviteCta: "Send invitation",
       smsHint: "They'll receive an SMS with the invite link and a verification code",
       cancel: "Cancel",
@@ -4496,11 +4571,10 @@ const en: Dictionary = {
     detail: {
       back: "Back to team",
       personalInfo: "Personal info",
-      titleSection: "Job title",
-      titleLabel: "Title",
-      permissionsSection: "Permissions",
-      permissionsHint: "This member's permissions are independent — toggle anything",
+      roleSection: "Role & permissions",
       activitySection: "Activity",
+      changeRole: "Change role",
+      changeRoleSave: "Save change",
       bypassApprovals: "Bypass approvals",
       bypassApprovalsHint: "This member can execute large amounts without approval",
       lastLogin: "Last login",
@@ -4512,33 +4586,6 @@ const en: Dictionary = {
       resendInvite: "Resend invitation",
       deleteBtn: "Delete account",
       deleteConfirm: "Confirm deletion",
-      customized: "Customized permissions",
-      basedOnTemplate: "Started from template: {name}",
-      saveChanges: "Save changes",
-    },
-    permissionStates: { allow: "Allow", requireApproval: "Needs approval", deny: "Deny" },
-    permissionGroups: {
-      contracts: "Contracts",
-      payments: "Payments",
-      customers: "Customers",
-      investors: "Investors",
-      system: "System",
-    },
-    permissionActions: {
-      createInstallmentContract: "Create installment contract",
-      editInstallments: "Edit installments",
-      rescheduleContract: "Reschedule contract",
-      deleteAttachment: "Delete attachment",
-      closeContract: "Close contract",
-      approvePaymentProof: "Approve payment proof",
-      rejectPaymentProof: "Reject payment proof",
-      recordPartialPayment: "Record partial payment",
-      createCustomer: "Create customer",
-      approveHighRiskCustomer: "Approve high-risk customer",
-      createInvestmentContract: "Create investment contract",
-      distributeProfits: "Distribute profits",
-      exportReport: "Export reports",
-      managePermissions: "Manage permissions",
     },
     accept: {
       title: "Welcome to Muqsit",
@@ -4622,22 +4669,93 @@ const en: Dictionary = {
       saved: "Saved",
     },
     employees: {
-      title: "System staff",
-      subtitle: "System admin sets each staff member's permissions",
+      title: "Platform team",
+      subtitle: "Add platform staff — pick each person's title and permissions",
       addEmployee: "+ Add staff",
       columns: {
         name: "Name",
-        role: "Role",
+        title: "Title",
         phone: "Phone",
-        permissions: "Permissions",
+        permissions: "Allowed permissions",
+        lastLogin: "Last login",
         status: "Status",
+        actions: "Actions",
       },
-      role: {
-        systemAdmin: "System admin",
-        systemEmployee: "System staff",
+      authRole: {
+        systemAdmin: "Platform admin",
+        systemEmployee: "Platform staff",
       },
       active: "Active",
       inactive: "Inactive",
+      view: "View",
+      neverLoggedIn: "Never logged in",
+      allowedCount: "{n} of {total}",
+      invite: {
+        title: "Add a platform staff member",
+        subtitle: "Fill in their details, pick a title and permissions",
+        nameLabel: "Name",
+        nationalIdLabel: "National ID",
+        phoneLabel: "Phone",
+        emailLabel: "Email",
+        emailOptional: "optional",
+        titleLabel: "Job title",
+        titleHint: "Free text — doesn't affect permissions",
+        authRoleLabel: "Account type",
+        authRoleHint:
+          "Platform admin bypasses every permission automatically. For everyone else, the matrix below is the source of truth.",
+        permissionsLabel: "Permissions",
+        permissionsHint:
+          "Pick what this staff member can do at the platform level — each permission is independent",
+        loadFromTemplate: "Load from a template",
+        addCta: "Add staff member",
+        cancel: "Cancel",
+      },
+      detail: {
+        back: "Back to platform team",
+        personalInfo: "Personal info",
+        titleSection: "Job title",
+        titleLabel: "Title",
+        authRoleSection: "Account type",
+        permissionsSection: "Permissions",
+        permissionsHint:
+          "This staff member's permissions are independent — toggle anything",
+        activitySection: "Activity",
+        joinedAt: "Added",
+        lastLogin: "Last login",
+        actions: "Actions",
+        suspendBtn: "Suspend",
+        reactivateBtn: "Reactivate",
+        deleteBtn: "Delete account",
+        customized: "Customized permissions",
+        basedOnTemplate: "Started from template: {name}",
+        saveChanges: "Save changes",
+        adminBypassHint:
+          "Platform admins have every permission by default — this matrix is read-only for them.",
+      },
+      permissionGroups: {
+        offices: "Offices",
+        subscriptions: "Subscriptions & billing",
+        team: "Platform team",
+        settings: "Settings",
+        auditReports: "Audit & reports",
+      },
+      permissionActions: {
+        viewOffices: "View offices",
+        registerOffice: "Register a new office",
+        extendTrial: "Extend trial",
+        suspendOffice: "Suspend an office",
+        reactivateOffice: "Reactivate an office",
+        deleteOffice: "Delete an office",
+        changeSubscriptionPlan: "Change subscription plan",
+        issueInvoice: "Issue an invoice",
+        recordSubscriptionPayment: "Record a subscription payment",
+        viewPlatformEmployees: "View platform staff",
+        managePlatformEmployees: "Manage platform staff",
+        manageSystemSettings: "Manage platform settings",
+        sendGlobalAnnouncement: "Send a global announcement",
+        viewAudit: "View audit log",
+        exportPlatformReports: "Export platform reports",
+      },
     },
     audit: {
       title: "Platform audit log",

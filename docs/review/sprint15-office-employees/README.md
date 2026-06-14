@@ -1,44 +1,43 @@
-# Sprint 15 — Office team management
+# Sprint 15 — Office team + Platform team (revision 2)
 
 Static review assets for the Sprint 15 prototype on
 `claude/sprint15-office-employees` (stacked on `claude/sprint14-system-admin`).
 **Prototype only. No backend. Mock invitations and SMS.**
 
-## Goal
+## What this sprint contains
 
-Close the loop on the office team. Sprint 4 built the roles &
-permissions matrix; Sprint 13 captured the office manager during
-registration. This sprint gives the office manager the screens to
-**invite team members**, assign each one a **custom job title and
-their own per-employee permissions matrix**, and manage them over
-time.
+Two parallel deliverables on top of Sprints 13 (office manager
+registration) and 14 (system admin shell):
 
-## Title vs. permissions — decoupled
+1. **Office team management** (`/employees`) — the office manager
+   invites their staff and assigns each one a role from Sprint 4's
+   roles & permissions seed (مدير المكتب · موظف · موظف تحصيل · محاسب).
+   This is the same simple role-based model Sprint 4 established —
+   no per-employee flexibility here.
 
-The office manager gives each member a free-text **job title** (e.g.
-"مساعد مدير العمليات", "موظف تحصيل — فرع الشمال", "محاسبة أولى") and
-**independently** assigns that member a permissions matrix — every
-single action (14 of them) can be set to allow / requires approval /
-deny. Two people with the same title can have completely different
-permissions; one person can have a unique title nobody else has.
+2. **Platform team management** (`/admin/employees`) — the **platform
+   owner** (system admin) builds the team that runs the platform
+   itself. Each platform staff member gets a free-text **job title**
+   and a **per-employee permissions matrix** independent from the
+   title. The auth role (`platform admin` vs `platform staff`) is a
+   separate dimension used only for routing/shell access.
 
-Roles from Sprint 4 are still here but they're **templates**, not
-identities. The invite form and detail page both offer a "Load from
-template" button that fills the matrix from a chosen role; the
-manager can then change anything before saving. After save, the
-matrix is the source of truth — changing the template later never
-retroactively affects employees.
+The flexibility model lives at the platform layer because that's where
+the variety of duties (support, accounting, operations) demands
+fine-grained, individual permission decisions. The office layer keeps
+the simpler "pick a role" model since office staff fall into a small
+set of well-understood roles.
 
-## Screens
+## Office screens (Sprint 4 role model)
 
 | Route | Purpose |
 |---|---|
-| `/employees` | Team list with filters + search + status badges. The "Title" column shows each member's custom title. |
-| `/employees/new` | Invite a member — personal info + custom title + per-employee permissions matrix (optionally pre-filled from a template). |
-| `/employees/[id]` | Member detail — edit title, toggle every permission, "based on template / customized" indicator, bypass-approvals, suspend / reactivate, delete. |
+| `/employees` | Team list with filters + search + status badges |
+| `/employees/new` | Invite a member (name + national ID + phone + role) |
+| `/employees/[id]` | Member detail — change role, toggle bypass-approvals, suspend / reactivate, delete |
 | `/invite/[token]` | The invitation-acceptance flow for invited team members |
 
-## Invitation lifecycle
+### Invitation lifecycle (office)
 
 ```
 Office manager → /employees/new
@@ -53,55 +52,90 @@ Member's phone receives SMS with link
 Member lands on /dashboard with their role's permissions
 ```
 
-The `Employee` interface gained an `inviteStatus` field
-(`pending` / `accepted` / `expired`) so the list can mark
-not-yet-accepted invitations and the detail page can offer a
-"Resend invitation" action.
-
-## Member states surfaced in the UI
+### Member states surfaced in the office UI
 
 | State | Badge | What the office manager sees |
 |---|---|---|
 | Active member | Green "نشط" | Can change role, suspend, delete |
-| Pending invitation | Gold "في انتظار القبول" | Resend invitation, suspend, delete + a banner "أُرسلت دعوة عبر SMS — لم يدخل الموظف بعد" |
+| Pending invitation | Gold "في انتظار القبول" | Resend invitation, suspend, delete + a banner |
 | Suspended | Gray "موقوف" | Reactivate, delete |
 
-## Role templates
+## Platform screens (per-employee title + matrix)
 
-The Sprint 4 roles (`/permissions`) are still here — مدير المكتب ·
-موظف · موظف تحصيل · محاسب — but they only serve as **starting points**
-for new employees. The "Load from template" button copies a template's
-matrix into the form; from that moment on the matrix is per-employee
-and the template is decorative metadata only (we store
-`templateRoleId` for informational purposes, never to derive
-permissions).
+| Route | Purpose |
+|---|---|
+| `/admin/employees` | Platform team list — title, allowed-permissions count (`n من 15`), last login, status |
+| `/admin/employees/new` | Add a platform staff member — personal info + free-text title + auth-role picker + permissions matrix |
+| `/admin/employees/[id]` | Staff detail — edit title, full matrix per action, "customized / based on template" indicator, suspend / reactivate / delete |
 
-A "**Bypass approvals**" checkbox on the detail page lets the manager
-trust a specific member with large-amount transactions without
-re-routing every one through the approval workflow.
+### Title vs. permissions — decoupled
+
+The platform owner gives each member a free-text **job title** (e.g.
+"قائد فريق العمليات", "محاسب اشتراكات", "أخصائي دعم المكاتب") and
+**independently** assigns a permissions matrix. The 15 actions are
+grouped into 5 categories:
+
+| Group | Actions |
+|---|---|
+| المكاتب | عرض، تسجيل، تمديد التجربة، تعليق، إعادة تفعيل، حذف |
+| الاشتراكات والفواتير | تغيير الخطة، إصدار فاتورة، تسجيل دفعة اشتراك |
+| موظفو المنصة | عرض، إدارة |
+| الإعدادات | إعدادات المنصة، إرسال إعلان عام |
+| السجل والتقارير | عرض السجل، تصدير التقارير |
+
+Every action is **tri-state**: مسموح / يحتاج موافقة / ممنوع.
+
+### Templates, not identities
+
+Four reusable starting matrices ship in the seed:
+
+| Template | Description |
+|---|---|
+| مدير المنصة | All actions allowed |
+| مسؤول دعم | View offices, extend trial, record subscription payments, view audit; announcements need approval |
+| محاسب المنصة | View offices, issue invoice, record payment, plan changes need approval, export reports |
+| أخصائي عمليات | Register offices, extend trial, suspend/reactivate; plan changes need approval |
+
+The "Load from template" picker copies a template's matrix into the
+form. The manager can change anything before saving. After save the
+matrix is per-employee — changes to a template **never retroactively
+affect existing staff**. `templateRoleId` is informational only and
+drives the "Started from template / Customized" indicator on the
+detail page.
+
+### Platform admin override
+
+When a staff member has the auth role `platform admin` (`systemAdmin`),
+the permissions matrix is shown read-only with a hint:
+"مدير المنصة لديه كل الصلاحيات بشكل افتراضي — هذه المصفوفة للعرض فقط."
+This keeps the screen consistent for all roles while making the
+admin's bypass behavior explicit.
 
 ## What stays out of scope
 
-- No backend; the "send invitation" button is a no-op redirect.
+- No backend; the "Send invitation" / "Add staff" buttons are no-op
+  redirects.
 - No SMS service integration.
-- No edit form for the role list itself (still on `/permissions`).
 - No bulk import of staff.
-- No audit log on the office side (Sprint 4's office audit log is
-  available; new actions aren't wired into it here).
-- No deep-link from the invite SMS to the mobile app (would require
-  a native app first).
+- No audit-log wiring for the new platform actions (Sprint 14's audit
+  log displays existing entries; new mock actions weren't backfilled).
+- No edit form for the platform role templates themselves.
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
-| `lib/mock/types.ts` | `Employee` gains `title` (free-text, decoupled from roles), `permissions` (per-employee matrix), `templateRoleId`, `phone`, `nationalId`, `inviteStatus`, `invitedAt`, `lastLoginAt`. New `EmployeeInviteStatus` type. Legacy `roleId/roleName/bypassApprovals` kept for backward-compatibility with Sprint 4 audit/approvals/permissions pages. |
-| `lib/mock/employees.ts` | Seed expanded to 7 members covering all three states (active, pending, suspended). Each member has a custom title and a per-employee permissions matrix (one member — عبدالله المطيري — gets a custom mix on top of the "employee" template to demonstrate the model). |
-| `lib/i18n/dictionaries.ts` | New `officeEmployees.*` namespace (AR + EN) including `permissionStates`, `permissionGroups`, and `permissionActions` so the matrix UI is fully localized. |
-| `app/(app)/employees/page.tsx` (new) | List with filter pills + search + status badges. The "Title" column shows each member's custom title. |
-| `app/(app)/employees/new/page.tsx` (new) | Invite form — personal info section + free-text title + permissions matrix grouped by category, with a "Load from template" picker. |
-| `app/(app)/employees/[id]/page.tsx` (new) | Member detail — personal info, activity, editable title, full permissions matrix (per-action 3-state toggle), "customized" vs "based on template" indicator, bypass-approvals, actions. |
+| `lib/mock/types.ts` | `Employee` gains `phone`, `nationalId`, `inviteStatus`, `invitedAt`, `lastLoginAt`. New `EmployeeInviteStatus` type. **`SystemEmployee` gains `title` (free-text), per-employee `permissions: Record<SystemPermissionAction, PermissionState>`, `templateRoleId`, `lastLoginAt`.** New `SystemPermissionAction` (15 actions), `SystemPermissionGroup` (5), and `SystemRole` (template). |
+| `lib/mock/employees.ts` | Office staff seed expanded to 7 members across active / pending / suspended states. |
+| `lib/mock/admin-data.ts` | Adds **`MOCK_SYSTEM_ROLES`** (4 templates) and replaces the 3-member system staff seed with a **5-member platform team** carrying titles + per-employee matrices (one — نوف القحطاني — customizes the "operations" template to demonstrate). |
+| `lib/i18n/dictionaries.ts` | Adds the full `admin.employees.*` namespace (AR + EN) — `invite`, `detail`, `permissionGroups`, `permissionActions`, `authRole`, etc. |
+| `app/(app)/employees/page.tsx` (new) | Office team list. |
+| `app/(app)/employees/new/page.tsx` (new) | Office invite form (role card picker). |
+| `app/(app)/employees/[id]/page.tsx` (new) | Office member detail (role dropdown + bypass approvals). |
 | `app/(auth)/invite/[token]/page.tsx` (new) | Invitation acceptance flow — OTP + optional password. |
+| `app/(admin)/admin/employees/page.tsx` | Platform team list — title, allowed-count, last login. |
+| `app/(admin)/admin/employees/new/page.tsx` (new) | Platform staff invite form — title + auth-role + permissions matrix + load-from-template. |
+| `app/(admin)/admin/employees/[id]/page.tsx` (new) | Platform staff detail — editable title + matrix + customized indicator + admin override hint. |
 
 ## Verification
 
@@ -110,19 +144,23 @@ re-routing every one through the approval workflow.
 | `pnpm --filter @muqsit/web type-check` | ✅ |
 | `pnpm --filter @muqsit/web lint` | ✅ |
 | `pnpm --filter @muqsit/web build` | ✅ |
-| Visual screenshots | ✅ 6 captured |
+| Visual screenshots | ✅ 10 captured |
 
 ## Screenshots
 
 | File | Description |
 | --- | --- |
-| `sprint15.pdf` | Cover + 6 captioned screenshots. |
-| `01-employees-list-desktop-ar.png` | Team list with 7 members covering all states. The "Title" column shows custom job titles, not role names. Desktop · AR. |
-| `02-invite-employee-desktop-ar.png` | Invite form — personal info + free-text title + full permissions matrix (5 groups × 14 actions) with "Load from template" button. Desktop · AR. |
-| `03-employee-detail-desktop-ar.png` | Detail page for an active member (نورة) — editable title + editable permissions matrix per action + bypass-approvals + actions. Desktop · AR. |
-| `04-employee-pending-desktop-ar.png` | Detail page for a pending invitation (بدر — "موظف تحصيل — فرع الشمال") showing the gold banner and resend-invitation action. Desktop · AR. |
-| `05-employees-list-mobile-ar.png` | List on mobile. AR. |
-| `06-invite-accept-mobile-ar.png` | Invitation acceptance screen — OTP + optional password. Mobile · AR. |
+| `sprint15.pdf` | Cover + 10 captioned screenshots. |
+| `01-employees-list-desktop-ar.png` | Office team list with 7 members. Desktop · AR. |
+| `02-invite-employee-desktop-ar.png` | Office invite form (role card picker). Desktop · AR. |
+| `03-employee-detail-desktop-ar.png` | Office member detail (نورة) with role dropdown + bypass-approvals. Desktop · AR. |
+| `04-employee-pending-desktop-ar.png` | Office member detail for a pending invitation (بدر) with the gold banner + resend action. Desktop · AR. |
+| `05-employees-list-mobile-ar.png` | Office list on mobile. AR. |
+| `06-invite-accept-mobile-ar.png` | Invitation acceptance — OTP + optional password. Mobile · AR. |
+| `07-platform-employees-list-desktop-ar.png` | **Platform team list** — five staff members with distinct custom titles; "الصلاحيات" column shows the allowed-count out of 15. Desktop · AR. |
+| `08-platform-employee-invite-desktop-ar.png` | **Add platform staff form** — personal info + free-text title + auth-role picker + matrix (5 groups, 15 tri-state actions) + "Load from template". Desktop · AR. |
+| `09-platform-employee-detail-desktop-ar.png` | **Platform staff detail — نوف القحطاني** (custom mix on the "operations" template). Editable title + matrix; "صلاحيات مخصصة" badge. Desktop · AR. |
+| `10-platform-employee-admin-detail-desktop-ar.png` | **Platform admin (مدير المنصة) detail** — same screen with the matrix locked all-allow and a primary banner explaining the override. Desktop · AR. |
 
 ## Stack on top of
 

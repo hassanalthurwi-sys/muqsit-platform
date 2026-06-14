@@ -287,20 +287,6 @@ export interface Employee {
   // and surface KYC-ready info on the employee detail page.
   phone?: string;
   nationalId?: string;
-  // Sprint 15 revision — title (free-text) is decoupled from
-  // permissions. The office manager gives the member a custom job
-  // title, then assigns permissions independently.
-  title: string;
-  // Sprint 15 revision — per-employee permission matrix. Roles still
-  // exist as optional templates (templateRoleId references the role
-  // used as the starting point when the employee was created, purely
-  // informational). The effective permissions are these — no
-  // implicit fallback to the role.
-  permissions: Record<PermissionAction, PermissionState>;
-  templateRoleId?: string;
-  // ── Legacy fields kept for backward compatibility with earlier
-  // sprints that read roleId / roleName. New code should prefer
-  // title and permissions above.
   roleId: string;
   roleName: string;
   bypassApprovals: boolean;
@@ -746,21 +732,61 @@ export interface AdminAuditEntry {
   notes?: string;
 }
 
+// Sprint 15 — Platform employees can have a free-text job title
+// (decoupled from auth role) and a per-employee permissions matrix.
+// 15 actions grouped into 5 categories, each tri-state.
+export type SystemPermissionAction =
+  | "viewOffices"
+  | "registerOffice"
+  | "extendTrial"
+  | "suspendOffice"
+  | "reactivateOffice"
+  | "deleteOffice"
+  | "changeSubscriptionPlan"
+  | "issueInvoice"
+  | "recordSubscriptionPayment"
+  | "viewPlatformEmployees"
+  | "managePlatformEmployees"
+  | "manageSystemSettings"
+  | "sendGlobalAnnouncement"
+  | "viewAudit"
+  | "exportPlatformReports";
+
+export type SystemPermissionGroup =
+  | "offices"
+  | "subscriptions"
+  | "team"
+  | "settings"
+  | "auditReports";
+
+// A reusable starting matrix. Like office Roles — these are templates,
+// not identities. The actual permissions live on the employee record.
+export interface SystemRole {
+  id: string;
+  name: string;
+  description: string;
+  permissions: Record<SystemPermissionAction, PermissionState>;
+}
+
 export interface SystemEmployee {
   id: string;
   name: string;
   nationalId?: string;
   phone: string;
   email?: string;
+  // Sprint 15 — free-text title shown in lists and on the detail
+  // page. Independent of the auth role below.
+  title: string;
+  // Auth-level role. Kept for routing / shell access only:
+  // `systemAdmin` is the platform owner (can do anything regardless of
+  // the matrix); `systemEmployee` is everyone else (gated by the matrix).
   role: "systemAdmin" | "systemEmployee";
-  permissions: Array<
-    | "viewOffices"
-    | "extendTrial"
-    | "suspendOffice"
-    | "manageEmployees"
-    | "manageSettings"
-    | "viewAudit"
-  >;
+  // Sprint 15 — per-employee permission matrix. Templates only
+  // pre-fill it on invite; after save the matrix is the source of
+  // truth and never re-derives from the template.
+  permissions: Record<SystemPermissionAction, PermissionState>;
+  templateRoleId?: string;
   active: boolean;
   createdAt: string;
+  lastLoginAt?: string;
 }

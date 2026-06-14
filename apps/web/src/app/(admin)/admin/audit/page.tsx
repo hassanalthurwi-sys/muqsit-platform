@@ -37,8 +37,8 @@ export default function AdminAuditPage() {
                   {entry.actorName}
                   <p className="text-[10px] text-muted-foreground">
                     {entry.actorRole === "systemAdmin"
-                      ? dict.admin.employees.role.systemAdmin
-                      : dict.admin.employees.role.systemEmployee}
+                      ? dict.admin.employees.authRole.systemAdmin
+                      : dict.admin.employees.authRole.systemEmployee}
                   </p>
                 </td>
                 <td className="px-4 py-3 text-sm font-medium">

@@ -1,6 +1,114 @@
 // Sprint 14 — Mock data for the system admin / platform level.
 
-import type { OfficeAccount, AdminAuditEntry, SystemEmployee, SystemSettings } from "./types";
+import type {
+  OfficeAccount,
+  AdminAuditEntry,
+  SystemEmployee,
+  SystemPermissionAction,
+  SystemRole,
+  SystemSettings,
+  PermissionState,
+} from "./types";
+
+// ─── Sprint 15 — Platform permission templates ─────────────────────
+// Reusable starting matrices for platform employees. Like office
+// roles, these are templates only — once an employee is created,
+// their matrix is independent and changes to the template never
+// retroactively apply.
+
+function allowAll(): Record<SystemPermissionAction, PermissionState> {
+  return {
+    viewOffices: "allow",
+    registerOffice: "allow",
+    extendTrial: "allow",
+    suspendOffice: "allow",
+    reactivateOffice: "allow",
+    deleteOffice: "allow",
+    changeSubscriptionPlan: "allow",
+    issueInvoice: "allow",
+    recordSubscriptionPayment: "allow",
+    viewPlatformEmployees: "allow",
+    managePlatformEmployees: "allow",
+    manageSystemSettings: "allow",
+    sendGlobalAnnouncement: "allow",
+    viewAudit: "allow",
+    exportPlatformReports: "allow",
+  };
+}
+
+function denyAll(): Record<SystemPermissionAction, PermissionState> {
+  return {
+    viewOffices: "deny",
+    registerOffice: "deny",
+    extendTrial: "deny",
+    suspendOffice: "deny",
+    reactivateOffice: "deny",
+    deleteOffice: "deny",
+    changeSubscriptionPlan: "deny",
+    issueInvoice: "deny",
+    recordSubscriptionPayment: "deny",
+    viewPlatformEmployees: "deny",
+    managePlatformEmployees: "deny",
+    manageSystemSettings: "deny",
+    sendGlobalAnnouncement: "deny",
+    viewAudit: "deny",
+    exportPlatformReports: "deny",
+  };
+}
+
+export const MOCK_SYSTEM_ROLES: SystemRole[] = [
+  {
+    id: "sysrole-admin",
+    name: "مدير المنصة",
+    description: "صلاحيات كاملة على كل عمليات المنصة.",
+    permissions: allowAll(),
+  },
+  {
+    id: "sysrole-support",
+    name: "مسؤول دعم",
+    description:
+      "يطّلع على المكاتب، يمدّد التجربة، ويسجّل دفعات الاشتراك. لا يستطيع تعليق أو حذف.",
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      extendTrial: "allow",
+      recordSubscriptionPayment: "allow",
+      sendGlobalAnnouncement: "requireApproval",
+      viewAudit: "allow",
+    },
+  },
+  {
+    id: "sysrole-accountant",
+    name: "محاسب المنصة",
+    description:
+      "يدير الاشتراكات والفواتير والمدفوعات. مطّلع على المكاتب وسجل العمليات.",
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      issueInvoice: "allow",
+      recordSubscriptionPayment: "allow",
+      changeSubscriptionPlan: "requireApproval",
+      viewAudit: "allow",
+      exportPlatformReports: "allow",
+    },
+  },
+  {
+    id: "sysrole-operations",
+    name: "أخصائي عمليات",
+    description:
+      "يسجّل المكاتب الجديدة، يمدّد التجربة، ويعلّق المكاتب. تعديلات الاشتراك تحتاج موافقة.",
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      registerOffice: "allow",
+      extendTrial: "allow",
+      suspendOffice: "allow",
+      reactivateOffice: "allow",
+      changeSubscriptionPlan: "requireApproval",
+      viewAudit: "allow",
+    },
+  },
+];
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   defaultTrialDays: 30,
@@ -121,6 +229,9 @@ export const MOCK_OFFICES: OfficeAccount[] = [
   },
 ];
 
+// Sprint 15 revision — each platform employee gets a custom title
+// (free text) and a direct permissions matrix. Templates above are
+// optional starting points; templateRoleId is informational only.
 export const MOCK_SYSTEM_EMPLOYEES: SystemEmployee[] = [
   {
     id: "sysemp-001",
@@ -128,17 +239,13 @@ export const MOCK_SYSTEM_EMPLOYEES: SystemEmployee[] = [
     nationalId: "1099443322",
     phone: "+966 55 234 5678",
     email: "hassan@muqsit-platform.sa",
+    title: "مدير المنصة",
     role: "systemAdmin",
-    permissions: [
-      "viewOffices",
-      "extendTrial",
-      "suspendOffice",
-      "manageEmployees",
-      "manageSettings",
-      "viewAudit",
-    ],
+    permissions: allowAll(),
+    templateRoleId: "sysrole-admin",
     active: true,
     createdAt: "2023-01-15T10:00:00Z",
+    lastLoginAt: "2026-06-13T09:30:00Z",
   },
   {
     id: "sysemp-002",
@@ -146,10 +253,20 @@ export const MOCK_SYSTEM_EMPLOYEES: SystemEmployee[] = [
     nationalId: "1056781234",
     phone: "+966 50 887 3092",
     email: "reem@muqsit-platform.sa",
+    title: "أخصائي دعم المكاتب",
     role: "systemEmployee",
-    permissions: ["viewOffices", "extendTrial", "viewAudit"],
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      extendTrial: "allow",
+      recordSubscriptionPayment: "allow",
+      sendGlobalAnnouncement: "requireApproval",
+      viewAudit: "allow",
+    },
+    templateRoleId: "sysrole-support",
     active: true,
     createdAt: "2024-02-01T10:00:00Z",
+    lastLoginAt: "2026-06-13T08:15:00Z",
   },
   {
     id: "sysemp-003",
@@ -157,10 +274,66 @@ export const MOCK_SYSTEM_EMPLOYEES: SystemEmployee[] = [
     nationalId: "1087452103",
     phone: "+966 55 119 2240",
     email: "sami@muqsit-platform.sa",
+    title: "محاسب اشتراكات",
     role: "systemEmployee",
-    permissions: ["viewOffices", "viewAudit"],
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      issueInvoice: "allow",
+      recordSubscriptionPayment: "allow",
+      changeSubscriptionPlan: "requireApproval",
+      viewAudit: "allow",
+      exportPlatformReports: "allow",
+    },
+    templateRoleId: "sysrole-accountant",
     active: true,
     createdAt: "2024-09-12T10:00:00Z",
+    lastLoginAt: "2026-06-12T15:42:00Z",
+  },
+  {
+    id: "sysemp-004",
+    name: "نوف القحطاني",
+    nationalId: "1078334451",
+    phone: "+966 56 778 1199",
+    email: "nouf@muqsit-platform.sa",
+    // Custom mix — started from "operations" template but the manager
+    // elevated subscription-plan changes from "requires approval" to
+    // "allow" since she's a senior operations lead.
+    title: "قائد فريق العمليات",
+    role: "systemEmployee",
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      registerOffice: "allow",
+      extendTrial: "allow",
+      suspendOffice: "allow",
+      reactivateOffice: "allow",
+      changeSubscriptionPlan: "allow",
+      sendGlobalAnnouncement: "allow",
+      viewAudit: "allow",
+      exportPlatformReports: "allow",
+    },
+    templateRoleId: "sysrole-operations",
+    active: true,
+    createdAt: "2024-04-22T10:00:00Z",
+    lastLoginAt: "2026-06-13T11:22:00Z",
+  },
+  {
+    id: "sysemp-005",
+    name: "خالد العتيبي",
+    nationalId: "1099887701",
+    phone: "+966 53 224 9930",
+    email: "khaled@muqsit-platform.sa",
+    title: "موظف دعم — مبتدئ",
+    role: "systemEmployee",
+    permissions: {
+      ...denyAll(),
+      viewOffices: "allow",
+      viewAudit: "allow",
+    },
+    active: false,
+    createdAt: "2024-11-08T10:00:00Z",
+    lastLoginAt: "2025-12-20T14:30:00Z",
   },
 ];
 

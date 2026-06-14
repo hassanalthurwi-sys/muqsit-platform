@@ -1407,6 +1407,76 @@ export interface Dictionary {
       };
     };
   };
+  officeSubscription: {
+    title: string;
+    subtitle: string;
+    trialBanner: {
+      title: string;
+      remaining: string;
+      cta: string;
+    };
+    currentPlan: {
+      heading: string;
+      onTrial: string;
+      activePlan: string;
+      renews: string;
+    };
+    compareHeading: string;
+    compareSubtitle: string;
+    durationToggle: { label: string; perMonth: string };
+    saveBadge: string;
+    chooseBtn: string;
+    currentBadge: string;
+    learnMore: string;
+    closeFeature: string;
+    scenarioHeading: string;
+    exampleHeading: string;
+    checkout: {
+      title: string;
+      subtitle: string;
+      orderSummary: string;
+      planRow: string;
+      durationRow: string;
+      total: string;
+      paymentMethod: string;
+      paymentMethodHint: string;
+      payBtn: string;
+      backToPlans: string;
+    };
+    paymentMethods: {
+      mada: string;
+      visa: string;
+      mastercard: string;
+      applePay: string;
+      stcPay: string;
+      bankTransfer: string;
+    };
+    paymentMethodHints: {
+      mada: string;
+      visa: string;
+      mastercard: string;
+      applePay: string;
+      stcPay: string;
+      bankTransfer: string;
+    };
+    success: {
+      title: string;
+      subtitle: string;
+      backHome: string;
+    };
+    chat: {
+      buttonLabel: string;
+      title: string;
+      subtitle: string;
+      placeholder: string;
+      send: string;
+      welcome: string;
+      suggestions: string[];
+      thinking: string;
+      errorFallback: string;
+      promptedBy: string;
+    };
+  };
   migration: {
     title: string;
     subtitle: string;
@@ -3174,7 +3244,7 @@ const ar: Dictionary = {
       },
       featureHints: {
         aiAssistant: "يردّ على رسائل العملاء على الواتساب ويجيب عن الأقساط والمدفوعات تلقائيًا",
-        ocr: "يقرأ صور إيصالات التحويلات البنكية ويعبّئ البيانات تلقائيًا",
+        ocr: "يقرأ إيصالات التحويل، الهويات والإقامات، وملفاتك القديمة عند نقل البيانات",
         whatsappMessages: "إرسال إشعارات تلقائية للعملاء عبر الواتساب (تذكير قسط، اعتماد دفع، …)",
         smsMessages: "إرسال إشعارات قصيرة عبر رسائل SMS للعملاء غير المفعّلين على الواتساب",
       },
@@ -3191,6 +3261,86 @@ const ar: Dictionary = {
         pickDuration: "اختيار المدة",
         confirm: "تأكيد الاشتراك",
       },
+    },
+  },
+  officeSubscription: {
+    title: "اشتراك المكتب",
+    subtitle: "اختر الباقة المناسبة لك وادفع بأي وسيلة دفع سعودية",
+    trialBanner: {
+      title: "أنت في الفترة التجريبية",
+      remaining: "بقي {days} يوم من تجربتك المجانية",
+      cta: "اشترك الآن",
+    },
+    currentPlan: {
+      heading: "اشتراكك الحالي",
+      onTrial: "في فترة التجربة — لم تختر باقة بعد",
+      activePlan: "باقتك: {name} · {duration}",
+      renews: "ينتهي في {date}",
+    },
+    compareHeading: "اختر باقتك",
+    compareSubtitle: "كل المزايا مشروحة بالتفصيل — لو احتجت مساعدة، اسأل المساعد الذكي في الأسفل",
+    durationToggle: {
+      label: "اختر مدة الاشتراك",
+      perMonth: "في الشهر",
+    },
+    saveBadge: "وفّر {pct}٪",
+    chooseBtn: "اشترك في هذه الباقة",
+    currentBadge: "باقتك الحالية",
+    learnMore: "كيف تشتغل بالضبط؟",
+    closeFeature: "إغلاق",
+    scenarioHeading: "السيناريو",
+    exampleHeading: "مثال حقيقي",
+    checkout: {
+      title: "إتمام الاشتراك",
+      subtitle: "اختر وسيلة الدفع المناسبة لك",
+      orderSummary: "ملخص الطلب",
+      planRow: "الباقة",
+      durationRow: "المدة",
+      total: "الإجمالي",
+      paymentMethod: "وسيلة الدفع",
+      paymentMethodHint: "كل المعاملات محمية بأنظمة الدفع السعودية",
+      payBtn: "ادفع {amount} ر.س",
+      backToPlans: "العودة للباقات",
+    },
+    paymentMethods: {
+      mada: "مدى",
+      visa: "Visa",
+      mastercard: "Mastercard",
+      applePay: "Apple Pay",
+      stcPay: "STC Pay",
+      bankTransfer: "حوالة بنكية",
+    },
+    paymentMethodHints: {
+      mada: "بطاقة مدى — الأكثر استخدامًا في السعودية",
+      visa: "بطاقة Visa دولية",
+      mastercard: "بطاقة Mastercard دولية",
+      applePay: "ادفع بـ Apple Pay بضغطة واحدة",
+      stcPay: "ادفع من محفظة STC Pay",
+      bankTransfer: "حوّل من حسابك البنكي مباشرة (مدة الاعتماد: ١-٣ أيام)",
+    },
+    success: {
+      title: "تم تفعيل اشتراكك بنجاح",
+      subtitle: "شكرًا لك — كل المزايا فُعّلت لمكتبك",
+      backHome: "العودة للوحة المكتب",
+    },
+    chat: {
+      buttonLabel: "💬 اسأل عن الباقات",
+      title: "مساعد الباقات",
+      subtitle: "اسأل عن أي ميزة وراح أوضحها لك بمثال",
+      placeholder: "اسأل عن الباقات أو المزايا…",
+      send: "إرسال",
+      welcome:
+        "أهلًا 👋 أنا هنا أساعدك تختار الباقة المناسبة لمكتبك. اسألني عن أي ميزة، أو الفرق بين الباقتين، أو كيف يشتغل المساعد الذكي.",
+      suggestions: [
+        "ما الفرق بين الأساسية والاحترافية؟",
+        "هل أحتاج المساعد الذكي؟",
+        "كيف يشتغل OCR؟",
+        "ما الفرق بين رسائل الواتساب وSMS؟",
+      ],
+      thinking: "جاري التفكير…",
+      errorFallback:
+        "تعذّر الاتصال بالمساعد الآن. خلني أعرض لك إجابة سريعة من معرفتي بالباقات.",
+      promptedBy: "إجابة من المساعد الذكي",
     },
   },
   migration: {
@@ -5013,7 +5163,7 @@ const en: Dictionary = {
       },
       featureHints: {
         aiAssistant: "Replies to customer WhatsApp messages and answers installment / payment questions automatically",
-        ocr: "Reads bank transfer receipt images and fills the proof fields automatically",
+        ocr: "Reads transfer receipts, IDs / iqamas, and old documents during data migration",
         whatsappMessages: "Auto-sends customer notifications via WhatsApp (installment reminders, payment confirmations, …)",
         smsMessages: "Sends short SMS notifications to customers who aren't on WhatsApp",
       },
@@ -5030,6 +5180,84 @@ const en: Dictionary = {
         pickDuration: "Pick a duration",
         confirm: "Confirm subscription",
       },
+    },
+  },
+  officeSubscription: {
+    title: "Office subscription",
+    subtitle: "Pick the plan that fits you and pay with any Saudi payment method",
+    trialBanner: {
+      title: "You're on the free trial",
+      remaining: "{days} days left of your free trial",
+      cta: "Subscribe now",
+    },
+    currentPlan: {
+      heading: "Your current subscription",
+      onTrial: "On trial — no plan picked yet",
+      activePlan: "Your plan: {name} · {duration}",
+      renews: "Renews {date}",
+    },
+    compareHeading: "Choose your plan",
+    compareSubtitle:
+      "Every feature is explained in detail — if you need help, ask the smart assistant below",
+    durationToggle: { label: "Subscription duration", perMonth: "/ month" },
+    saveBadge: "Save {pct}%",
+    chooseBtn: "Subscribe to this plan",
+    currentBadge: "Your current plan",
+    learnMore: "How does it work?",
+    closeFeature: "Close",
+    scenarioHeading: "Scenario",
+    exampleHeading: "Real example",
+    checkout: {
+      title: "Complete subscription",
+      subtitle: "Pick your payment method",
+      orderSummary: "Order summary",
+      planRow: "Plan",
+      durationRow: "Duration",
+      total: "Total",
+      paymentMethod: "Payment method",
+      paymentMethodHint: "All transactions are protected by Saudi payment systems",
+      payBtn: "Pay SAR {amount}",
+      backToPlans: "Back to plans",
+    },
+    paymentMethods: {
+      mada: "Mada",
+      visa: "Visa",
+      mastercard: "Mastercard",
+      applePay: "Apple Pay",
+      stcPay: "STC Pay",
+      bankTransfer: "Bank transfer",
+    },
+    paymentMethodHints: {
+      mada: "Mada card — the most-used card in Saudi Arabia",
+      visa: "International Visa card",
+      mastercard: "International Mastercard",
+      applePay: "Pay with Apple Pay in one tap",
+      stcPay: "Pay from your STC Pay wallet",
+      bankTransfer: "Transfer directly from your bank (1–3 business days)",
+    },
+    success: {
+      title: "Subscription activated",
+      subtitle: "Thank you — all features are now enabled for your office",
+      backHome: "Back to office dashboard",
+    },
+    chat: {
+      buttonLabel: "💬 Ask about plans",
+      title: "Plan assistant",
+      subtitle: "Ask about any feature and I'll explain with examples",
+      placeholder: "Ask about plans or features…",
+      send: "Send",
+      welcome:
+        "Hi 👋 I'm here to help you pick the right plan for your office. Ask about any feature, the difference between plans, or how the smart assistant works.",
+      suggestions: [
+        "What's the difference between Basic and Pro?",
+        "Do I really need the smart assistant?",
+        "How does OCR work?",
+        "WhatsApp messages vs SMS?",
+      ],
+      thinking: "Thinking…",
+      errorFallback:
+        "Couldn't reach the assistant right now. Here's a quick answer from my built-in knowledge.",
+      promptedBy: "Answer from the smart assistant",
     },
   },
   migration: {

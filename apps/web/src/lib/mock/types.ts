@@ -701,6 +701,15 @@ export type SubscriptionFeature =
 // = better unit price).
 export type SubscriptionDuration = 6 | 12 | 24;
 
+// Sprint 17 — Saudi payment methods supported at checkout.
+export type SubscriptionPaymentMethod =
+  | "mada"
+  | "visa"
+  | "mastercard"
+  | "applePay"
+  | "stcPay"
+  | "bankTransfer";
+
 export interface SubscriptionPlan {
   id: string;
   name: string;

@@ -112,6 +112,10 @@ export const MOCK_ROLES: Role[] = [
   },
 ];
 
+// Sprint 15 revision — each employee gets a custom title (free text)
+// and a direct permissions matrix. Titles ≠ roles. templateRoleId is
+// kept for informational purposes only; the actual permissions live
+// on the employee record.
 export const MOCK_EMPLOYEES: Employee[] = [
   {
     id: "emp-manager-1",
@@ -119,6 +123,9 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "manager@muqsit.sa",
     phone: "+966 55 234 5678",
     nationalId: "1099443322",
+    title: "مدير المكتب",
+    permissions: allAllow(),
+    templateRoleId: "role-manager",
     roleId: "role-manager",
     roleName: "مدير المكتب",
     bypassApprovals: false,
@@ -133,6 +140,9 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "noura@muqsit.sa",
     phone: "+966 50 887 3092",
     nationalId: "1056781234",
+    title: "أخصائي خدمة عملاء",
+    permissions: employeeDefault(),
+    templateRoleId: "role-employee",
     roleId: "role-employee",
     roleName: "موظف",
     bypassApprovals: false,
@@ -147,6 +157,16 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "abdullah@muqsit.sa",
     phone: "+966 54 119 4422",
     nationalId: "1078456321",
+    title: "مساعد مدير العمليات",
+    // Custom mix: starts from "employee" template but with a few
+    // extra approvals allowed since he's a senior trusted member.
+    permissions: {
+      ...employeeDefault(),
+      createInstallmentContract: "allow",
+      recordPartialPayment: "allow",
+      approvePaymentProof: "allow",
+    },
+    templateRoleId: "role-employee",
     roleId: "role-employee",
     roleName: "موظف",
     bypassApprovals: true,
@@ -161,6 +181,9 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "collections@muqsit.sa",
     phone: "+966 56 778 1199",
     nationalId: "1099334502",
+    title: "مسؤول التحصيل الميداني",
+    permissions: collectionsOfficerDefault(),
+    templateRoleId: "role-collections",
     roleId: "role-collections",
     roleName: "موظف تحصيل",
     bypassApprovals: false,
@@ -175,6 +198,9 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "accountant@muqsit.sa",
     phone: "+966 53 224 9930",
     nationalId: "1099887701",
+    title: "محاسبة أولى",
+    permissions: accountantDefault(),
+    templateRoleId: "role-accountant",
     roleId: "role-accountant",
     roleName: "محاسب",
     bypassApprovals: false,
@@ -189,8 +215,11 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "badr@muqsit.sa",
     phone: "+966 55 990 2244",
     nationalId: "1078990223",
-    roleId: "role-employee",
-    roleName: "موظف",
+    title: "موظف تحصيل — فرع الشمال",
+    permissions: collectionsOfficerDefault(),
+    templateRoleId: "role-collections",
+    roleId: "role-collections",
+    roleName: "موظف تحصيل",
     bypassApprovals: false,
     active: true,
     joinedAt: "2026-06-13",
@@ -203,6 +232,9 @@ export const MOCK_EMPLOYEES: Employee[] = [
     email: "khaled@muqsit.sa",
     phone: "+966 50 119 2240",
     nationalId: "1087452103",
+    title: "موظف خدمة عملاء",
+    permissions: employeeDefault(),
+    templateRoleId: "role-employee",
     roleId: "role-employee",
     roleName: "موظف",
     bypassApprovals: false,

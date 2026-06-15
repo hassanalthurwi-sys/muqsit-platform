@@ -1,12 +1,10 @@
 // Sprint 18 — server-side mock store.
+// Sprint 19 — falls back to mock store when DATABASE_URL is not set.
 //
-// Until Sprint 19 adds PostgreSQL+Prisma, the API routes read and
-// write to in-memory copies of the existing mock data. The store is
-// module-scope so it persists across requests within the same
-// server process (development single-instance).
-//
-// Each resource exposes a thin CRUD API. Resources are seeded once on
-// first access; subsequent calls operate on the live in-memory copy.
+// In production: the API routes call into Prisma via @muqsit/database.
+// In sandbox / prototype: the in-memory store backs everything so the
+// app continues to work without a database. The fallback is intentional
+// and shipped — every screen of this prototype must review end-to-end.
 
 import {
   MOCK_INVESTORS,

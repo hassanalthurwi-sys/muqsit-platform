@@ -1,0 +1,648 @@
+// Muqsit — Prisma schema
+// Mirrors apps/web/src/lib/mock/types.ts. Where the TypeScript type
+// system encodes invariants (discriminated unions for identity),
+// Prisma uses kind + nullable columns and we re-assemble at the app
+// layer.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth / tenancy ─────────────────────────────────────────────
+
+enum UserRole {
+  systemAdmin
+  systemEmployee
+  groupManager
+  officeManager
+  officeEmployee
+  investor
+  customer
+}
+
+enum SubscriptionStatus {
+  trial
+  active
+  expired
+  suspended
+}
+
+enum SubscriptionDuration {
+  M6
+  M12
+  M24
+}
+
+model AppUser {
+  id              String    @id @default(cuid())
+  name            String
+  nationalId      String?
+  phone           String    @unique
+  email           String?   @unique
+  role            UserRole
+  defaultOfficeId String?
+  investorId      String?   @unique
+  customerId      String?   @unique
+  createdAt       DateTime  @default(now())
+  lastLoginAt     DateTime?
+
+  offices    OfficeAccount[] @relation("UserOffices")
+  managerOf  OfficeAccount[] @relation("OfficeManager")
+  sessions   DeviceSession[]
+
+  @@index([phone])
+  @@index([email])
+}
+
+model DeviceSession {
+  id           String   @id @default(cuid())
+  userId       String
+  deviceLabel  String
+  lastActiveAt DateTime @default(now())
+  current      Boolean  @default(false)
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model OfficeAccount {
+  id                  String              @id @default(cuid())
+  name                String
+  cr                  String              @unique
+  managerName         String
+  managerNationalId   String
+  managerPhone        String
+  managerEmail        String?
+  managerUserId       String?
+  createdAt           DateTime            @default(now())
+  trialStartedAt      DateTime?
+  trialEndsAt         DateTime?
+  subscriptionStatus  SubscriptionStatus  @default(trial)
+  planId              String?
+  planDuration        SubscriptionDuration?
+  planStartedAt       DateTime?
+  planEndsAt          DateTime?
+  groupId             String?
+
+  manager  AppUser?           @relation("OfficeManager", fields: [managerUserId], references: [id])
+  users    AppUser[]          @relation("UserOffices")
+  plan     SubscriptionPlan?  @relation(fields: [planId], references: [id])
+  group    OfficeGroup?       @relation(fields: [groupId], references: [id])
+
+  investors            Investor[]
+  customers            Customer[]
+  investmentContracts  InvestmentContract[]
+  installmentContracts InstallmentContract[]
+  receipts             ReceiptVoucher[]
+  payments             PaymentVoucher[]
+  employees            Employee[]
+  approvals            ApprovalRequest[]
+  audit                AuditEntry[]
+
+  @@index([subscriptionStatus])
+}
+
+model OfficeGroup {
+  id          String          @id @default(cuid())
+  name        String
+  ownerUserId String
+  createdAt   DateTime        @default(now())
+
+  offices OfficeAccount[]
+}
+
+// ─── Subscription plans (Sprint 16) ─────────────────────────────
+
+model SubscriptionPlan {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  features     Json
+  prices       Json
+  active       Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  offices OfficeAccount[]
+}
+
+model SubscriptionTransaction {
+  id               String                @id @default(cuid())
+  officeId         String
+  planId           String
+  planSnapshot     Json
+  duration         SubscriptionDuration
+  price            Decimal               @db.Decimal(18, 2)
+  paymentMethod    String
+  status           String                // pending | paid | failed | refunded
+  gatewayReference String?
+  startedAt        DateTime?
+  endsAt           DateTime?
+  createdAt        DateTime              @default(now())
+
+  @@index([officeId])
+  @@index([status])
+}
+
+// ─── Investors & contracts ──────────────────────────────────────
+
+enum InvestorType {
+  internal
+  external
+}
+
+enum InvestorStatus {
+  active
+  inactive
+  suspended
+}
+
+enum ProfitPolicy {
+  officeFirst
+  investorFirst
+  proportional
+}
+
+model Investor {
+  id              String          @id @default(cuid())
+  officeId        String
+  name            String
+  type            InvestorType
+  identityKind    String
+  nationalId      String?
+  gccId           String?
+  gccCountry      String?
+  passport        String?
+  nationality     String?
+  cr              String?
+  entityName      String?
+  email           String?
+  phone           String?
+  joinedAt        DateTime        @default(now())
+  status          InvestorStatus  @default(active)
+  totalCapital    Decimal         @db.Decimal(18, 2) @default(0)
+  currentBalance  Decimal         @db.Decimal(18, 2) @default(0)
+  realizedProfit  Decimal         @db.Decimal(18, 2) @default(0)
+  activeContractCount Int         @default(0)
+  bankName        String
+  iban            String
+  accountHolder   String?
+  profitTerms     String          @default("")
+  profitPolicyOverride ProfitPolicy?
+
+  office    OfficeAccount        @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  contracts InvestmentContract[]
+  receipts  ReceiptVoucher[]
+  payments  PaymentVoucher[]
+  distributions ProfitDistribution[]
+
+  @@index([officeId, type])
+  @@index([officeId, status])
+}
+
+enum ContractStatus {
+  active
+  ended
+  pendingSetup
+  cancelled
+}
+
+model InvestmentContract {
+  id                          String          @id @default(cuid())
+  officeId                    String
+  number                      String
+  investorId                  String
+  amount                      Decimal         @db.Decimal(18, 2)
+  startDate                   DateTime
+  endDate                     DateTime
+  durationMonths              Int
+  operationPct                Decimal         @db.Decimal(7, 4) @default(0)
+  utilized                    Decimal         @db.Decimal(18, 2) @default(0)
+  remaining                   Decimal         @db.Decimal(18, 2) @default(0)
+  status                      ContractStatus  @default(active)
+  profitNotes                 String          @default("")
+  capitalRecyclingEnabled     Boolean         @default(false)
+  capitalRecyclingMinThreshold Decimal?       @db.Decimal(18, 2)
+  documentName                String?
+  officeExpectedProfit        Decimal         @db.Decimal(18, 2) @default(0)
+  investorExpectedProfit      Decimal         @db.Decimal(18, 2) @default(0)
+  sourceContractId            String?
+  recyclingCycle              Int?
+  recycledFromCollected       Decimal?        @db.Decimal(18, 2)
+  recyclingOfficeMargin       Decimal?        @db.Decimal(18, 2)
+  fromInvestorBalance         Boolean         @default(false)
+
+  office                OfficeAccount         @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  investor              Investor              @relation(fields: [investorId], references: [id])
+  installmentContracts  InstallmentContract[]
+
+  @@unique([officeId, number])
+  @@index([officeId, status])
+  @@index([investorId])
+}
+
+// ─── Customers ──────────────────────────────────────────────────
+
+enum CustomerRiskClass {
+  low
+  medium
+  high
+}
+
+model Customer {
+  id            String              @id @default(cuid())
+  officeId      String
+  name          String
+  identityKind  String
+  nationalId    String?
+  gccId         String?
+  gccCountry    String?
+  passport      String?
+  nationality   String
+  mobile        String
+  dateOfBirth   String
+  employer      String
+  monthlySalary Decimal             @db.Decimal(18, 2) @default(0)
+  obligations   Decimal?            @db.Decimal(18, 2)
+  city          String
+  address       String
+  riskClass     CustomerRiskClass   @default(medium)
+  notes         String              @default("")
+  createdAt     DateTime            @default(now())
+
+  office               OfficeAccount         @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  installmentContracts InstallmentContract[]
+  receipts             ReceiptVoucher[]
+  payments             PaymentVoucher[]
+
+  @@index([officeId, riskClass])
+  @@index([mobile])
+}
+
+enum InstallmentContractStatus {
+  active
+  completed
+  defaulted
+  cancelled
+}
+
+model InstallmentContract {
+  id                       String                    @id @default(cuid())
+  officeId                 String
+  number                   String
+  customerId               String
+  productType              String
+  cashPrice                Decimal                   @db.Decimal(18, 2)
+  installmentPrice         Decimal                   @db.Decimal(18, 2)
+  downPayment              Decimal                   @db.Decimal(18, 2)
+  installmentsCount        Int
+  financingAmount          Decimal                   @db.Decimal(18, 2)
+  monthlyInstallment       Decimal                   @db.Decimal(18, 2)
+  profitMargin             Decimal                   @db.Decimal(18, 2)
+  profitMarginPct          Decimal                   @db.Decimal(7, 4)
+  remainingBalance         Decimal                   @db.Decimal(18, 2)
+  investmentContractId     String
+  capitalUtilized          Decimal                   @db.Decimal(18, 2)
+  startDate                DateTime
+  endDate                  DateTime
+  status                   InstallmentContractStatus @default(active)
+  officeRecoveredSoFar     Decimal                   @db.Decimal(18, 2) @default(0)
+  investorRecoveredSoFar   Decimal                   @db.Decimal(18, 2) @default(0)
+  notes                    String?
+  documentName             String?
+
+  office             OfficeAccount       @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  customer           Customer            @relation(fields: [customerId], references: [id])
+  investmentContract InvestmentContract  @relation(fields: [investmentContractId], references: [id])
+  installments       Installment[]
+  distributions      ProfitDistribution[]
+
+  @@unique([officeId, number])
+  @@index([officeId, status])
+  @@index([customerId])
+  @@index([investmentContractId])
+}
+
+enum InstallmentStatus {
+  scheduled
+  partiallyPaid
+  paid
+  overdue
+  defaulted
+}
+
+model Installment {
+  id         String              @id @default(cuid())
+  contractId String
+  index      Int
+  dueDate    DateTime
+  amount     Decimal             @db.Decimal(18, 2)
+  paidAmount Decimal             @db.Decimal(18, 2) @default(0)
+  status     InstallmentStatus   @default(scheduled)
+
+  contract InstallmentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  payments PaymentRecord[]
+  distributions ProfitDistribution[]
+
+  @@unique([contractId, index])
+  @@index([contractId, dueDate])
+  @@index([status])
+}
+
+enum PaymentSource {
+  whatsapp_upload
+  bank_transfer
+  cash
+}
+
+model PaymentRecord {
+  id           String         @id @default(cuid())
+  installmentId String
+  ts           DateTime       @default(now())
+  amount       Decimal        @db.Decimal(18, 2)
+  source       PaymentSource
+  proofId      String?
+  approved     Boolean        @default(false)
+  verifiedBy   String?
+  verifiedAt   DateTime?
+  notes        String?
+
+  installment Installment @relation(fields: [installmentId], references: [id], onDelete: Cascade)
+
+  @@index([installmentId])
+}
+
+// ─── Vouchers ───────────────────────────────────────────────────
+
+enum PaymentMethod {
+  cash
+  bankTransfer
+  stcPay
+  cheque
+  card
+}
+
+enum VoucherStatus {
+  draft
+  verified
+  cancelled
+}
+
+enum PartyType {
+  investor
+  customer
+  other
+}
+
+model ReceiptVoucher {
+  id                   String        @id @default(cuid())
+  officeId             String
+  number               String
+  date                 DateTime
+  amount               Decimal       @db.Decimal(18, 2)
+  method               PaymentMethod
+  partyType            PartyType
+  fromName             String
+  customerId           String?
+  investorId           String?
+  contractId           String?
+  installmentId        String?
+  installmentIndex     Int?
+  investmentContractId String?
+  reference            String?
+  notes                String?
+  createdById          String
+  createdAt            DateTime      @default(now())
+  status               VoucherStatus @default(draft)
+  verifiedById         String?
+  verifiedAt           DateTime?
+  attachmentCount      Int           @default(0)
+  flags                String[]      @default([])
+
+  office   OfficeAccount @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  customer Customer?     @relation(fields: [customerId], references: [id])
+  investor Investor?     @relation(fields: [investorId], references: [id])
+
+  @@unique([officeId, number])
+  @@index([officeId, partyType])
+}
+
+model PaymentVoucher {
+  id                   String        @id @default(cuid())
+  officeId             String
+  number               String
+  date                 DateTime
+  partyType            PartyType
+  amount               Decimal       @db.Decimal(18, 2)
+  method               PaymentMethod
+  beneficiaryName      String
+  customerId           String?
+  investorId           String?
+  contractId           String?
+  investmentContractId String?
+  purchaseId           String?
+  reference            String?
+  notes                String?
+  createdById          String
+  createdAt            DateTime      @default(now())
+  status               VoucherStatus @default(draft)
+  needsApproval        Boolean       @default(false)
+  approvalId           String?
+  attachmentCount      Int           @default(0)
+
+  office   OfficeAccount @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  customer Customer?     @relation(fields: [customerId], references: [id])
+  investor Investor?     @relation(fields: [investorId], references: [id])
+
+  @@unique([officeId, number])
+  @@index([officeId, partyType])
+}
+
+// ─── Profit distribution (Sprint 11) ────────────────────────────
+
+enum ProfitPolicySource {
+  officeDefault
+  investorOverride
+}
+
+model ProfitDistribution {
+  id                    String              @id @default(cuid())
+  date                  DateTime
+  investorId            String
+  investmentContractId  String
+  installmentContractId String
+  installmentId         String
+  installmentIndex      Int
+  amountCollected       Decimal             @db.Decimal(18, 2)
+  officeShare           Decimal             @db.Decimal(18, 2)
+  investorShare         Decimal             @db.Decimal(18, 2)
+  investorProfitPortion Decimal             @db.Decimal(18, 2)
+  investorCapitalPortion Decimal            @db.Decimal(18, 2)
+  policyApplied         ProfitPolicy
+  policySource          ProfitPolicySource
+  createdAt             DateTime            @default(now())
+
+  investor            Investor             @relation(fields: [investorId], references: [id])
+  installment         Installment          @relation(fields: [installmentId], references: [id])
+  installmentContract InstallmentContract  @relation(fields: [installmentContractId], references: [id])
+
+  @@index([investorId])
+  @@index([installmentContractId])
+}
+
+// ─── Approvals / Audit / Notifications ─────────────────────────
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+  needsClarification
+  escalated
+}
+
+enum ApprovalPriority {
+  critical
+  normal
+  low
+}
+
+model ApprovalRequest {
+  id                String           @id @default(cuid())
+  officeId          String
+  type              String
+  priority          ApprovalPriority @default(normal)
+  status            ApprovalStatus   @default(pending)
+  requestedById     String
+  requestedAt       DateTime         @default(now())
+  reason            String?
+  flags             String[]         @default([])
+  relatedEntityKind String
+  relatedEntityId   String
+  relatedEntityLabel String
+  amount            Decimal?         @db.Decimal(18, 2)
+  decidedById       String?
+  decidedAt         DateTime?
+  decisionNote      String?
+  remindersSent     Int              @default(0)
+
+  office OfficeAccount @relation(fields: [officeId], references: [id], onDelete: Cascade)
+
+  @@index([officeId, status])
+}
+
+model AuditEntry {
+  id          String   @id @default(cuid())
+  officeId    String
+  ts          DateTime @default(now())
+  actorId     String
+  action      String
+  entityKind  String
+  entityId    String
+  entityLabel String
+  summary     String
+  before      String?
+  after       String?
+
+  office OfficeAccount @relation(fields: [officeId], references: [id], onDelete: Cascade)
+
+  @@index([officeId, ts])
+  @@index([actorId])
+}
+
+// ─── Employees (Sprint 15) ──────────────────────────────────────
+
+enum EmployeeInviteStatus {
+  pending
+  accepted
+  expired
+}
+
+model Employee {
+  id              String                @id @default(cuid())
+  officeId        String
+  userId          String?
+  name            String
+  email           String
+  phone           String?
+  nationalId      String?
+  title           String
+  permissions     Json
+  templateRoleId  String?
+  roleId          String                @default("")
+  roleName        String                @default("")
+  bypassApprovals Boolean               @default(false)
+  active          Boolean               @default(true)
+  joinedAt        DateTime              @default(now())
+  inviteStatus    EmployeeInviteStatus  @default(pending)
+  invitedAt       DateTime?
+  lastLoginAt     DateTime?
+
+  office OfficeAccount @relation(fields: [officeId], references: [id], onDelete: Cascade)
+
+  @@index([officeId, active])
+  @@index([email])
+}
+
+// ─── Platform employees (Sprint 15) ─────────────────────────────
+
+model SystemEmployee {
+  id             String   @id @default(cuid())
+  name           String
+  nationalId     String?
+  phone          String   @unique
+  email          String?
+  title          String
+  role           String   // systemAdmin | systemEmployee
+  permissions    Json
+  templateRoleId String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  lastLoginAt    DateTime?
+}
+
+// ─── Platform settings & audit ──────────────────────────────────
+
+model SystemSettings {
+  id                     Int      @id @default(1)
+  defaultTrialDays       Int      @default(30)
+  autoSuspendDays        Int      @default(7)
+  globalAnnouncement     String?
+  allowSelfRegistration  Boolean  @default(true)
+  updatedAt              DateTime @updatedAt
+}
+
+model AdminAuditEntry {
+  id               String   @id @default(cuid())
+  ts               DateTime @default(now())
+  actorName        String
+  actorRole        String
+  action           String
+  targetOfficeId   String?
+  targetOfficeName String?
+  notes            String?
+
+  @@index([ts])
+}
+
+// ─── Sprint 12 — Migration journey state (per office) ──────────
+
+model OfficeMigrationState {
+  officeId String @id
+  state    Json
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Office settings (Sprint 8) — JSON blob, no relations ──────
+
+model OfficeSettings {
+  officeId  String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+}

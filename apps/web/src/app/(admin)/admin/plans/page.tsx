@@ -12,7 +12,7 @@ import {
   Package,
 } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { MOCK_PLANS } from "@/lib/mock/plans";
+import { useAdminPlans } from "@/lib/api/hooks";
 import type {
   SubscriptionDuration,
   SubscriptionFeature,
@@ -32,7 +32,10 @@ export default function PlansListPage() {
   const p = dict.admin.plans;
   const numLocale = locale === "ar" ? "ar-SA-u-nu-latn" : "en-US";
 
-  const sorted = [...MOCK_PLANS].sort((a, b) => a.displayOrder - b.displayOrder);
+  // Sprint 18: plans fetched from /api/admin/plans. Server already
+  // sorts by displayOrder.
+  const { data, isLoading, isError } = useAdminPlans();
+  const sorted = data?.data ?? [];
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -42,6 +45,18 @@ export default function PlansListPage() {
           <p className="text-sm text-muted-foreground">{p.subtitle}</p>
         </div>
       </header>
+
+      {isError ? (
+        <div className="rounded-2xl border bg-card px-6 py-4 text-sm text-destructive">
+          Couldn&apos;t load plans. Please refresh.
+        </div>
+      ) : null}
+
+      {isLoading && sorted.length === 0 ? (
+        <div className="rounded-2xl border bg-card px-6 py-4 text-sm text-muted-foreground">
+          Loading…
+        </div>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {sorted.map((plan) => {

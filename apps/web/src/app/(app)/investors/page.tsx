@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,46 +8,38 @@ import { Currency } from "@/components/ui/currency";
 import { StatusPill } from "@/components/ui/status-pill";
 import { IdentityBadge } from "@/components/ui/identity-badge";
 import { InvestorAvatar } from "@/components/investor-avatar";
-import { MOCK_INVESTORS, getInvestedCapital } from "@/lib/mock/investors";
+import { getInvestedCapital } from "@/lib/mock/investors";
 import { useStore } from "@/lib/mock/store";
+import { useInvestors } from "@/lib/api/hooks";
 import { useI18n } from "@/components/providers/i18n-provider";
-import type { InvestorType, LegalIdentity } from "@/lib/mock/types";
+import type { InvestorType } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | InvestorType;
 
-function identityValue(id: LegalIdentity): string {
-  switch (id.kind) {
-    case "saudiIndividual":
-      return id.nationalId;
-    case "gccIndividual":
-      return id.gccId;
-    case "foreignIndividual":
-      return id.passport;
-    case "commercialEntity":
-      return id.cr;
-  }
-}
-
 export default function InvestorsPage() {
   const { dict } = useI18n();
+  // Sprint 18: investors list is fetched from /api/investors. The
+  // derived metrics (balance, invested capital, recycling eligibility)
+  // still read from the in-memory store until Sprint 19 unifies the
+  // aggregates server-side.
   const { investmentContracts: contracts, officeSettings, getInvestorBalance } = useStore();
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const i = dict.investors;
 
   const recyclingThreshold = officeSettings.investmentDefaults.recyclingThreshold;
 
+  const { data, isLoading, isError } = useInvestors({
+    filter,
+    q: deferredQuery || undefined,
+    pageSize: 200,
+  });
+
   const rows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return MOCK_INVESTORS.filter((inv) => {
-      if (filter !== "all" && inv.type !== filter) return false;
-      if (!q) return true;
-      return (
-        inv.name.toLowerCase().includes(q) ||
-        identityValue(inv.identity).toLowerCase().includes(q)
-      );
-    }).map((inv) => {
+    const investors = data?.data ?? [];
+    return investors.map((inv) => {
       const balance = getInvestorBalance(inv.id);
       return {
         inv,
@@ -56,7 +48,7 @@ export default function InvestorsPage() {
         eligibleForRecycling: balance >= recyclingThreshold,
       };
     });
-  }, [contracts, filter, query, recyclingThreshold, getInvestorBalance]);
+  }, [contracts, data, recyclingThreshold, getInvestorBalance]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -99,6 +91,22 @@ export default function InvestorsPage() {
           />
         </div>
       </div>
+
+      {isError ? (
+        <Card>
+          <CardContent className="px-6 py-4 text-sm text-destructive">
+            {i.errorLoading}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {isLoading && rows.length === 0 ? (
+        <Card>
+          <CardContent className="px-6 py-4 text-sm text-muted-foreground">
+            {i.loading}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Mobile card list */}
       <div className="flex flex-col gap-3 md:hidden">

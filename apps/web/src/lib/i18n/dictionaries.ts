@@ -183,6 +183,8 @@ export interface Dictionary {
     newInvestor: string;
     filters: { all: string; internal: string; external: string };
     searchPlaceholder: string;
+    loading: string;
+    errorLoading: string;
     columns: {
       investor: string;
       type: string;
@@ -1915,6 +1917,8 @@ const ar: Dictionary = {
     newInvestor: "+ مستثمر جديد",
     filters: { all: "الكل", internal: "داخلي", external: "خارجي" },
     searchPlaceholder: "ابحث بالاسم أو رقم الهوية…",
+    loading: "جاري التحميل…",
+    errorLoading: "تعذّر تحميل البيانات. حاول إعادة الصفحة.",
     columns: {
       investor: "المستثمر",
       type: "النوع",
@@ -3833,6 +3837,8 @@ const en: Dictionary = {
     newInvestor: "+ New investor",
     filters: { all: "All", internal: "Internal", external: "External" },
     searchPlaceholder: "Search by name or ID…",
+    loading: "Loading…",
+    errorLoading: "Couldn't load. Please refresh.",
     columns: {
       investor: "Investor",
       type: "Type",

@@ -565,48 +565,103 @@ ChatWidget renders
 ## ١٦. النشر (Deployment)
 
 ### ١٦.١ البيئات (Environments)
-| البيئة | الغرض | المضيف |
-|---|---|---|
-| Local | تطوير | localhost:3000 |
-| Preview | كل PR | Vercel preview |
-| Staging | اختبار قبل الإنتاج | Vercel staging URL |
-| Production | الإنتاج | Vercel + custom domain |
 
-### ١٦.٢ متغيرات البيئة
+> **قرار صاحب المنتج (2026-06-15):** ثلاث بيئات رسمية بالإضافة إلى البيئة المحلية للتطوير.
+
+| البيئة | الـURL المقترح | الغرض | المستخدمون | البيانات |
+|---|---|---|---|---|
+| **Local** | `localhost:3000` | تطوير المهندس على جهازه | المهندسون | seed محلي قابل للحذف |
+| **Test** (اختبار) | `test.muqsit.sa` | اختبار آلي + يدوي بعد كل merge إلى `main`. تكامل ميزات حديثة وغير مستقرة | المهندسون + QA | بيانات تجريبية معدّة، تُحدَّث/تُمسح بحرّية |
+| **UAT** (قبول المستخدم) | `uat.muqsit.sa` | مراجعة صاحب المنتج وأصحاب الأعمال قبل الإطلاق. تأكيد أن الميزات تطابق متطلبات BRS | صاحب المنتج، عملاء تجريبيون مختارون، فريق QA | لقطة من إنتاج (مع إخفاء البيانات الحساسة) أو بيانات أعمال واقعية |
+| **Live** (الإنتاج) | `muqsit.sa` و`app.muqsit.sa` | المنصة الحية للعملاء الفعليين | كل المكاتب المشتركة، المستثمرون، العملاء، فريق المنصة | بيانات حقيقية — لا تمسح أبدًا، نسخ احتياطية يومية |
+
+#### ١٦.١.١ تدفّق الترقية (Promotion Flow)
 ```
-# Public
-NEXT_PUBLIC_APP_URL=https://muqsit.sa
+   Developer Branch
+        │
+        ▼
+   PR → review + CI passes
+        │
+        ▼
+   merge to main → auto-deploy → ▶ TEST
+        │
+        ▼   ينجح اختبار التكامل + QA على Test؟
+        │
+        ▼
+   tag release-candidate → manual promote → ▶ UAT
+        │
+        ▼   صاحب المنتج يعتمد بعد المراجعة؟
+        │
+        ▼
+   tag release → manual promote with 2-person approval → ▶ LIVE
+```
 
-# Server
-DATABASE_URL=postgresql://...
-AUTH_SECRET=...
+#### ١٦.١.٢ خصائص كل بيئة
+| الخاصية | Test | UAT | Live |
+|---|---|---|---|
+| **نشر تلقائي** | نعم، على كل merge إلى main | لا — manual promote | لا — manual promote + موافقة |
+| **قاعدة بيانات** | منفصلة، صغيرة | منفصلة، أكبر | الإنتاجية |
+| **خدمات خارجية** | Sandbox/test mode (Anthropic، Moyasar، WhatsApp) | Sandbox مع بيانات أقرب للحقيقة | Production keys |
+| **رسائل/SMS فعلية** | لا — تُحبَس | اختياري — لعملاء UAT المحددين | نعم |
+| **معدّل النسخ الاحتياطي** | لا | أسبوعي | يومي + نسخة قبل كل ترقية |
+| **Monitoring** | بسيط | مراقبة الأخطاء فقط | كامل (Sentry + Vercel Analytics + Uptime) |
+| **SLA** | لا | best-effort | 99.5%+ |
+
+### ١٦.٢ متغيرات البيئة (لكل بيئة)
+كل بيئة لها مجموعة متغيرات مستقلة في Vercel (أو GitHub Actions secrets للأتمتة):
+
+```
+# Public (يختلف لكل بيئة)
+NEXT_PUBLIC_APP_URL=https://{test|uat}.muqsit.sa  أو  https://muqsit.sa
+NEXT_PUBLIC_ENV=test  أو  uat  أو  production
+
+# Server — Secrets (بيئة لكل واحد)
+DATABASE_URL=postgresql://...                # DB منفصل لكل بيئة
+AUTH_SECRET=...                              # سر مختلف لكل بيئة
 ANTHROPIC_API_KEY=sk-ant-...
-UNIFONIC_API_KEY=...
-MOYASAR_API_KEY=...
-WHATSAPP_PHONE_ID=...
+UNIFONIC_API_KEY=...                         # Test: sandbox، UAT: sandbox، Live: production
+MOYASAR_API_KEY=...                          # Test/UAT: test keys، Live: live keys
+WHATSAPP_PHONE_ID=...                        # Test/UAT: رقم اختبار، Live: رقم المنصة
 WHATSAPP_TOKEN=...
-S3_BUCKET=...
-S3_REGION=...
+S3_BUCKET=muqsit-{env}-files                 # bucket لكل بيئة
+S3_REGION=me-south-1
 S3_ACCESS_KEY=...
 S3_SECRET_KEY=...
-SENTRY_DSN=...
+SENTRY_DSN=...                               # مشروع Sentry لكل بيئة
+SENTRY_ENVIRONMENT=test|uat|production
 ```
 
+> **مبدأ:** لا متغيّر مشترك بين البيئات. أي خدمة خارجية تُستخدم في الـTest أو UAT يجب أن تكون sandbox، لا تلامس بيانات حقيقية.
+
 ### ١٦.٣ CI/CD (مخطَّط)
-- GitHub Actions.
-- على كل push:
+- **GitHub Actions** ينفّذ خط الترقية الكامل.
+- **على كل PR**:
   1. `pnpm install --frozen-lockfile`
   2. `tsc --noEmit`
   3. `next lint`
   4. `vitest run`
   5. `next build`
-- على main: deploy تلقائي إلى Staging.
-- Manual trigger لـProduction.
+  6. Preview deploy عبر Vercel على بيئة فرعية مؤقتة.
+- **على merge إلى main**: نشر تلقائي إلى **Test**.
+- **على tag `rc-*`** (release candidate): نشر إلى **UAT** بعد موافقة manual.
+- **على tag `v*`** (release): نشر إلى **Live** بشرط موافقة شخصين (Engineering Lead + Product Owner) — GitHub Environment Protection Rules.
 
 ### ١٦.٤ Database Migrations
-- Prisma Migrate.
-- كل migration مراجَعة قبل الـmerge.
-- في Production: `prisma migrate deploy` كخطوة في الـpipeline.
+- **Prisma Migrate** عبر كل البيئات.
+- **في Test**: `prisma migrate dev` يومًا بيوم. مسموح بإعادة بناء الـschema بحرّية.
+- **في UAT**: `prisma migrate deploy` بعد المراجعة. اختبار الـmigration على نسخة من بيانات الإنتاج.
+- **في Live**: `prisma migrate deploy` في pipeline التشغيل، بعد:
+  1. نسخة احتياطية كاملة قبل الـmigration.
+  2. تأكيد نجاحها في UAT.
+  3. نافذة صيانة محددة لو كانت Schema breaking.
+
+### ١٦.٥ سياسة Hotfix
+لو ظهر bug حرج في الإنتاج:
+1. Branch من tag الـrelease الحالي.
+2. الإصلاح + اختبار محلي.
+3. PR → CI → merge إلى main (يدخل Test).
+4. Tag `hotfix-*` → نشر مباشر إلى Live مع موافقة شخصين، مع تخطّي UAT في حالات الـsecurity فقط.
+5. Cherry-pick إلى أي branches قيد التطوير.
 
 ---
 
@@ -743,6 +798,7 @@ SENTRY_DSN=...
 |---|---|---|
 | **TDD v1.0** | **2026-06-14** | الإصدار الأول. يغطي البنية الحالية + خطة الانتقال إلى الإنتاج. |
 | **TDD v1.0.1** | **2026-06-15** | يوثّق قرار صاحب المنتج: المرحلة الأولى = الويب، المرحلة الثانية = الجوال. إضافة Sprints 27–34 للجوال + قسم المعمارية المشتركة ويب↔جوال. |
+| **TDD v1.0.2** | **2026-06-15** | يوثّق قرار صاحب المنتج بشأن البيئات: **Test + UAT + Live**. إعادة كتابة §١٦ كاملة — البيئات الثلاث، خصائصها، تدفّق الترقية، متغيرات لكل بيئة، CI/CD، سياسة الـmigrations، سياسة الـHotfix. |
 
 ---
 

@@ -65,22 +65,40 @@
 └──────────────────────────────────────────────────┘
 ```
 
-### ٢.٢ نظرة عامة (v2.0 — الإنتاج المخطط)
+### ٢.٢ نظرة عامة (المرحلة الأولى — الويب فقط، الإنتاج المخطَّط)
 ```
 ┌─────────────────┐     ┌────────────────┐     ┌──────────────┐
 │   Next.js Web   │────▶│  API (Next.js  │────▶│  PostgreSQL  │
 │  (Vercel/AWS)   │     │   server)       │     │   + Prisma   │
 └─────────────────┘     └────────────────┘     └──────────────┘
-        │                       │                       │
-        │                       ├──▶ Anthropic API (LLM)
-        │                       ├──▶ WhatsApp Business API
-        │                       ├──▶ SMS Gateway (Unifonic)
-        │                       ├──▶ OCR Service
-        │                       ├──▶ Payment Gateway (Moyasar)
-        │                       └──▶ S3 (File storage)
-        │
-        └──▶ Mobile Apps (Phase 2)
+                                │
+                                ├──▶ Anthropic API (LLM)
+                                ├──▶ WhatsApp Business API
+                                ├──▶ SMS Gateway (Unifonic)
+                                ├──▶ OCR Service (Claude Vision)
+                                ├──▶ Payment Gateway (Moyasar)
+                                └──▶ S3 (File storage)
 ```
+
+### ٢.٣ نظرة عامة (المرحلة الثانية — الجوال + الويب يتشاركان نفس الـAPI)
+```
+┌──────────────────────────┐
+│  Mobile Apps (Phase 2)   │
+│  - Office  (RN/Flutter)  │──┐
+│  - Investor              │  │
+│  - Customer              │  │
+└──────────────────────────┘  │
+                              ▼
+┌─────────────────┐     ┌────────────────┐     ┌──────────────┐
+│   Next.js Web   │────▶│  Shared API    │────▶│  PostgreSQL  │
+│  (Vercel/AWS)   │     │   (Phase 1)    │     │   + Prisma   │
+└─────────────────┘     └────────────────┘     └──────────────┘
+                                │
+                                ├──▶ Push Notifications (FCM + APNs)
+                                ├──▶ كل تكاملات الويب أعلاه
+```
+
+> **مبدأ تصميمي:** الـAPI نفسه يخدم الويب والجوال — لا تكرار للمنطق العملي. `packages/shared-types` يضمن أن النموذج البياني واحد.
 
 ### ٢.٣ القرارات المعمارية الكبرى
 | القرار | السبب |
@@ -620,26 +638,67 @@ SENTRY_DSN=...
 - OCR service.
 - Payment gateway.
 
-### ١٧.٢ التتبّع
-كل خطوة لها sprint محدد:
+### ١٧.٢ التتبّع — المرحلة الأولى (الويب)
+كل سبرنت ينضج طبقة في الـstack نفسه — الناتج آخر سبرنت = منصة ويب جاهزة للإنتاج.
 
-| Sprint | المحتوى |
-|---|---|
-| 18 | API layer (mock-backed) |
-| 19 | PostgreSQL + Prisma |
-| 20 | Auth.js + real auth |
-| 21 | WhatsApp Business API integration |
-| 22 | SMS gateway (Unifonic) |
-| 23 | OCR service (Claude Vision) |
-| 24 | Payment gateway (Moyasar) |
-| 25 | ZATCA e-invoicing |
-| 26 | Reports module (deferred from Phase 2) |
+| Sprint | المحتوى | الـtrack |
+|---|---|---|
+| 18 | API layer (mock-backed) | Web |
+| 19 | PostgreSQL + Prisma | Web |
+| 20 | Auth.js + real auth | Web |
+| 21 | WhatsApp Business API integration | Web |
+| 22 | SMS gateway (Unifonic) | Web |
+| 23 | OCR service (Claude Vision) | Web |
+| 24 | Payment gateway (Moyasar) | Web |
+| 25 | ZATCA e-invoicing | Web |
+| 26 | Reports module | Web |
+
+عند ختام Sprint 26: **المرحلة الأولى مكتملة** — منصة ويب كاملة الميزات وجاهزة لاستقبال مكاتب فعلية.
+
+### ١٧.٣ التتبّع — المرحلة الثانية (تطبيقات الجوال)
+
+> **قرار صاحب المنتج (2026-06-15):** المرحلة الثانية = تطبيقات الجوال الأصلية. تبدأ بعد إثبات نموذج الويب في الإنتاج.
+
+#### ١٧.٣.١ نهج الترحيل إلى الجوال
+**الخطوة ١:** اختيار المنصة التقنية (انظر §١٨.١).
+
+**الخطوة ٢:** فصل الـAPI من تطبيق الويب الحالي:
+- نقل `app/api/*` إلى `apps/api/` كخدمة مستقلة أو في monorepo.
+- الويب والجوال يستهلكان نفس الـAPI.
+
+**الخطوة ٣:** إعادة استخدام `packages/shared-types`:
+- نفس TypeScript types للويب والجوال.
+- نفس النموذج البياني، نفس قواعد العمل.
+
+**الخطوة ٤:** بناء الثلاث تطبيقات بالتوازي:
+- تطبيق المكتب.
+- تطبيق المستثمر.
+- تطبيق العميل.
+
+**الخطوة ٥:** الميزات الأصلية للجوال:
+- Push Notifications (FCM + APNs).
+- Camera + Vision APIs لمسح المستندات.
+- Biometric Auth (Face ID / بصمة).
+- Offline storage (SQLite/Realm).
+- In-app payments (Apple Pay / Google Pay).
+
+#### ١٧.٣.٢ السبرنتات المخططة
+| Sprint | المحتوى | الـtrack |
+|---|---|---|
+| 27 | فصل API + اختيار تقنية الجوال + setup المشروع | Mobile setup |
+| 28 | تطبيق المكتب (لوحة، تحصيل، إشعارات Push) | Mobile-Office |
+| 29 | تطبيق المكتب — Camera + OCR + Offline | Mobile-Office |
+| 30 | تطبيق المكتب — Approvals + Audit | Mobile-Office |
+| 31 | تطبيق المستثمر | Mobile-Investor |
+| 32 | تطبيق العميل | Mobile-Customer |
+| 33 | In-app payments + Biometric auth | Mobile |
+| 34 | App Store / Play Store إطلاق | Release |
 
 ---
 
-## ١٨. القرارات التقنية المؤجَّلة (Phase 2)
+## ١٨. القرارات التقنية المؤجَّلة
 
-### ١٨.١ ما لم يُحسَم بعد
+### ١٨.١ المرحلة الأولى — ما لم يُحسَم بعد
 | القرار | الاحتمالات | التأجيل لـ |
 |---|---|---|
 | **PostgreSQL Self-hosted أم Managed (Neon/Supabase/RDS)** | Vercel Postgres / Supabase / RDS | Sprint 19 |
@@ -647,15 +706,25 @@ SENTRY_DSN=...
 | **OCR للهويات بـClaude Vision أم خدمة متخصصة** | Claude Vision / Tabby / Tarmeez | Sprint 23 |
 | **Payment Gateway** | Moyasar / HyperPay / Tap / Geidea | Sprint 24 |
 | **Auth UX** | OTP only / OTP + password / social login | Sprint 20 |
-| **Mobile apps technology** | React Native (Expo) / Flutter / Native | Phase 2 — بعد إثبات الويب |
 
-### ١٨.٢ ما حُسم سلفًا
+### ١٨.٢ المرحلة الثانية — ما لم يُحسَم بعد
+| القرار | الاحتمالات | التأجيل لـ |
+|---|---|---|
+| **تقنية الجوال** | React Native (Expo) / Flutter / Native (Swift+Kotlin) | Sprint 27 |
+| **استراتيجية مشاركة الكود ويب↔جوال** | Solito / Tamagui / لا مشاركة | Sprint 27 |
+| **إدارة الإشعارات الفورية** | OneSignal / Firebase + APNs مباشرة | Sprint 28 |
+| **استراتيجية الـOffline** | SQLite + sync queue / Realm / لا offline في v2 | Sprint 29 |
+
+### ١٨.٣ ما حُسم سلفًا
+- ✅ المرحلة الأولى = الويب فقط.
+- ✅ المرحلة الثانية = تطبيقات الجوال الأصلية.
 - ✅ Next.js 15 App Router للـweb.
-- ✅ TypeScript بالتزام صارم.
-- ✅ Tailwind 4 + Radix UI.
+- ✅ TypeScript بالتزام صارم في الـstack كله (ويب وجوال).
+- ✅ Tailwind 4 + Radix UI للويب.
 - ✅ Anthropic Claude للـLLM.
 - ✅ pnpm workspaces.
-- ✅ Vercel للـhosting الأولي.
+- ✅ Vercel للـhosting الأولي للويب.
+- ✅ packages/shared-types ينمو ليخدم الويب والجوال معًا.
 
 ---
 
@@ -673,6 +742,7 @@ SENTRY_DSN=...
 | الإصدار | التاريخ | التغيير |
 |---|---|---|
 | **TDD v1.0** | **2026-06-14** | الإصدار الأول. يغطي البنية الحالية + خطة الانتقال إلى الإنتاج. |
+| **TDD v1.0.1** | **2026-06-15** | يوثّق قرار صاحب المنتج: المرحلة الأولى = الويب، المرحلة الثانية = الجوال. إضافة Sprints 27–34 للجوال + قسم المعمارية المشتركة ويب↔جوال. |
 
 ---
 

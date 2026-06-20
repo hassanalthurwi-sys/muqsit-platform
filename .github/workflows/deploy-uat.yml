@@ -1,0 +1,46 @@
+name: Deploy → UAT
+
+# Triggered by tagging a release-candidate, e.g. `rc-2026.06.01`
+on:
+  push:
+    tags: ["rc-*"]
+
+concurrency:
+  group: deploy-uat
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to uat.muqsit.sa
+    runs-on: ubuntu-latest
+    environment:
+      name: uat
+      url: https://uat.muqsit.sa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: DATABASE_URL="postgresql://placeholder@localhost:5432/x" pnpm --filter @muqsit/database db:generate
+
+      - name: Apply migrations to UAT database
+        run: pnpm --filter @muqsit/database db:deploy
+        env:
+          DATABASE_URL: ${{ secrets.UAT_DATABASE_URL }}
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel env
+        run: vercel pull --yes --environment=preview --git-branch=uat --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

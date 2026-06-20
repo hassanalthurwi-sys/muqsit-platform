@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, uat, production]
+  push:
+    branches: [main, uat, production]
+
+jobs:
+  ci:
+    name: type-check · lint · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: DATABASE_URL="postgresql://placeholder@localhost:5432/x" pnpm --filter @muqsit/database db:generate
+
+      - name: Type-check
+        run: pnpm --filter @muqsit/web type-check
+
+      - name: Lint
+        run: pnpm --filter @muqsit/web lint
+
+      - name: Build
+        run: pnpm --filter @muqsit/web build
+        env:
+          NEXT_PUBLIC_APP_URL: https://muqsit.sa
+          MUQSIT_VAT_NUMBER: "300000000000003"

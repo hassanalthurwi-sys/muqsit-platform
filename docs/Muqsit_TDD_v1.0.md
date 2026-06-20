@@ -770,6 +770,22 @@ SENTRY_ENVIRONMENT=test|uat|production
 | **إدارة الإشعارات الفورية** | OneSignal / Firebase + APNs مباشرة | Sprint 28 |
 | **استراتيجية الـOffline** | SQLite + sync queue / Realm / لا offline في v2 | Sprint 29 |
 
+### ١٨.٢.١ تكاملات Beta-deferred (قرار 2026-06-15)
+
+أربعة تكاملات خارجية مؤجَّلة إلى مرحلة Beta، لكنها مبنية كـproviders
+بـmock fallback في الكود:
+
+| Provider | الملف | البديل |
+|---|---|---|
+| `lib/integrations/ocr.ts` | Claude Vision | بيانات وهمية معقولة |
+| `lib/integrations/whatsapp.ts` | Meta Cloud API | console.log + id وهمي |
+| `lib/integrations/sms.ts` | Unifonic | console.log + id وهمي |
+| `lib/integrations/payments.ts` | Moyasar | حالة `paid` فورية |
+
+**سياسة التفعيل**: حقن الـAPI key في env vars يقلب الـprovider من mock
+إلى live بدون لمس الـUI أو طبقة الـbusiness. هذا اختبر في Sprints 21-24
+وكُتب لـSprint 27 (MVP hardening) ليكون رسميًا.
+
 ### ١٨.٣ ما حُسم سلفًا
 - ✅ المرحلة الأولى = الويب فقط.
 - ✅ المرحلة الثانية = تطبيقات الجوال الأصلية.
@@ -799,6 +815,7 @@ SENTRY_ENVIRONMENT=test|uat|production
 | **TDD v1.0** | **2026-06-14** | الإصدار الأول. يغطي البنية الحالية + خطة الانتقال إلى الإنتاج. |
 | **TDD v1.0.1** | **2026-06-15** | يوثّق قرار صاحب المنتج: المرحلة الأولى = الويب، المرحلة الثانية = الجوال. إضافة Sprints 27–34 للجوال + قسم المعمارية المشتركة ويب↔جوال. |
 | **TDD v1.0.2** | **2026-06-15** | يوثّق قرار صاحب المنتج بشأن البيئات: **Test + UAT + Live**. إعادة كتابة §١٦ كاملة — البيئات الثلاث، خصائصها، تدفّق الترقية، متغيرات لكل بيئة، CI/CD، سياسة الـmigrations، سياسة الـHotfix. |
+| **TDD v1.0.3** | **2026-06-15** | يوثّق قرار صاحب المنتج بتأجيل ٤ تكاملات خارجية لـBeta. أضيف §١٨.٢.١ مع جدول مزوّدي Mock vs Live. يوازي BRS v1.0.3. |
 
 ---
 
